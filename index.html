@@ -27,9 +27,10 @@
         }
     </script>
     <style>
+        /* Base Styling */
         body { 
             background: radial-gradient(ellipse at top, #064e3b, #022c22, #000000); 
-            color: #f1f5f9; margin: 0; padding: 0; min-height: 100vh;
+            color: #f1f5f9; margin: 0; padding: 0; height: 100dvh; overflow: hidden;
             -webkit-tap-highlight-color: transparent; 
         }
         
@@ -40,6 +41,7 @@
             z-index: 100;
         }
 
+        /* Flexbox Layout untuk Halaman Konten (Sticky Header & Scrollable Text) */
         #page-detail { 
             display: flex; 
             flex-direction: column; 
@@ -47,24 +49,30 @@
             width: 100%; 
             max-width: 28rem; 
             margin: 0 auto; 
-            overflow: hidden;
+            overflow: hidden; /* Mencegah body scroll */
         }
         
         .sticky-top-area { 
-            flex-shrink: 0; 
+            flex-shrink: 0; /* Header tidak akan menyusut */
             width: 100%; 
         }
         
         .scrollable-text-area { 
-            flex-grow: 1; 
-            overflow-y: auto;
+            flex-grow: 1; /* Area teks mengisi sisa ruang */
+            overflow-y: auto; /* Hanya area teks ini yang bisa di-scroll */
             padding: 1.5rem; 
             padding-bottom: 50vh; 
         } 
         
         .content-area { outline: none; min-height: 100%; }
-        .content-area[contenteditable="true"]:focus { border: 1px dashed rgba(234, 179, 8, 0.5); border-radius: 8px; padding: 8px; background: rgba(255,255,255,0.02); }
+        .content-area[contenteditable="true"]:focus { 
+            border: 1px dashed rgba(234, 179, 8, 0.5); 
+            border-radius: 8px; 
+            padding: 8px; 
+            background: rgba(255,255,255,0.02); 
+        }
         
+        /* Scrollbar Styling */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #eab308; border-radius: 4px; }
@@ -72,8 +80,10 @@
 </head>
 <body class="selection:bg-gold-500 selection:text-royal-dark font-sans relative">
 
+    <!-- Komponen Pesan (Toast) -->
     <div id="toast" class="fixed top-16 left-1/2 transform -translate-x-1/2 bg-royal-dark border border-gold-500 text-gold-400 px-6 py-2 rounded-full shadow-lg z-[1000] opacity-0 pointer-events-none transition-opacity duration-300 font-semibold text-sm">Pesan</div>
 
+    <!-- Komponen Modal -->
     <div id="custom-modal" class="fixed inset-0 bg-black/80 z-[1000] hidden items-center justify-center px-4 backdrop-blur-sm">
         <div class="bg-royal-dark border border-gold-500/30 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <h3 id="modal-title" class="text-xl font-serif text-gold-400 mb-4">Judul</h3>
@@ -90,20 +100,16 @@
 
     <!-- HALAMAN 1: COVER -->
     <div id="page-cover" class="flex flex-col items-center justify-center text-center h-[100dvh] overflow-hidden relative px-6 w-full max-w-md mx-auto">
-        
         <div class="mb-6 relative">
             <div class="absolute inset-0 bg-gold-500 blur-[30px] opacity-20 rounded-full"></div>
             <i class="fas fa-lantern text-6xl text-gold-500 relative z-10"></i>
         </div>
-        
         <h1 class="text-5xl font-serif font-bold text-gold-400 mb-4 tracking-wide drop-shadow-md">Buku Saku</h1>
-        
         <div class="flex items-center gap-3 mb-4">
             <div class="h-px w-12 bg-gradient-to-r from-transparent to-gold-500"></div>
             <i class="fas fa-gem text-gold-500 text-[10px]"></i>
             <div class="h-px w-12 bg-gradient-to-l from-transparent to-gold-500"></div>
         </div>
-        
         <h2 class="text-xs text-slate-300 tracking-[0.2em] uppercase mb-12">Ngopsin Mabu Park</h2>
         
         <button onclick="navigateTo('page-toc')" class="border border-gold-500 text-gold-400 font-serif italic py-3 px-10 rounded-full hover:bg-gold-500 hover:text-black transition-colors flex items-center gap-3 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
@@ -134,9 +140,11 @@
         </main>
     </div>
 
-    <!-- HALAMAN 3: KONTEN -->
+    <!-- HALAMAN 3: KONTEN DETAIL -->
+    <!-- Flexbox Layout: Header Sticky (flex-shrink-0), Teks (flex-grow) -->
     <div id="page-detail" class="hidden">
         
+        <!-- HEADER STICKY (Menu Baca / Menu Edit) -->
         <div class="sticky-top-area glass-header">
             <div class="flex justify-between items-center p-3 border-b border-gold-500/20">
                 <button onclick="navigateTo('page-toc')" class="text-gold-400 text-xl px-2"><i class="fas fa-arrow-left"></i></button>
@@ -144,26 +152,17 @@
                 <button id="btn-edit-mode" onclick="toggleEditor()" class="text-slate-500 hidden px-2"><i id="edit-icon" class="fas fa-pen"></i></button>
             </div>
 
+            <!-- FITUR PEMBACA -->
             <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar border-b border-gold-500/20 items-center bg-black/20">
                 <button onclick="changeFontSize(-2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
                 <button onclick="changeFontSize(2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
                 <button onclick="toggleWakeLock()" id="btn-wakelock" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-lightbulb text-gold-500"></i> Layar</button>
                 <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-angle-double-down text-gold-500"></i> Scroll</button>
-                <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
-                <div class="flex items-center gap-1 px-2 py-0.5 bg-royal-dark rounded border border-gold-500/30 flex-shrink-0">
-                    <i class="fas fa-music text-gold-500 text-xs"></i>
-                    <audio id="bg-audio" controls class="h-6 w-24 outline-none grayscale invert opacity-70">
-                        <source src="https://www.soundhelix.com/architectureplay/SoundHelix-Song-1.mp3" type="audio/mpeg">
-                    </audio>
-                </div>
             </div>
 
+            <!-- FITUR EDIT ADMIN -->
             <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 border-b border-gold-500/30 shadow-inner">
-                <button onclick="changeFontSize(-2)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
-                <button onclick="changeFontSize(2)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
-                <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
-
                 <button onclick="execCmd('undo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-undo text-xs"></i></button>
                 <button onclick="execCmd('redo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-redo text-xs"></i></button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
@@ -178,6 +177,7 @@
                 <button onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-right text-xs"></i></button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 
+                <!-- Opsi Font Family -->
                 <select onchange="execCmd('fontName', this.value)" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
                     <option value="Poppins">Poppins</option>
                     <option value="Amiri">Amiri</option>
@@ -185,8 +185,25 @@
                     <option value="Playfair Display">Playfair</option>
                 </select>
 
+                <!-- BARU: Opsi Ukuran Font Teks Terseleksi (8px - 40px) -->
+                <select onchange="applyFontSizeToSelection(this.value)" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-16">
+                    <option value="" disabled selected>Ukr</option>
+                    <option value="8">8px</option>
+                    <option value="10">10px</option>
+                    <option value="12">12px</option>
+                    <option value="14">14px</option>
+                    <option value="16">16px</option>
+                    <option value="18">18px</option>
+                    <option value="20">20px</option>
+                    <option value="24">24px</option>
+                    <option value="28">28px</option>
+                    <option value="32">32px</option>
+                    <option value="40">40px</option>
+                </select>
+
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
-                <button onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs"><i class="fas fa-text-height"></i> Spasi</button>
+                <!-- BARU: Tombol Spasi Dinamis (1, 1.5, 2, 2.5, 3) -->
+                <button onclick="cycleLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs whitespace-nowrap"><i class="fas fa-text-height"></i> Spasi</button>
                 
                 <input type="color" onchange="changeTextColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
                 
@@ -195,20 +212,26 @@
             </div>
         </div>
 
+        <!-- AREA KONTEN (Teks yang Bisa Di-scroll) -->
         <div class="scrollable-text-area">
-            <div id="detail-content" class="content-area text-xl font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
+            <div id="detail-content" class="content-area font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
         </div>
 
     </div>
 
+    <!-- LOGIK & SKRIP -->
     <script>
+        // Inisialisasi Firebase
         const firebaseConfig = { apiKey: "AIzaSyA40Q6eOPK5vKAq-q9w6OhoCTtanb6GlHI", authDomain: "buku-digital-ngopsin.firebaseapp.com", databaseURL: "https://buku-digital-ngopsin-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "buku-digital-ngopsin", storageBucket: "buku-digital-ngopsin.firebasestorage.app", messagingSenderId: "80687588401", appId: "1:80687588401:web:5bcfcbb2a3398556b16110" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const dbRef = database.ref('bukuSakuData');
 
-        let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
+        // Variabel Global
+        let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false;
+        let baseFontSize = 22; // Ukuran Font Dasar
 
+        // Mendengarkan Perubahan Data dari Firebase
         dbRef.on('value', (snapshot) => {
             const data = snapshot.val();
             appData = data ? (Array.isArray(data) ? data.filter(i=>i) : Object.values(data).filter(i=>i)) : [];
@@ -221,6 +244,7 @@
         });
 
         function saveData() { dbRef.set(appData).catch(() => showToast("Gagal menyimpan.")); }
+        
         function showToast(msg) {
             const t = document.getElementById('toast'); t.innerText = msg; t.classList.remove('opacity-0');
             setTimeout(() => t.classList.add('opacity-0'), 2500);
@@ -245,6 +269,7 @@
         }
         document.getElementById('btn-modal-confirm').addEventListener('click', () => { if(modalCallback) modalCallback(document.getElementById('modal-input').value); closeModal(); });
 
+        // Fitur Login Admin
         function promptAdminLogin() {
             if(isAdmin) {
                 isAdmin = false; showToast("Admin Logout.");
@@ -258,12 +283,14 @@
             }});
         }
 
+        // Navigasi
         function navigateTo(pageId) {
             ['page-cover', 'page-toc', 'page-detail'].forEach(id => { document.getElementById(id).style.display = 'none'; });
             document.getElementById(pageId).style.display = 'flex';
             if(pageId === 'page-toc') renderToc();
         }
 
+        // Memuat Daftar Isi
         function renderToc() {
             const container = document.getElementById('toc-container'); container.innerHTML = '';
             document.getElementById('btn-add-toc').style.display = isAdmin ? 'block' : 'none';
@@ -283,12 +310,18 @@
             }});
         }
 
+        // Membuka Halaman Detail
         function openDetail(id) {
             currentActiveId = id; const item = appData.find(x => x.id === id); if(!item) return;
             document.getElementById('detail-title').innerText = (item.title||'').replace(/^\d+[\.\-]?\s*/, '');
             const contentEl = document.getElementById('detail-content');
-            contentEl.innerHTML = item.content || ""; contentEl.style.fontSize = baseFontSize + 'px';
-            if(contentEl.dataset.lh) changeLineHeight(contentEl.dataset.lh);
+            
+            contentEl.innerHTML = item.content || ""; 
+            
+            // Set styles berdasarkan data yang tersimpan atau default
+            if(!contentEl.dataset.lh) contentEl.dataset.lh = "1.5"; // default spasi
+            updateReaderStyles();
+
             document.getElementById('btn-edit-mode').style.display = isAdmin ? 'block' : 'none';
             isEditorActive = false;
             document.getElementById('reader-features').classList.replace('hidden', 'flex');
@@ -296,6 +329,7 @@
             document.getElementById('edit-icon').className = 'fas fa-pen';
             document.getElementById('btn-edit-mode').classList.replace('text-gold-400', 'text-slate-500');
             contentEl.setAttribute('contenteditable', 'false');
+            
             navigateTo('page-detail');
         }
 
@@ -328,12 +362,14 @@
             }
         }
 
+        // FUNGSI UMUM EKSEKUSI CMD EDITOR
         function execCmd(command, value = null) {
             document.execCommand(command, false, value);
             document.getElementById('detail-content').focus();
             saveCurrentContent();
         }
 
+        // MENGUBAH WARNA (Highlight Teks)
         function changeTextColor(color) {
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('foreColor', false, color);
@@ -341,48 +377,132 @@
             saveCurrentContent();
         }
 
-        function changeLineHeight(forceValue = null) {
+        // BARU: FUNGSI MENGUBAH UKURAN FONT PADA TEKS TERSELEKSI (8px - 40px)
+        function applyFontSizeToSelection(pxSize) {
+            if (!pxSize) return;
+            
+            // Trik menggunakan <font size="7"> sebagai hook, lalu mengubahnya menjadi span dengan style
+            document.execCommand("styleWithCSS", false, false);
+            document.execCommand("fontSize", false, "7"); 
+            
             const contentEl = document.getElementById('detail-content');
-            let currentLH = parseFloat(contentEl.dataset.lh) || 2.0;
-            let nextLH = forceValue ? forceValue : (currentLH === 2.0 ? 2.5 : (currentLH === 2.5 ? 3.0 : 2.0));
-            contentEl.dataset.lh = nextLH;
-            let styleTag = document.getElementById('force-line-height');
-            if(!styleTag) { styleTag = document.createElement('style'); styleTag.id = 'force-line-height'; document.head.appendChild(styleTag); }
-            styleTag.innerHTML = `#detail-content, #detail-content * { line-height: ${nextLH} !important; }`;
-            if(!forceValue) { saveCurrentContent(); showToast(`Spasi: ${nextLH}`); }
-        }
-
-        function saveCurrentContent() {
-            if(!currentActiveId || !isAdmin) return;
-            const itemIndex = appData.findIndex(x => x.id === currentActiveId);
-            if(itemIndex > -1) { appData[itemIndex].content = document.getElementById('detail-content').innerHTML; saveData(); }
-        }
-        document.getElementById('detail-content').addEventListener('input', () => { if(isEditorActive) saveCurrentContent(); });
-
-        function changeFontSize(step) {
-            baseFontSize += step; if(baseFontSize < 14) baseFontSize = 14; if(baseFontSize > 60) baseFontSize = 60;
-            document.getElementById('detail-content').style.fontSize = baseFontSize + 'px';
+            const fonts = contentEl.querySelectorAll('font[size="7"]');
+            
+            fonts.forEach(f => {
+                const span = document.createElement('span');
+                span.style.fontSize = pxSize + 'px';
+                span.innerHTML = f.innerHTML;
+                f.parentNode.replaceChild(span, f);
+            });
+            
+            document.execCommand("styleWithCSS", false, true);
+            document.getElementById('detail-content').focus();
             saveCurrentContent();
         }
 
+        // UPDATE GAYA BACA OTOMATIS: Spasi dan Ukuran Font Keseluruhan Skala Proporsional
+        function updateReaderStyles() {
+            const contentEl = document.getElementById('detail-content');
+            let currentLH = parseFloat(contentEl.dataset.lh) || 1.5;
+            
+            let styleTag = document.getElementById('dynamic-reader-styles');
+            if(!styleTag) { 
+                styleTag = document.createElement('style'); 
+                styleTag.id = 'dynamic-reader-styles'; 
+                document.head.appendChild(styleTag); 
+            }
+            
+            // Menerapkan font-size ke wadah, line-height dalam desimal (tanpa 'px') akan 
+            // men-scale jarak atas-bawah mengikuti ukuran font saat A+ atau A- ditekan.
+            styleTag.innerHTML = `
+                #detail-content { font-size: ${baseFontSize}px !important; line-height: ${currentLH} !important; }
+                #detail-content * { line-height: ${currentLH} !important; }
+            `;
+        }
+
+        // BARU: SIKLUS SPASI (1, 1.5, 2, 2.5, 3)
+        function cycleLineHeight() {
+            const contentEl = document.getElementById('detail-content');
+            let currentLH = parseFloat(contentEl.dataset.lh) || 1.5;
+            
+            // Putaran siklus: 1 -> 1.5 -> 2 -> 2.5 -> 3 -> 1
+            let nextLH = (currentLH === 1.0) ? 1.5 : 
+                         (currentLH === 1.5) ? 2.0 : 
+                         (currentLH === 2.0) ? 2.5 : 
+                         (currentLH === 2.5) ? 3.0 : 1.0;
+                         
+            contentEl.dataset.lh = nextLH;
+            updateReaderStyles();
+            saveCurrentContent();
+            showToast(`Spasi: ${nextLH}`);
+        }
+
+        // FUNGSI A- DAN A+ PEMBACA (Font Scaling Otomatis)
+        function changeFontSize(step) {
+            baseFontSize += step; 
+            if(baseFontSize < 14) baseFontSize = 14; 
+            if(baseFontSize > 60) baseFontSize = 60;
+            
+            updateReaderStyles(); // Spasi otomatis merenggang/menyusut proporsional
+            saveCurrentContent();
+        }
+
+        // SIMPAN KONTEN
+        function saveCurrentContent() {
+            if(!currentActiveId || !isAdmin) return;
+            const itemIndex = appData.findIndex(x => x.id === currentActiveId);
+            if(itemIndex > -1) { 
+                appData[itemIndex].content = document.getElementById('detail-content').innerHTML; 
+                saveData(); 
+            }
+        }
+        
+        // Simpan ketika mengetik
+        document.getElementById('detail-content').addEventListener('input', () => { 
+            if(isEditorActive) saveCurrentContent(); 
+        });
+
+        // AUTO SCROLL
         let scrollInterval, isScrolling = false;
         function toggleAutoScroll() {
             const btn = document.getElementById('btn-autoscroll'), container = document.querySelector('.scrollable-text-area');
-            if (isScrolling) { clearInterval(scrollInterval); isScrolling = false; btn.classList.replace('text-gold-400', 'text-slate-300'); } 
-            else { isScrolling = true; btn.classList.replace('text-slate-300', 'text-gold-400'); scrollInterval = setInterval(() => { container.scrollBy({ top: 1, left: 0, behavior: 'auto' }); }, 50); }
+            if (isScrolling) { 
+                clearInterval(scrollInterval); 
+                isScrolling = false; 
+                btn.classList.replace('text-gold-400', 'text-slate-300'); 
+            } else { 
+                isScrolling = true; 
+                btn.classList.replace('text-slate-300', 'text-gold-400'); 
+                scrollInterval = setInterval(() => { container.scrollBy({ top: 1, left: 0, behavior: 'auto' }); }, 50); 
+            }
         }
 
+        // WAKE LOCK (Supaya Layar Tidak Mati)
         let wakeLock = null;
         async function toggleWakeLock() {
             const btn = document.getElementById('btn-wakelock');
             if ('wakeLock' in navigator) {
                 try {
-                    if (wakeLock) { await wakeLock.release(); wakeLock = null; btn.classList.replace('text-gold-400', 'text-slate-300'); } 
-                    else { wakeLock = await navigator.wakeLock.request('screen'); btn.classList.replace('text-slate-300', 'text-gold-400'); wakeLock.addEventListener('release', () => { wakeLock = null; btn.classList.replace('text-gold-400', 'text-slate-300'); }); }
-                } catch(e) {}
-            }
+                    if (wakeLock) { 
+                        await wakeLock.release(); 
+                        wakeLock = null; 
+                        btn.classList.replace('text-gold-400', 'text-slate-300'); 
+                    } else { 
+                        wakeLock = await navigator.wakeLock.request('screen'); 
+                        btn.classList.replace('text-slate-300', 'text-gold-400'); 
+                        wakeLock.addEventListener('release', () => { 
+                            wakeLock = null; 
+                            btn.classList.replace('text-gold-400', 'text-slate-300'); 
+                        }); 
+                    }
+                } catch(e) { showToast("Gagal menahan layar."); }
+            } else { showToast("Browser tidak mendukung Layar Nyala."); }
         }
-        if('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
+
+        // Register Service Worker
+        if('serviceWorker' in navigator) { 
+            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{})); 
+        }
     </script>
 </body>
 </html>
