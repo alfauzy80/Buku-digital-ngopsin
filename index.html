@@ -2,7 +2,7 @@
 <html lang="id" class="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Buku Saku Digital - Ngopsin Mabu Park</title>
     
     <!-- PWA Meta Tags -->
@@ -17,7 +17,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Lateef&family=Scheherazade+New:wght@400;700&family=Tajawal:wght@400;500;700&family=Reem+Kufi:wght@400;600&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK (v8 Compat) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -27,33 +27,23 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Poppins', 'sans-serif'], arabic: ['Amiri', 'serif'] },
-                    colors: {
-                        islamic: { light: '#e6f2f0', primary: '#0d9488', dark: '#115e59', gold: '#d97706', night: '#0f172a' }
-                    },
-                    animation: { 'twinkle': 'twinkle 3s ease-in-out infinite', 'swing': 'swing 4s ease-in-out infinite' },
-                    keyframes: {
-                        twinkle: { '0%, 100%': { opacity: 0.3 }, '50%': { opacity: 1 } },
-                        swing: { '0%, 100%': { transform: 'rotate(-3deg)' }, '50%': { transform: 'rotate(3deg)' } }
-                    }
+                    colors: { islamic: { light: '#e6f2f0', primary: '#0d9488', dark: '#115e59', gold: '#d97706', night: '#0f172a' } }
                 }
             }
         }
     </script>
     <style>
-        body { transition: background-color 0.3s, color 0.3s; }
-        .bg-pattern {
-            background-color: #ffffff;
-            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%230d9488' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
-        }
-        .dark .bg-pattern {
-            background-color: #0f172a;
-            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
-        }
+        body { transition: background-color 0.3s, color 0.3s; margin: 0; overflow: hidden; }
+        .bg-pattern { background-color: #ffffff; background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%230d9488' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E"); }
+        .dark .bg-pattern { background-color: #0f172a; background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E"); }
         .content-area { outline: none; }
         .content-area[contenteditable="true"]:focus { border: 1px dashed #0d9488; padding: 4px; border-radius: 4px; }
+        /* Mengunci Header agar tak bergerak */
+        .fixed-header { position: fixed; top: 0; left: 0; right: 0; z-index: 50; }
+        .scroll-body { height: 100vh; overflow-y: auto; padding-top: 120px; padding-bottom: 40px; }
     </style>
 </head>
-<body class="bg-pattern text-slate-800 dark:text-slate-200 min-h-screen selection:bg-islamic-primary selection:text-white">
+<body class="bg-pattern text-slate-800 dark:text-slate-200 selection:bg-islamic-primary selection:text-white">
 
     <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-islamic-dark text-white px-4 py-2 rounded-full shadow-lg z-[100] transition-opacity duration-300 opacity-0 pointer-events-none">Pesan</div>
 
@@ -67,135 +57,116 @@
             <p id="modal-desc" class="hidden text-gray-600 dark:text-gray-300 mb-6">Deskripsi</p>
             <div class="flex justify-end gap-3">
                 <button onclick="closeModal()" class="px-4 py-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 font-medium">Batal</button>
-                <button id="btn-modal-confirm" class="px-4 py-2 rounded-lg bg-islamic-primary hover:bg-islamic-dark text-white font-medium shadow-md">Simpan</button>
+                <button id="btn-modal-confirm" class="px-4 py-2 rounded-lg bg-islamic-primary text-white font-medium shadow-md">Simpan</button>
             </div>
         </div>
     </div>
 
-    <div id="app" class="max-w-md mx-auto min-h-screen bg-white/90 dark:bg-islamic-night/95 shadow-xl relative flex flex-col">
+    <!-- WADAH UTAMA -->
+    <div id="app" class="max-w-md mx-auto h-screen bg-white/90 dark:bg-islamic-night/95 shadow-xl relative">
         
-        <!-- HALAMAN 1: COVER -->
-        <div id="page-cover" class="flex-1 flex flex-col items-center justify-center p-6 text-center h-screen relative bg-gradient-to-b from-slate-900 to-islamic-night overflow-hidden">
+        <!-- ================= HALAMAN 1: COVER ================= -->
+        <div id="page-cover" class="flex flex-col items-center justify-center p-6 text-center h-full relative bg-gradient-to-b from-slate-900 to-islamic-night overflow-hidden">
+            <!-- Hiasan Cover -->
             <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
-                <div class="absolute top-10 left-10 w-1 h-1 bg-white rounded-full animate-twinkle"></div>
-                <div class="absolute top-20 right-20 w-2 h-2 bg-white rounded-full animate-twinkle" style="animation-delay: 1s;"></div>
-                <div class="absolute top-1/3 left-1/4 w-1.5 h-1.5 bg-white rounded-full animate-twinkle" style="animation-delay: 0.5s;"></div>
+                <div class="absolute top-10 left-10 w-1 h-1 bg-white rounded-full animate-pulse"></div>
+                <div class="absolute top-20 right-20 w-2 h-2 bg-white rounded-full animate-pulse"></div>
             </div>
-            <div class="absolute top-0 left-6 opacity-80 animate-swing origin-top">
-                <i class="fas fa-lantern text-4xl text-islamic-gold drop-shadow-lg"></i>
-                <div class="w-0.5 h-12 bg-islamic-gold mx-auto -mt-12"></div>
-            </div>
-            <div class="absolute top-0 right-6 opacity-80 animate-swing origin-top" style="animation-delay: 0.5s;">
-                <i class="fas fa-lantern text-3xl text-islamic-gold drop-shadow-lg"></i>
-                <div class="w-0.5 h-8 bg-islamic-gold mx-auto -mt-10"></div>
-            </div>
-            <div class="absolute top-20 w-full flex justify-center opacity-30">
-                <i class="fas fa-moon text-9xl text-yellow-300 drop-shadow-[0_0_30px_rgba(253,224,71,0.8)]"></i>
-            </div>
-            <div class="absolute bottom-0 w-full opacity-20 pointer-events-none">
-                <svg viewBox="0 0 1440 320" class="w-full h-auto text-islamic-primary fill-current">
-                    <path d="M720,100 C800,100 850,200 900,250 L1440,250 L1440,320 L0,320 L0,250 L540,250 C590,200 640,100 720,100 Z"></path>
-                    <circle cx="720" cy="80" r="10" class="fill-islamic-gold"></circle>
-                </svg>
-            </div>
+            <div class="absolute top-0 left-6 opacity-80"><i class="fas fa-lantern text-4xl text-islamic-gold"></i></div>
+            <div class="absolute top-20 w-full flex justify-center opacity-30"><i class="fas fa-moon text-9xl text-yellow-300"></i></div>
+            
             <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 to-yellow-500 mb-2 z-10 font-arabic tracking-wide drop-shadow-md mt-10">BUKU SAKU DIGITAL</h1>
-            <div class="w-24 h-1 bg-islamic-gold mx-auto mb-4 rounded z-10 shadow-[0_0_10px_rgba(217,119,6,0.8)]"></div>
+            <div class="w-24 h-1 bg-islamic-gold mx-auto mb-4 rounded z-10"></div>
             <h2 class="text-xl font-semibold text-gray-300 z-10 mb-12 tracking-wider">NGOPSIN MABU PARK</h2>
-            <button onclick="navigateTo('page-toc')" class="z-10 bg-white/10 backdrop-blur-md border border-white/30 hover:bg-white/20 text-white font-semibold py-3 px-8 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all transform hover:scale-105 active:scale-95 flex items-center gap-3">
+            <button onclick="navigateTo('page-toc')" class="z-10 bg-white/10 backdrop-blur-md border border-white/30 text-white font-semibold py-3 px-8 rounded-full flex items-center gap-3">
                 Buka Buku <i class="fas fa-book-open"></i>
             </button>
-            <button onclick="promptAdminLogin()" class="mt-8 z-10 p-2 text-white/40 hover:text-white/80 transition-colors">
-                <i id="admin-icon" class="fas fa-user-lock text-xl"></i>
-            </button>
+            <button onclick="promptAdminLogin()" class="mt-8 z-10 p-2 text-white/40"><i id="admin-icon" class="fas fa-user-lock text-xl"></i></button>
         </div>
 
-        <!-- HALAMAN 2: DAFTAR ISI -->
-        <div id="page-toc" class="hidden flex-1 flex flex-col h-screen overflow-hidden">
-            <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur shadow-sm z-50 p-4">
+        <!-- ================= HALAMAN 2: DAFTAR ISI ================= -->
+        <div id="page-toc" class="hidden flex-col h-full">
+            <header class="fixed-header max-w-md mx-auto bg-white/95 dark:bg-slate-900/95 border-b border-gray-200 dark:border-gray-700 p-4">
                 <div class="flex justify-between items-center">
                     <button onclick="navigateTo('page-cover')" class="text-islamic-primary dark:text-islamic-light"><i class="fas fa-home text-xl"></i></button>
                     <h1 class="text-lg font-bold text-islamic-primary dark:text-islamic-light">BUKU SAKU</h1>
                     <button onclick="toggleTheme()" class="text-islamic-primary dark:text-islamic-light"><i class="fas fa-adjust text-xl"></i></button>
                 </div>
             </header>
-            <main class="p-6 flex-1 overflow-y-auto">
+            <main class="scroll-body px-6">
                 <div class="flex items-center mb-6">
                     <h2 class="text-2xl font-bold text-islamic-dark dark:text-islamic-light border-b-2 border-islamic-primary pb-1">Daftar Isi</h2>
-                    <button id="btn-add-toc" onclick="promptNewToc()" class="hidden ml-3 bg-islamic-gold hover:bg-yellow-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-md active:scale-95"><i class="fas fa-plus text-sm"></i></button>
+                    <button id="btn-add-toc" onclick="promptNewToc()" class="hidden ml-3 bg-islamic-gold text-white rounded-full w-7 h-7 flex items-center justify-center"><i class="fas fa-plus"></i></button>
                 </div>
                 <div id="toc-container" class="space-y-3">
-                    <div class="text-center text-gray-500 py-4"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat data...</div>
+                    <div class="text-center text-gray-500 py-4">Memuat data...</div>
                 </div>
             </main>
         </div>
 
-        <!-- HALAMAN 3: KONTEN -->
-        <div id="page-detail" class="hidden flex-1 flex flex-col h-screen overflow-hidden relative">
+        <!-- ================= HALAMAN 3: KONTEN (TERKUNCI SEMPURNA) ================= -->
+        <div id="page-detail" class="hidden flex-col h-full">
             
-            <!-- HEADER UTAMA -->
-            <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur shadow-sm z-50 flex-shrink-0">
+            <!-- WADAH HEADER DIKUNCI MATI (TIDAK BISA DI-SCROLL) -->
+            <header class="fixed-header max-w-md mx-auto bg-white/95 dark:bg-slate-900/95 shadow-md">
+                <!-- Baris 1: Navigasi & Judul -->
                 <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
                     <button onclick="navigateTo('page-toc')" class="text-islamic-primary dark:text-islamic-light"><i class="fas fa-arrow-left text-xl"></i></button>
-                    <h1 id="detail-title" class="text-md font-bold text-islamic-dark dark:text-islamic-light truncate max-w-[200px] cursor-pointer" ondblclick="if(isAdmin) promptEditTitle()">Judul</h1>
-                    <button id="btn-edit-mode" onclick="toggleEditor()" class="text-islamic-gold hidden"><i class="fas fa-edit text-xl"></i></button>
+                    <h1 id="detail-title" class="text-md font-bold text-islamic-dark dark:text-islamic-light truncate max-w-[200px]" ondblclick="if(isAdmin) promptEditTitle()">Judul</h1>
+                    <button id="btn-edit-mode" onclick="toggleEditor()" class="text-islamic-gold hidden"><i id="edit-icon" class="fas fa-edit text-xl"></i></button>
                 </div>
-                <div class="flex overflow-x-auto gap-2 p-2 bg-gray-50 dark:bg-slate-800 text-sm no-scrollbar">
-                    <button onclick="changeFontSize(-2)" class="px-3 py-1 bg-white dark:bg-slate-700 rounded shadow font-bold flex-shrink-0 border border-gray-200 dark:border-gray-600">A-</button>
-                    <button onclick="changeFontSize(2)" class="px-3 py-1 bg-white dark:bg-slate-700 rounded shadow font-bold flex-shrink-0 border border-gray-200 dark:border-gray-600">A+</button>
-                    <button onclick="toggleWakeLock()" id="btn-wakelock" class="px-3 py-1 bg-white dark:bg-slate-700 rounded shadow flex items-center gap-1 flex-shrink-0 border border-gray-200 dark:border-gray-600"><i class="fas fa-lightbulb"></i> Layar</button>
-                    <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-white dark:bg-slate-700 rounded shadow flex items-center gap-1 flex-shrink-0 border border-gray-200 dark:border-gray-600"><i class="fas fa-angle-double-down"></i> Scroll</button>
-                    <div class="flex items-center gap-1 px-2 py-1 bg-white dark:bg-slate-700 rounded shadow flex-shrink-0 border border-gray-200 dark:border-gray-600">
+
+                <!-- Baris 2A: MENU PEMBACA (Hilang saat mode edit aktif) -->
+                <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 bg-gray-50 dark:bg-slate-800 text-sm no-scrollbar">
+                    <button onclick="changeFontSize(-2)" class="px-3 py-1 bg-white dark:bg-slate-700 rounded shadow font-bold border border-gray-200 dark:border-gray-600 flex-shrink-0">A-</button>
+                    <button onclick="changeFontSize(2)" class="px-3 py-1 bg-white dark:bg-slate-700 rounded shadow font-bold border border-gray-200 dark:border-gray-600 flex-shrink-0">A+</button>
+                    <button onclick="toggleWakeLock()" id="btn-wakelock" class="px-3 py-1 bg-white dark:bg-slate-700 rounded shadow flex items-center gap-1 border border-gray-200 dark:border-gray-600 flex-shrink-0"><i class="fas fa-lightbulb"></i> Layar</button>
+                    <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-white dark:bg-slate-700 rounded shadow flex items-center gap-1 border border-gray-200 dark:border-gray-600 flex-shrink-0"><i class="fas fa-angle-double-down"></i> Scroll</button>
+                    <div class="flex items-center gap-1 px-2 py-1 bg-white dark:bg-slate-700 rounded shadow border border-gray-200 dark:border-gray-600 flex-shrink-0">
                         <i class="fas fa-music text-xs"></i>
                         <audio id="bg-audio" controls class="h-6 w-32 outline-none">
                             <source src="https://www.soundhelix.com/architectureplay/SoundHelix-Song-1.mp3" type="audio/mpeg">
                         </audio>
                     </div>
                 </div>
+
+                <!-- Baris 2B: MENU ADMIN (Muncul khusus saat mode edit aktif) -->
+                <div id="admin-features" class="hidden flex-wrap gap-1 p-2 bg-islamic-light dark:bg-slate-800 text-sm">
+                    <button onclick="execCmd('undo')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-undo"></i></button>
+                    <button onclick="execCmd('redo')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-redo"></i></button>
+                    <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+
+                    <button onclick="execCmd('bold')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold">B</button>
+                    <button onclick="execCmd('italic')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm italic">I</button>
+                    <button onclick="execCmd('underline')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm underline">U</button>
+                    <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+                    <button onclick="execCmd('justifyLeft')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-left"></i></button>
+                    <button onclick="execCmd('justifyCenter')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-center"></i></button>
+                    <button onclick="execCmd('justifyRight')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-right"></i></button>
+                    <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+                    
+                    <select onchange="execCmd('fontName', this.value)" class="px-1 py-1 bg-white dark:bg-slate-700 rounded shadow-sm outline-none max-w-[100px]">
+                        <option value="Poppins">Poppins</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Amiri">Amiri</option>
+                        <option value="Lateef">Lateef</option>
+                        <option value="'Scheherazade New'">Scheherazade</option>
+                    </select>
+                    
+                    <input type="color" onchange="execCmd('foreColor', this.value)" class="w-7 h-7 p-0 border-0 rounded shadow-sm" title="Warna Teks">
+                    
+                    <!-- Tombol Jarak Baris -->
+                    <button onclick="changeLineHeight()" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm" title="Jarak Baris"><i class="fas fa-text-height"></i></button>
+                    
+                    <div class="w-px h-6 bg-gray-300 mx-1 self-center flex-grow"></div>
+                    <button onclick="promptDeleteCurrent()" class="px-2 py-1 bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 rounded shadow-sm">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </header>
 
-            <!-- MENU ADMIN EDIT (DIBUAT STICKY TOP AGAR NGIKUTIN LAYAR ATAS, TIDAK TENGGELAM) -->
-            <div id="admin-toolbar" class="hidden flex-wrap gap-1 p-2 bg-islamic-light dark:bg-slate-800 border-b border-islamic-primary/20 shadow-xl flex-shrink-0 sticky top-0 z-40">
-                <!-- Undo & Redo -->
-                <button onclick="execCmd('undo')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm" title="Undo"><i class="fas fa-undo"></i></button>
-                <button onclick="execCmd('redo')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm" title="Redo"><i class="fas fa-redo"></i></button>
-                <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-
-                <button onclick="execCmd('decreaseFontSize')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold text-sm">A-</button>
-                <button onclick="execCmd('increaseFontSize')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold text-sm">A+</button>
-                <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-
-                <button onclick="execCmd('bold')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold">B</button>
-                <button onclick="execCmd('italic')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm italic">I</button>
-                <button onclick="execCmd('underline')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm underline">U</button>
-                <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-                <button onclick="execCmd('justifyLeft')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-left"></i></button>
-                <button onclick="execCmd('justifyCenter')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-center"></i></button>
-                <button onclick="execCmd('justifyRight')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-right"></i></button>
-                <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-                
-                <select onchange="execCmd('fontName', this.value)" class="px-1 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm outline-none max-w-[110px]">
-                    <option value="Poppins">Poppins</option>
-                    <option value="Arial">Arial</option>
-                    <option value="Amiri">Amiri</option>
-                    <option value="Lateef">Lateef</option>
-                    <option value="'Scheherazade New'">Scheherazade</option>
-                    <option value="Tajawal">Tajawal</option>
-                    <option value="'Reem Kufi'">Reem Kufi</option>
-                </select>
-                
-                <input type="color" onchange="execCmd('foreColor', this.value)" class="w-7 h-7 p-0 border-0 rounded shadow-sm cursor-pointer" title="Warna Teks">
-                
-                <!-- Atur Jarak Baris (Line Height) -->
-                <button onclick="changeLineHeight()" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm" title="Jarak Baris"><i class="fas fa-text-height"></i></button>
-                
-                <div class="w-px h-6 bg-gray-300 mx-1 self-center flex-grow"></div>
-                <button onclick="promptDeleteCurrent()" class="px-2 py-1 bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 rounded shadow-sm text-sm">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-
-            <!-- AREA KONTEN -->
-            <main class="flex-1 overflow-y-auto relative p-6 pb-32" id="scroll-container">
+            <!-- WADAH KONTEN (Area ini yang tergulung, aman di bawah header) -->
+            <main class="scroll-body px-6" id="scroll-container">
                 <div id="detail-content" class="content-area text-lg leading-relaxed min-h-[400px]" contenteditable="false" onblur="saveCurrentContent()"></div>
             </main>
         </div>
@@ -227,19 +198,12 @@
         dbRef.on('value', (snapshot) => {
             try {
                 const data = snapshot.val();
-                if (data && Array.isArray(data)) {
-                    appData = data.filter(item => item !== null);
-                } else if (data && typeof data === 'object') {
-                    appData = Object.values(data).filter(item => item !== null);
-                } else {
-                    appData = [];
-                }
+                if (data && Array.isArray(data)) { appData = data.filter(item => item !== null); } 
+                else if (data && typeof data === 'object') { appData = Object.values(data).filter(item => item !== null); } 
+                else { appData = []; }
 
                 if (appData.length === 0) {
-                    appData = [
-                        { id: 1, title: '1. Mukadimah', content: '<div style="text-align: center; line-height: 1.6;"><b>Bismillahirrohmanirrohim</b><br><br>Selamat datang di Buku Saku Digital Ngopsin Mabu Park.</div>' },
-                        { id: 2, title: '2. Marhaban', content: '<div style="font-family: Amiri; font-size: 32px; text-align: center; color: #0d9488; line-height: 2;">مَرْحَبًا يَانُوْرَ العَيْنِ<br>مَرْحَبًا جَدَّ الحُسَيْنِ</div><br><div style="text-align:center;">Silakan edit teks ini...</div>' }
-                    ];
+                    appData = [{ id: 1, title: '1. Mukadimah', content: '<div style="text-align: center; line-height: 1.6;"><b>Bismillahirrohmanirrohim</b><br><br>Selamat datang di Buku Saku Digital.</div>' }];
                     saveData(); 
                 }
 
@@ -247,16 +211,10 @@
                 if (!document.getElementById('page-detail').classList.contains('hidden') && !isEditorActive) {
                     if(currentActiveId) openDetail(currentActiveId);
                 }
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) {}
         });
 
-        function saveData() { 
-            dbRef.set(appData).catch((error) => {
-                showToast("GAGAL MENYIMPAN! Periksa Rules Firebase.");
-            });
-        }
+        function saveData() { dbRef.set(appData).catch(() => showToast("Gagal menyimpan ke server.")); }
 
         function showToast(msg) {
             const toast = document.getElementById('toast');
@@ -266,7 +224,7 @@
         }
 
         let modalCallback = null;
-        function openModal({ title, isInput, isPassword, placeholder, desc, btnText, btnColor, onConfirm }) {
+        function openModal({ title, isInput, isPassword, placeholder, desc, btnText, onConfirm }) {
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-input-container').classList.toggle('hidden', !isInput);
             document.getElementById('modal-desc').classList.toggle('hidden', isInput);
@@ -282,11 +240,7 @@
             } else {
                 document.getElementById('modal-desc').innerText = desc || '';
             }
-
-            const btnConfirm = document.getElementById('btn-modal-confirm');
-            btnConfirm.innerText = btnText || 'Simpan';
-            btnConfirm.className = `px-4 py-2 rounded-lg text-white font-medium shadow-md ${btnColor || 'bg-islamic-primary hover:bg-islamic-dark'}`;
-            
+            document.getElementById('btn-modal-confirm').innerText = btnText || 'Simpan';
             modalCallback = onConfirm;
             document.getElementById('custom-modal').classList.remove('hidden');
             document.getElementById('custom-modal').classList.add('flex');
@@ -312,8 +266,7 @@
 
         function promptAdminLogin() {
             if(isAdmin) {
-                isAdmin = false;
-                showToast("Logout Admin Berhasil.");
+                isAdmin = false; showToast("Logout Admin Berhasil.");
                 document.getElementById('admin-icon').classList.remove('text-islamic-gold');
                 return;
             }
@@ -346,15 +299,12 @@
             appData.forEach((item, index) => {
                 if(!item) return;
                 const btn = document.createElement('div');
-                btn.className = 'flex items-center justify-between bg-white dark:bg-slate-800 p-4 rounded-xl shadow border-l-4 border-islamic-primary cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition';
+                btn.className = 'flex items-center justify-between bg-white dark:bg-slate-800 p-4 rounded-xl shadow border-l-4 border-islamic-primary cursor-pointer hover:bg-gray-50';
                 btn.onclick = () => openDetail(item.id);
-
                 const titleSpan = document.createElement('span');
                 titleSpan.className = 'font-semibold text-lg w-full';
                 let titleText = item.title ? item.title.toString() : "Halaman Baru";
-                let cleanTitle = titleText.replace(/^\d+[\.\-]?\s*/, '');
-                titleSpan.innerText = `${index + 1}. ${cleanTitle}`;
-                
+                titleSpan.innerText = `${index + 1}. ${titleText.replace(/^\d+[\.\-]?\s*/, '')}`;
                 btn.appendChild(titleSpan);
                 container.appendChild(btn);
             });
@@ -362,7 +312,7 @@
 
         function promptNewToc() {
             openModal({
-                title: 'Tambah Daftar Isi / Doa', isInput: true, placeholder: 'Judul Baru...',
+                title: 'Tambah Doa', isInput: true, placeholder: 'Judul Baru...',
                 onConfirm: (val) => {
                     if (val && val.trim() !== "") {
                         appData.push({ id: Date.now(), title: val, content: '<div style="text-align:center; line-height: 1.6;">Ketik di sini...</div>' });
@@ -377,27 +327,31 @@
             const item = appData.find(x => x.id === id);
             if (!item) return;
 
-            let titleText = item.title ? item.title.toString() : "";
-            document.getElementById('detail-title').innerText = titleText.replace(/^\d+[\.\-]?\s*/, '');
-            
+            document.getElementById('detail-title').innerText = (item.title||"").toString().replace(/^\d+[\.\-]?\s*/, '');
             const contentEl = document.getElementById('detail-content');
             contentEl.innerHTML = item.content || "";
             contentEl.style.fontSize = baseFontSize + 'px';
 
             document.getElementById('btn-edit-mode').classList.toggle('hidden', !isAdmin);
+            
+            // Kembalikan ke mode baca setiap kali pindah halaman
             isEditorActive = false;
-            document.getElementById('admin-toolbar').classList.add('hidden');
-            document.getElementById('admin-toolbar').classList.remove('flex');
+            document.getElementById('reader-features').classList.remove('hidden');
+            document.getElementById('reader-features').classList.add('flex');
+            document.getElementById('admin-features').classList.add('hidden');
+            document.getElementById('admin-features').classList.remove('flex');
+            document.getElementById('edit-icon').className = 'fas fa-edit text-xl';
+            document.getElementById('btn-edit-mode').classList.remove('text-green-500');
+            document.getElementById('btn-edit-mode').classList.add('text-islamic-gold');
             contentEl.setAttribute('contenteditable', 'false');
 
             navigateTo('page-detail');
         }
 
         function promptEditTitle() {
-            if(!isEditorActive) { showToast("Aktifkan icon pensil dulu."); return; }
+            if(!isEditorActive) { showToast("Aktifkan mode edit dulu."); return; }
             const item = appData.find(x => x.id === currentActiveId);
             if(!item) return;
-            
             openModal({
                 title: 'Ubah Judul', isInput: true, placeholder: 'Ketik judul baru...',
                 onConfirm: (val) => {
@@ -408,14 +362,12 @@
                     }
                 }
             });
-            let titleText = item.title ? item.title.toString() : "";
-            setTimeout(() => { document.getElementById('modal-input').value = titleText.replace(/^\d+[\.\-]?\s*/, ''); }, 50);
+            setTimeout(() => { document.getElementById('modal-input').value = (item.title||"").toString().replace(/^\d+[\.\-]?\s*/, ''); }, 50);
         }
 
         function promptDeleteCurrent() {
             openModal({
-                title: 'Konfirmasi Hapus', isInput: false, desc: 'Hapus permanen dari server?',
-                btnText: 'Ya, Hapus', btnColor: 'bg-red-600',
+                title: 'Konfirmasi Hapus', isInput: false, desc: 'Hapus permanen dari server?', btnText: 'Ya, Hapus',
                 onConfirm: () => {
                     appData = appData.filter(x => x.id !== currentActiveId);
                     saveData(); navigateTo('page-toc'); showToast('Hapus berhasil!');
@@ -423,48 +375,64 @@
             });
         }
 
+        // SISTEM TUKAR MENU PEMBACA DAN ADMIN SECARA SEMPURNA
         function toggleEditor() {
             isEditorActive = !isEditorActive;
-            const toolbar = document.getElementById('admin-toolbar');
+            const readerBar = document.getElementById('reader-features');
+            const adminBar = document.getElementById('admin-features');
             const contentEl = document.getElementById('detail-content');
+            const btnEdit = document.getElementById('btn-edit-mode');
+            const iconEdit = document.getElementById('edit-icon');
             
             if (isEditorActive) {
-                toolbar.classList.remove('hidden');
-                toolbar.classList.add('flex');
+                // Sembunyikan menu pembaca, Tampilkan menu admin
+                readerBar.classList.remove('flex');
+                readerBar.classList.add('hidden');
+                
+                adminBar.classList.remove('hidden');
+                adminBar.classList.add('flex');
+                
+                // Ubah icon pensil jadi icon centang (Simpan)
+                iconEdit.className = 'fas fa-check text-xl';
+                btnEdit.classList.remove('text-islamic-gold');
+                btnEdit.classList.add('text-green-500');
+                
                 contentEl.setAttribute('contenteditable', 'true');
                 contentEl.focus();
-                showToast("Mode Edit Aktif.");
+                showToast("Mode Edit: ON");
             } else {
-                toolbar.classList.add('hidden');
-                toolbar.classList.remove('flex');
+                // Tampilkan menu pembaca, Sembunyikan menu admin
+                adminBar.classList.remove('flex');
+                adminBar.classList.add('hidden');
+                
+                readerBar.classList.remove('hidden');
+                readerBar.classList.add('flex');
+                
+                // Ubah icon kembali ke pensil
+                iconEdit.className = 'fas fa-edit text-xl';
+                btnEdit.classList.remove('text-green-500');
+                btnEdit.classList.add('text-islamic-gold');
+                
                 contentEl.setAttribute('contenteditable', 'false');
                 saveCurrentContent();
-                showToast("Tersimpan.");
+                showToast("Perubahan Tersimpan.");
             }
         }
 
         function execCmd(command, value = null) {
-            if (command === 'increaseFontSize' || command === 'decreaseFontSize') {
-                let currentSize = document.queryCommandValue("fontSize") || 3;
-                let newSize = command === 'increaseFontSize' ? parseInt(currentSize) + 1 : parseInt(currentSize) - 1;
-                if(newSize > 7) newSize = 7;
-                if(newSize < 1) newSize = 1;
-                document.execCommand('fontSize', false, newSize);
-            } else {
-                document.execCommand(command, false, value);
-            }
+            document.execCommand(command, false, value);
             document.getElementById('detail-content').focus();
             saveCurrentContent();
         }
 
-        // PERBAIKAN FUNGSI JARAK BARIS (LINE HEIGHT LANGSUNG PADA ELEMEN TEKS)
+        // Fungsi Jarak Baris Diperbaiki
         function changeLineHeight() {
             const contentEl = document.getElementById('detail-content');
             let currentLH = parseFloat(contentEl.style.lineHeight) || 1.6;
             let nextLH = currentLH === 1.6 ? 2.0 : (currentLH === 2.0 ? 2.5 : 1.6);
             contentEl.style.lineHeight = nextLH;
             saveCurrentContent();
-            showToast(`Jarak baris: ${nextLH}`);
+            showToast(`Jarak baris disesuaikan.`);
         }
 
         function saveCurrentContent() {
@@ -478,6 +446,7 @@
 
         document.getElementById('detail-content').addEventListener('input', () => { if(isEditorActive) saveCurrentContent(); });
 
+        // Fungsi A- dan A+ Diperbaiki
         function changeFontSize(step) {
             baseFontSize += step;
             if(baseFontSize < 12) baseFontSize = 12;
@@ -491,10 +460,11 @@
         }
         if(localStorage.getItem('temaMalam') === 'true') document.documentElement.classList.add('dark');
 
+        // Fungsi Scroll Otomatis Diperbaiki
         let scrollInterval, isScrolling = false;
         function toggleAutoScroll() {
             const btn = document.getElementById('btn-autoscroll');
-            const container = document.getElementById('scroll-container');
+            const container = document.getElementById('scroll-container'); // Scroll diarahkan ke wadah konten
             if (isScrolling) {
                 clearInterval(scrollInterval); isScrolling = false;
                 btn.classList.remove('bg-islamic-primary', 'text-white');
@@ -506,6 +476,7 @@
         }
         function stopAutoScroll() { if (isScrolling) toggleAutoScroll(); }
 
+        // Fungsi WakeLock (Anti Layar Mati)
         let wakeLock = null;
         async function toggleWakeLock() {
             const btn = document.getElementById('btn-wakelock');
@@ -520,14 +491,12 @@
                         wakeLock.addEventListener('release', () => { wakeLock = null; btn.classList.remove('bg-yellow-500', 'text-white'); });
                     }
                 } catch (err) { showToast('Gagal mengaktifkan kunci layar.'); }
-            } else { showToast('Tidak didukung browser.'); }
+            } else { alert('Maaf, browser HP Anda tidak mendukung fitur ini.'); }
         }
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => {
-                    console.log('Service Worker Registered');
-                });
+                navigator.serviceWorker.register('./sw.js').then(reg => { console.log('Service Worker Registered'); });
             });
         }
     </script>
