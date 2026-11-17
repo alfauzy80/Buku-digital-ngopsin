@@ -47,11 +47,10 @@
         }
     </script>
     <style>
-        /* PERBAIKAN UTAMA: Mengunci body agar tidak bisa di-scroll sama sekali */
         html, body {
             margin: 0; padding: 0; 
             width: 100vw; height: 100dvh; 
-            overflow: hidden; /* Mengunci scroll global */
+            overflow: hidden; 
             background: radial-gradient(ellipse at top, #064e3b, #022c22, #000000); 
             color: #f1f5f9;
             -webkit-tap-highlight-color: transparent; 
@@ -64,25 +63,21 @@
             z-index: 100;
         }
 
-        /* PERBAIKAN UTAMA: Semua halaman diatur Absolute agar saling bertumpuk dan rapi */
         .page-container {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            display: none; /* Disembunyikan secara default */
+            display: none; 
             flex-direction: column;
             max-width: 28rem;
             margin: 0 auto;
-            right: 0; /* Untuk memastikan max-width berada di tengah */
+            right: 0; 
         }
         
-        .page-container.active {
-            display: flex; /* Ditampilkan jika memiliki class active */
-        }
+        .page-container.active { display: flex; }
 
         .sticky-top-area { flex-shrink: 0; width: 100%; }
         
-        /* Area yang bisa di-scroll HANYA ini saja */
         .scrollable-text-area { 
             flex-grow: 1; 
             overflow-y: auto; 
@@ -100,10 +95,8 @@
 </head>
 <body class="selection:bg-gold-500 selection:text-royal-dark font-sans relative">
 
-    <!-- TOAST NOTIFIKASI -->
     <div id="toast" class="fixed top-16 left-1/2 transform -translate-x-1/2 bg-royal-dark border border-gold-500 text-gold-400 px-6 py-2 rounded-full shadow-lg z-[1000] opacity-0 pointer-events-none transition-opacity duration-300 font-semibold text-sm">Pesan</div>
 
-    <!-- BANNER INSTALL PWA -->
     <div id="install-banner" class="fixed bottom-0 left-0 w-full bg-royal-dark/95 backdrop-blur border-t border-gold-500/50 p-4 hidden flex-row justify-between items-center z-[2000] shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
         <div class="flex items-center gap-3">
             <img src="./icon-192.png" onerror="this.src='./logo.png'" alt="Icon" class="w-12 h-12 rounded-xl shadow-md border border-gold-500/30">
@@ -118,7 +111,6 @@
         </div>
     </div>
 
-    <!-- MODAL EDITOR / PASSWORD -->
     <div id="custom-modal" class="fixed inset-0 bg-black/80 z-[1000] hidden items-center justify-center px-4 backdrop-blur-sm">
         <div class="bg-royal-dark border border-gold-500/30 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <h3 id="modal-title" class="text-xl font-serif text-gold-400 mb-4">Judul</h3>
@@ -134,7 +126,6 @@
     </div>
 
     <!-- HALAMAN 1: COVER -->
-    <!-- PERUBAHAN: Ditambahkan class 'page-container' dan 'active' -->
     <div id="page-cover" class="page-container active relative px-6">
         <div class="flex-grow w-full flex items-center justify-center pt-8">
             <div class="relative">
@@ -165,7 +156,6 @@
     </div>
 
     <!-- HALAMAN 2: DAFTAR ISI -->
-    <!-- PERUBAHAN: Ditambahkan class 'page-container' -->
     <div id="page-toc" class="page-container relative">
         <header class="sticky-top-area glass-header p-4 flex justify-between items-center z-50">
             <button onclick="navigateTo('page-cover')" class="text-gold-500 text-xl"><i class="fas fa-arrow-left"></i></button>
@@ -183,7 +173,6 @@
     </div>
 
     <!-- HALAMAN 3: KONTEN -->
-    <!-- PERUBAHAN: Ditambahkan class 'page-container' -->
     <div id="page-detail" class="page-container relative">
         <div class="sticky-top-area glass-header">
             <div class="flex justify-between items-center p-3 border-b border-gold-500/20">
@@ -201,25 +190,28 @@
             </div>
 
             <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 border-b border-gold-500/30 shadow-inner">
-                <button onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(-1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
-                <button onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
+                <!-- Tambahan ontouchstart pada semua tombol menu agar tidak mencuri fokus teks -->
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(-1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
 
-                <button onmousedown="event.preventDefault()" onclick="execCmd('undo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-undo text-xs"></i></button>
-                <button onmousedown="event.preventDefault()" onclick="execCmd('redo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-redo text-xs"></i></button>
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('undo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-undo text-xs"></i></button>
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('redo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-redo text-xs"></i></button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
 
-                <button onmousedown="event.preventDefault()" onclick="execCmd('bold')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">B</button>
-                <button onmousedown="event.preventDefault()" onclick="execCmd('italic')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 italic text-sm">I</button>
-                <button onmousedown="event.preventDefault()" onclick="execCmd('underline')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 underline text-sm">U</button>
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('bold')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">B</button>
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('italic')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 italic text-sm">I</button>
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('underline')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 underline text-sm">U</button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 
-                <button onmousedown="event.preventDefault()" onclick="execCmd('justifyLeft')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-left text-xs"></i></button>
-                <button onmousedown="event.preventDefault()" onclick="execCmd('justifyCenter')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-center text-xs"></i></button>
-                <button onmousedown="event.preventDefault()" onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-right text-xs"></i></button>
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('justifyLeft')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-left text-xs"></i></button>
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('justifyCenter')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-center text-xs"></i></button>
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-right text-xs"></i></button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 
-                <select onchange="execCmd('fontName', this.value)" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
+                <!-- Font Dropdown: Otomatis kembali ke "Font" setelah dipilih agar bisa digunakan berkali-kali -->
+                <select ontouchstart="saveSelectionExplicitly()" onmousedown="saveSelectionExplicitly()" onchange="execCmd('fontName', this.value); this.selectedIndex=0;" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
+                    <option value="" disabled selected>Font</option>
                     <option value="Poppins">Poppins</option>
                     <option value="Amiri">Amiri</option>
                     <option value="Lateef">Lateef</option>
@@ -227,12 +219,12 @@
                 </select>
 
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
-                <button onmousedown="event.preventDefault()" onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs"><i class="fas fa-text-height"></i> Spasi</button>
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs"><i class="fas fa-text-height"></i> Spasi</button>
                 
-                <input type="color" oninput="restoreAndColor(this.value)" onchange="restoreAndColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
+                <input type="color" ontouchstart="saveSelectionExplicitly()" onmousedown="saveSelectionExplicitly()" oninput="restoreAndColor(this.value)" onchange="restoreAndColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
                 
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
-                <button onmousedown="event.preventDefault()" onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
+                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
             </div>
         </div>
 
@@ -346,7 +338,6 @@
             }});
         }
 
-        // PERBAIKAN: Fungsi Navigasi disesuaikan dengan class 'active'
         function navigateTo(pageId) {
             ['page-cover', 'page-toc', 'page-detail'].forEach(id => { 
                 document.getElementById(id).classList.remove('active'); 
@@ -404,20 +395,38 @@
             }
         }
 
+        // ============ SISTEM PENGAMANAN SELEKSI (ANTI HILANG SAAT DRAG) ============
         document.addEventListener('selectionchange', () => {
             if (!isEditorActive) return;
             const sel = window.getSelection();
             if (sel.rangeCount > 0) {
                 const range = sel.getRangeAt(0);
                 const editor = document.getElementById('detail-content');
+                // Clone range digunakan agar seleksi tersimpan kuat di memori
                 if (editor && editor.contains(range.commonAncestorContainer)) {
-                    savedRange = range;
+                    savedRange = range.cloneRange();
                 }
             }
         });
 
+        // Dipanggil khusus untuk elemen <select> dan <input type="color">
+        function saveSelectionExplicitly() {
+            if (!isEditorActive) return;
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0) {
+                const range = sel.getRangeAt(0);
+                const editor = document.getElementById('detail-content');
+                if (editor && editor.contains(range.commonAncestorContainer)) {
+                    savedRange = range.cloneRange();
+                }
+            }
+        }
+
         function restoreSelection() {
             if (savedRange) {
+                const editor = document.getElementById('detail-content');
+                // PENTING: Memaksa fokus kembali ke kotak teks sebelum menerapkan perintah
+                editor.focus();
                 const sel = window.getSelection();
                 sel.removeAllRanges();
                 sel.addRange(savedRange);
