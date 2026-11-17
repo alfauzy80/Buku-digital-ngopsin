@@ -2,8 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <!-- Meta tag khusus untuk mengatasi zoom dan keyboard di mobile -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Buku Saku Digital - Premium Edition</title>
     
     <meta name="theme-color" content="#022c22">
@@ -12,8 +11,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Font Mewah untuk kesan Elegan -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Amiri:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -23,504 +20,294 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { 
-                        sans: ['Poppins', 'sans-serif'], 
-                        serif: ['Playfair Display', 'serif'],
-                        arabic: ['Amiri', 'serif'] 
-                    },
-                    colors: { 
-                        royal: { dark: '#022c22', base: '#064e3b', light: '#065f46' },
-                        gold: { 300: '#fde047', 400: '#facc15', 500: '#eab308', 600: '#ca8a04' }
-                    }
+                    fontFamily: { sans: ['Poppins', 'sans-serif'], serif: ['Playfair Display', 'serif'], arabic: ['Amiri', 'serif'] },
+                    colors: { royal: { dark: '#022c22', base: '#064e3b' }, gold: { 400: '#facc15', 500: '#eab308' } }
                 }
             }
         }
     </script>
     <style>
         body { 
-            background-color: #022c22; 
-            color: #f1f5f9;
-            margin: 0; padding: 0;
-            -webkit-tap-highlight-color: transparent;
+            background: radial-gradient(ellipse at top, #064e3b, #022c22, #000000); 
+            color: #f1f5f9; margin: 0; padding: 0; height: 100dvh; overflow: hidden; -webkit-tap-highlight-color: transparent; 
         }
         
-        /* Background Pattern Elegan (Radial Minimalis) */
-        .bg-premium {
-            background: radial-gradient(ellipse at top, #064e3b, #022c22, #000000);
-            background-attachment: fixed;
+        .glass-header {
+            background: rgba(2, 44, 34, 0.95);
+            border-bottom: 1px solid rgba(234, 179, 8, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            z-index: 50;
         }
 
-        /* Glassmorphism Card & Toolbar */
-        .glass {
-            background: rgba(2, 44, 34, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(234, 179, 8, 0.15);
-        }
+        /* STRUKTUR ANTI KEYBOARD: Membagi layar jadi 2 bagian kaku */
+        #page-detail { display: flex; flex-direction: column; height: 100dvh; width: 100%; max-width: 28rem; margin: 0 auto; }
+        .fixed-top-area { flex-shrink: 0; width: 100%; } /* Area Menu (Tidak bisa scroll) */
+        .scrollable-text-area { flex-grow: 1; overflow-y: auto; padding: 1.5rem; padding-bottom: 10rem; } /* Area Teks (Bisa scroll) */
         
-        .glass-card {
-            background: linear-gradient(145deg, rgba(6, 78, 59, 0.4), rgba(2, 44, 34, 0.8));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(250, 204, 21, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-        }
-
-        /* Area Konten dengan Extra Padding Bawah untuk Keyboard */
-        .content-area { 
-            outline: none; 
-            min-height: 70vh; 
-            padding-bottom: 50vh !important; /* Mencegah baris terakhir tertutup keyboard */
-        }
+        .content-area { outline: none; min-height: 100%; }
+        .content-area[contenteditable="true"]:focus { border: 1px dashed rgba(234, 179, 8, 0.5); border-radius: 8px; padding: 8px; background: rgba(255,255,255,0.02); }
         
-        /* Animasi Lembut */
-        .glow-gold { text-shadow: 0 0 20px rgba(234, 179, 8, 0.6); }
-        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* WADAH TOOLBAR ANTI KEYBOARD */
-        #toolbar-wrapper {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 99999;
-            width: 100%;
-            transition: opacity 0.3s ease;
-        }
-        
-        /* Penahan Layout agar konten tidak tertimpa toolbar */
-        .toolbar-spacer { height: 70px; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #eab308; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-premium selection:bg-gold-500 selection:text-royal-dark relative font-sans min-h-screen">
+<body class="selection:bg-gold-500 selection:text-royal-dark font-sans relative">
 
-    <!-- Toast Elegan -->
-    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 glass border-gold-500 text-gold-400 px-6 py-3 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-[100000] transition-all duration-300 opacity-0 pointer-events-none font-medium tracking-wide flex items-center gap-2">
-        <i class="fas fa-info-circle"></i> <span id="toast-msg">Pesan</span>
-    </div>
+    <div id="toast" class="fixed top-16 left-1/2 transform -translate-x-1/2 bg-royal-dark border border-gold-500 text-gold-400 px-6 py-2 rounded-full shadow-lg z-[1000] opacity-0 pointer-events-none transition-opacity duration-300 font-semibold text-sm">Pesan</div>
 
     <!-- MODAL -->
-    <div id="custom-modal" class="fixed inset-0 bg-black/90 z-[100000] hidden items-center justify-center px-4 backdrop-blur-sm transition-opacity">
-        <div class="glass-card rounded-2xl p-7 w-full max-w-sm">
-            <h3 id="modal-title" class="text-2xl font-serif text-gold-400 mb-2 glow-gold">Judul</h3>
-            <p id="modal-desc" class="text-slate-300 mb-6 text-sm">Deskripsi</p>
-            
-            <div class="relative w-full mb-8" id="modal-input-container">
-                <input type="text" id="modal-input" class="w-full px-4 py-3 bg-black/40 border border-gold-600/30 rounded-xl outline-none text-white focus:border-gold-400 transition-colors">
+    <div id="custom-modal" class="fixed inset-0 bg-black/80 z-[1000] hidden items-center justify-center px-4 backdrop-blur-sm">
+        <div class="bg-royal-dark border border-gold-500/30 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 id="modal-title" class="text-xl font-serif text-gold-400 mb-4">Judul</h3>
+            <div class="relative w-full mb-6" id="modal-input-container">
+                <input type="text" id="modal-input" class="w-full px-4 py-3 bg-black/50 border border-gold-500/50 rounded-lg outline-none text-white focus:border-gold-400">
                 <button id="modal-eye-btn" class="absolute right-4 top-3.5 text-slate-400 hidden" onclick="toggleModalPassword()"><i class="fas fa-eye-slash" id="modal-eye-icon"></i></button>
             </div>
-            
             <div class="flex justify-end gap-3">
-                <button onclick="closeModal()" class="px-5 py-2 rounded-lg text-slate-400 hover:text-white transition-colors">Batal</button>
-                <button id="btn-modal-confirm" class="px-6 py-2 rounded-lg bg-gradient-to-r from-gold-600 to-gold-400 text-royal-dark font-bold shadow-lg shadow-gold-500/30 hover:scale-105 transition-transform">Simpan</button>
+                <button onclick="closeModal()" class="px-4 py-2 text-slate-400 hover:text-white">Batal</button>
+                <button id="btn-modal-confirm" class="px-5 py-2 bg-gradient-to-r from-gold-500 to-gold-400 text-black font-bold rounded-lg shadow-md">Simpan</button>
             </div>
         </div>
     </div>
 
-    <!-- HALAMAN 1: COVER (ELEGAN & MEWAH) -->
-    <div id="page-cover" class="flex flex-col items-center justify-center text-center min-h-screen relative px-6 fade-in">
-        
-        <!-- Ornamen Mewah -->
-        <div class="mb-10 relative">
-            <div class="absolute inset-0 bg-gold-500 blur-[60px] opacity-20 rounded-full"></div>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Star_and_Crescent.svg/1024px-Star_and_Crescent.svg.png" 
-                 alt="Islamic Ornament" class="w-24 h-24 object-contain relative z-10 invert sepia-[1] saturate-[5] hue-rotate-[10deg] drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]">
+    <!-- HALAMAN 1: COVER (STABIL & IKON AMAN) -->
+    <div id="page-cover" class="flex flex-col items-center justify-center text-center h-[100dvh] relative px-6 w-full max-w-md mx-auto">
+        <!-- Ikon Lentera FontAwesome murni (Dijamin tidak broken) -->
+        <div class="mb-6 relative">
+            <div class="absolute inset-0 bg-gold-500 blur-[40px] opacity-20 rounded-full"></div>
+            <i class="fas fa-lantern text-6xl text-gold-500 relative z-10 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]"></i>
         </div>
         
-        <h1 class="text-5xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-b from-gold-300 to-gold-600 mb-4 glow-gold tracking-wide">Buku Saku</h1>
-        <div class="flex items-center justify-center gap-4 w-full mb-6">
-            <div class="h-px bg-gradient-to-r from-transparent to-gold-500 w-16"></div>
-            <i class="fas fa-gem text-gold-500 text-xs"></i>
-            <div class="h-px bg-gradient-to-l from-transparent to-gold-500 w-16"></div>
-        </div>
-        <h2 class="text-sm font-light text-slate-300 tracking-[0.3em] uppercase mb-16">Ngopsin Mabu Park</h2>
+        <h1 class="text-5xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-b from-gold-300 to-gold-500 mb-4 tracking-wide" style="text-shadow: 0 0 10px rgba(234,179,8,0.3);">Buku Saku</h1>
         
-        <button onclick="navigateTo('page-toc')" class="relative group overflow-hidden bg-transparent border border-gold-500 text-gold-400 font-serif text-lg italic py-3 px-12 rounded-full transition-all duration-300 hover:text-royal-dark hover:bg-gold-500 hover:shadow-[0_0_30px_rgba(234,179,8,0.5)]">
-            <span class="relative z-10 flex items-center gap-3">Buka Kitab <i class="fas fa-book-reader text-sm"></i></span>
+        <div class="flex items-center gap-3 mb-4">
+            <div class="h-px w-12 bg-gradient-to-r from-transparent to-gold-500"></div>
+            <i class="fas fa-gem text-gold-500 text-[10px]"></i>
+            <div class="h-px w-12 bg-gradient-to-l from-transparent to-gold-500"></div>
+        </div>
+        
+        <h2 class="text-xs text-slate-300 tracking-[0.2em] uppercase mb-12">Ngopsin Mabu Park</h2>
+        
+        <button onclick="navigateTo('page-toc')" class="border border-gold-500 text-gold-400 font-serif italic py-3 px-10 rounded-full hover:bg-gold-500 hover:text-black transition-colors flex items-center gap-3 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+            Buka Kitab <i class="fas fa-book-open text-sm"></i>
         </button>
 
-        <button onclick="promptAdminLogin()" class="absolute bottom-8 p-4 text-slate-600 hover:text-gold-500 transition-colors">
-            <i id="admin-icon" class="fas fa-lock text-sm"></i>
-        </button>
+        <!-- Ikon Gembok di ujung bawah layar (Fix) -->
+        <div class="absolute bottom-6 w-full text-center">
+            <button onclick="promptAdminLogin()" class="p-3 text-slate-600 hover:text-gold-500 transition-colors">
+                <i id="admin-icon" class="fas fa-lock text-sm"></i>
+            </button>
+        </div>
     </div>
 
-    <!-- HALAMAN 2: DAFTAR ISI (KARTU EKSKLUSIF) -->
-    <div id="page-toc" class="hidden flex-col w-full min-h-screen">
-        <!-- Header -->
-        <header class="glass fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center max-w-md mx-auto">
+    <!-- HALAMAN 2: DAFTAR ISI -->
+    <div id="page-toc" class="hidden flex-col h-[100dvh] w-full max-w-md mx-auto">
+        <header class="glass-header flex-shrink-0 p-4 flex justify-between items-center">
             <button onclick="navigateTo('page-cover')" class="text-gold-500 text-xl"><i class="fas fa-arrow-left"></i></button>
-            <h1 class="font-serif font-bold text-gold-400 tracking-widest text-lg glow-gold">DAFTAR ISI</h1>
-            <button onclick="toggleTheme()" class="text-gold-500 text-xl"><i class="fas fa-moon"></i></button>
+            <h1 class="font-serif font-bold text-gold-400 tracking-widest">DAFTAR ISI</h1>
+            <div class="w-6"></div>
         </header>
-
-        <main class="px-6 pt-28 pb-12 w-full max-w-md mx-auto fade-in">
+        <main class="flex-grow overflow-y-auto p-6 pb-20">
             <div class="flex justify-end mb-6">
-                <button id="btn-add-toc" onclick="promptNewToc()" class="hidden bg-gradient-to-r from-gold-500 to-gold-600 text-royal-dark font-bold rounded-full px-5 py-2 shadow-lg shadow-gold-500/20 hover:scale-105 transition-transform"><i class="fas fa-plus mr-2"></i>Tambah Doa</button>
+                <button id="btn-add-toc" onclick="promptNewToc()" class="hidden bg-gold-500 text-black font-bold rounded-full px-4 py-1.5 shadow-md text-sm"><i class="fas fa-plus mr-1"></i>Tambah</button>
             </div>
-            
-            <div id="toc-container" class="space-y-4">
-                <div class="text-center text-gold-500 py-10 animate-pulse font-serif">Memuat lembaran kitab...</div>
+            <div id="toc-container" class="space-y-3">
+                <div class="text-center text-gold-500 py-10 font-serif animate-pulse">Memuat...</div>
             </div>
         </main>
     </div>
 
     <!-- HALAMAN 3: KONTEN (ANTI KEYBOARD BUG) -->
-    <div id="page-detail" class="hidden flex-col w-full min-h-screen bg-royal-950">
+    <div id="page-detail" class="hidden">
         
-        <!-- WADAH TOOLBAR DIKUNCI MATI DENGAN JAVASCRIPT (ANTI TENGGELAM) -->
-        <div id="toolbar-wrapper" class="glass shadow-lg">
-            
-            <!-- Baris 1: Judul & Navigasi Utama -->
-            <div class="flex justify-between items-center p-3 border-b border-gold-600/20 max-w-md mx-auto">
+        <!-- AREA ATAS KAKU (Tidak akan tergulung atau hilang) -->
+        <div class="fixed-top-area glass-header">
+            <!-- Navigasi -->
+            <div class="flex justify-between items-center p-3 border-b border-gold-500/20">
                 <button onclick="navigateTo('page-toc')" class="text-gold-400 text-xl px-2"><i class="fas fa-arrow-left"></i></button>
-                <h1 id="detail-title" class="font-serif font-bold text-gold-300 truncate max-w-[200px]" ondblclick="if(isAdmin) promptEditTitle()">Judul</h1>
-                <button id="btn-edit-mode" onclick="toggleEditor()" class="text-slate-500 hidden px-2"><i id="edit-icon" class="fas fa-pen text-lg"></i></button>
+                <h1 id="detail-title" class="font-serif font-bold text-gold-400 truncate max-w-[200px]" ondblclick="if(isAdmin) promptEditTitle()">Judul</h1>
+                <button id="btn-edit-mode" onclick="toggleEditor()" class="text-slate-500 hidden px-2"><i id="edit-icon" class="fas fa-pen"></i></button>
             </div>
 
-            <!-- Baris 2A: MENU BACA JAMAAH (Elegan, scroll horizontal rapi) -->
-            <div id="reader-features" class="flex overflow-x-auto gap-3 p-3 max-w-md mx-auto no-scrollbar items-center">
-                <button onclick="changeFontSize(-2)" class="px-3 py-1.5 bg-black/40 text-gold-400 rounded-lg border border-gold-600/30 flex-shrink-0 font-bold"><i class="fas fa-minus text-xs"></i> A</button>
-                <button onclick="changeFontSize(2)" class="px-3 py-1.5 bg-black/40 text-gold-400 rounded-lg border border-gold-600/30 flex-shrink-0 font-bold">A <i class="fas fa-plus text-xs"></i></button>
-                <div class="w-px h-6 bg-gold-600/20 flex-shrink-0"></div>
-                <button onclick="toggleWakeLock()" id="btn-wakelock" class="px-4 py-1.5 bg-black/40 text-slate-300 rounded-lg border border-gold-600/30 flex items-center gap-2 flex-shrink-0"><i class="fas fa-lightbulb text-gold-500"></i> Layar</button>
-                <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-4 py-1.5 bg-black/40 text-slate-300 rounded-lg border border-gold-600/30 flex items-center gap-2 flex-shrink-0"><i class="fas fa-angle-double-down text-gold-500"></i> Scroll</button>
-                <div class="w-px h-6 bg-gold-600/20 flex-shrink-0"></div>
-                <!-- Audio Player dikemas rapi -->
-                <div class="flex items-center gap-2 px-3 py-1 bg-black/40 rounded-lg border border-gold-600/30 flex-shrink-0">
+            <!-- Menu Baca -->
+            <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar border-b border-gold-500/20 items-center bg-black/20">
+                <button onclick="changeFontSize(-2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
+                <button onclick="changeFontSize(2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
+                <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
+                <button onclick="toggleWakeLock()" id="btn-wakelock" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-lightbulb text-gold-500"></i> Layar</button>
+                <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-angle-double-down text-gold-500"></i> Scroll</button>
+                <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
+                <div class="flex items-center gap-1 px-2 py-0.5 bg-royal-dark rounded border border-gold-500/30 flex-shrink-0">
                     <i class="fas fa-music text-gold-500 text-xs"></i>
-                    <audio id="bg-audio" controls class="h-6 w-28 outline-none grayscale invert opacity-70">
+                    <audio id="bg-audio" controls class="h-6 w-24 outline-none grayscale invert opacity-70">
                         <source src="https://www.soundhelix.com/architectureplay/SoundHelix-Song-1.mp3" type="audio/mpeg">
                     </audio>
                 </div>
             </div>
 
-            <!-- Baris 2B: MENU EDIT ADMIN (Muncul saat edit) -->
-            <div id="admin-features" class="hidden overflow-x-auto gap-2 p-3 max-w-md mx-auto no-scrollbar items-center bg-black/20">
-                <button onclick="execCmd('undo')" class="p-2 bg-black/40 text-gold-400 rounded-lg border border-gold-600/30 flex-shrink-0"><i class="fas fa-undo"></i></button>
-                <button onclick="execCmd('redo')" class="p-2 bg-black/40 text-gold-400 rounded-lg border border-gold-600/30 flex-shrink-0"><i class="fas fa-redo"></i></button>
-                <div class="w-px h-6 bg-gold-600/20 flex-shrink-0 mx-1"></div>
+            <!-- Menu Edit Admin (Sudah ada A- A+ dan Warna diperbaiki) -->
+            <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 border-b border-gold-500/30 shadow-inner">
+                <!-- A- dan A+ dikembalikan -->
+                <button onclick="changeFontSize(-2)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
+                <button onclick="changeFontSize(2)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
+                <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
 
-                <button onclick="execCmd('bold')" class="w-9 h-9 bg-black/40 text-gold-400 rounded-lg border border-gold-600/30 flex-shrink-0 font-bold">B</button>
-                <button onclick="execCmd('italic')" class="w-9 h-9 bg-black/40 text-gold-400 rounded-lg border border-gold-600/30 flex-shrink-0 italic">I</button>
-                <button onclick="execCmd('underline')" class="w-9 h-9 bg-black/40 text-gold-400 rounded-lg border border-gold-600/30 flex-shrink-0 underline">U</button>
-                <div class="w-px h-6 bg-gold-600/20 flex-shrink-0 mx-1"></div>
+                <button onclick="execCmd('undo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-undo text-xs"></i></button>
+                <button onclick="execCmd('redo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-redo text-xs"></i></button>
+                <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
+
+                <button onclick="execCmd('bold')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">B</button>
+                <button onclick="execCmd('italic')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 italic text-sm">I</button>
+                <button onclick="execCmd('underline')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 underline text-sm">U</button>
+                <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 
-                <button onclick="execCmd('justifyLeft')" class="w-9 h-9 bg-black/40 text-gold-400 rounded-lg border border-gold-600/30 flex-shrink-0"><i class="fas fa-align-left"></i></button>
-                <button onclick="execCmd('justifyCenter')" class="w-9 h-9 bg-black/40 text-gold-400 rounded-lg border border-gold-600/30 flex-shrink-0"><i class="fas fa-align-center"></i></button>
-                <button onclick="execCmd('justifyRight')" class="w-9 h-9 bg-black/40 text-gold-400 rounded-lg border border-gold-600/30 flex-shrink-0"><i class="fas fa-align-right"></i></button>
-                <div class="w-px h-6 bg-gold-600/20 flex-shrink-0 mx-1"></div>
+                <button onclick="execCmd('justifyLeft')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-left text-xs"></i></button>
+                <button onclick="execCmd('justifyCenter')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-center text-xs"></i></button>
+                <button onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-right text-xs"></i></button>
+                <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 
-                <!-- TOMBOL JARAK BARIS YANG DIJAMIN BERFUNGSI -->
-                <button onclick="changeLineHeight()" class="px-3 h-9 bg-black/40 text-gold-400 rounded-lg border border-gold-600/30 flex-shrink-0 flex items-center gap-1">
-                    <i class="fas fa-text-height"></i> Spasi
-                </button>
+                <button onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs"><i class="fas fa-text-height"></i> Spasi</button>
                 
-                <input type="color" onchange="execCmd('foreColor', this.value)" class="w-9 h-9 p-0 border-0 rounded bg-transparent cursor-pointer flex-shrink-0 ml-1" title="Warna">
+                <!-- Perbaikan Warna Teks -->
+                <input type="color" onchange="execCmd('foreColor', this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
                 
-                <div class="w-px h-6 bg-gold-600/20 flex-shrink-0 mx-1"></div>
-                <button onclick="promptDeleteCurrent()" class="px-3 h-9 bg-red-900/50 text-red-400 rounded-lg border border-red-500/30 flex-shrink-0">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
+                <button onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
             </div>
         </div>
 
-        <!-- Ruang Kosong agar teks tidak tertutup header -->
-        <div id="spacer" class="h-[120px] w-full shrink-0"></div>
+        <!-- AREA TEKS (Bagian yang bisa di-scroll saat keyboard muncul) -->
+        <div class="scrollable-text-area" id="scroll-container">
+            <div id="detail-content" class="content-area text-xl text-gold-400 font-arabic" contenteditable="false" onblur="saveCurrentContent()"></div>
+        </div>
 
-        <!-- AREA KONTEN (Teks warna Emas Elegan) -->
-        <main class="w-full max-w-md mx-auto px-6 flex-grow fade-in">
-            <div id="detail-content" class="content-area text-xl leading-[2.0] text-gold-400 font-arabic" contenteditable="false" onblur="saveCurrentContent()"></div>
-        </main>
-        
     </div>
 
-    <!-- JAVASCRIPT & FIREBASE -->
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyA40Q6eOPK5vKAq-q9w6OhoCTtanb6GlHI",
-            authDomain: "buku-digital-ngopsin.firebaseapp.com",
-            databaseURL: "https://buku-digital-ngopsin-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "buku-digital-ngopsin",
-            storageBucket: "buku-digital-ngopsin.firebasestorage.app",
-            messagingSenderId: "80687588401",
-            appId: "1:80687588401:web:5bcfcbb2a3398556b16110"
-        };
-
+        const firebaseConfig = { apiKey: "AIzaSyA40Q6eOPK5vKAq-q9w6OhoCTtanb6GlHI", authDomain: "buku-digital-ngopsin.firebaseapp.com", databaseURL: "https://buku-digital-ngopsin-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "buku-digital-ngopsin", storageBucket: "buku-digital-ngopsin.firebasestorage.app", messagingSenderId: "80687588401", appId: "1:80687588401:web:5bcfcbb2a3398556b16110" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-
-        let appData = [];
-        let isAdmin = false;
-        let currentActiveId = null;
-        let isEditorActive = false;
-        let baseFontSize = 22; // Huruf arab lebih besar agar nyaman
-
-        // ==========================================
-        // SOLUSI ABSOLUT UNTUK KEYBOARD ANDROID
-        // ==========================================
-        const toolbar = document.getElementById('toolbar-wrapper');
-        if (window.visualViewport) {
-            const adjustToolbar = () => {
-                // Paksa toolbar menempel ke ujung atas Visual Viewport (bukan layout)
-                // Ini menembus perlindungan keyboard Android
-                if (isEditorActive && document.activeElement.isContentEditable) {
-                    toolbar.style.position = 'absolute';
-                    toolbar.style.top = window.visualViewport.offsetTop + 'px';
-                } else {
-                    toolbar.style.position = 'fixed';
-                    toolbar.style.top = '0px';
-                }
-            };
-            window.visualViewport.addEventListener('resize', adjustToolbar);
-            window.visualViewport.addEventListener('scroll', adjustToolbar);
-        }
-
         const dbRef = database.ref('bukuSakuData');
-        
+
+        let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
+
         dbRef.on('value', (snapshot) => {
-            try {
-                const data = snapshot.val();
-                if (data && Array.isArray(data)) { appData = data.filter(item => item !== null); } 
-                else if (data && typeof data === 'object') { appData = Object.values(data).filter(item => item !== null); } 
-                else { appData = []; }
-
-                if (appData.length === 0) {
-                    appData = [{ id: 1, title: '1. Mukadimah', content: '<div style="text-align: center;"><b style="font-family: \'Playfair Display\'; color: #facc15;">Bismillahirrohmanirrohim</b><br><br>Selamat datang di Buku Saku Digital.</div>' }];
-                    saveData(); 
-                }
-
-                if (!document.getElementById('page-toc').classList.contains('hidden')) renderToc();
-                if (!document.getElementById('page-detail').classList.contains('hidden') && !isEditorActive) {
-                    if(currentActiveId) openDetail(currentActiveId);
-                }
-            } catch (err) {}
+            const data = snapshot.val();
+            appData = data ? (Array.isArray(data) ? data.filter(i=>i) : Object.values(data).filter(i=>i)) : [];
+            if (appData.length === 0) {
+                appData = [{ id: 1, title: 'Mukadimah', content: '<div style="text-align: center;"><b style="font-family: \'Playfair Display\'; color: #facc15;">Bismillahirrohmanirrohim</b><br><br>Selamat datang di Buku Saku Digital.</div>' }];
+                saveData(); 
+            }
+            if (!document.getElementById('page-toc').classList.contains('hidden')) renderToc();
+            if (!document.getElementById('page-detail').classList.contains('hidden') && !isEditorActive && currentActiveId) openDetail(currentActiveId);
         });
 
-        function saveData() { dbRef.set(appData).catch(() => showToast("Gagal menyimpan ke server.")); }
-
+        function saveData() { dbRef.set(appData).catch(() => showToast("Gagal menyimpan.")); }
         function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('opacity-0');
-            setTimeout(() => toast.classList.add('opacity-0'), 3000);
+            const t = document.getElementById('toast'); t.innerText = msg; t.classList.remove('opacity-0');
+            setTimeout(() => t.classList.add('opacity-0'), 2500);
         }
 
         let modalCallback = null;
-        function openModal({ title, isInput, isPassword, placeholder, desc, btnText, onConfirm }) {
+        function openModal({ title, isInput, isPassword, placeholder, onConfirm }) {
             document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-input-container').classList.toggle('hidden', !isInput);
-            document.getElementById('modal-desc').classList.toggle('hidden', isInput);
-            
-            if(isInput) {
-                const inputEl = document.getElementById('modal-input');
-                inputEl.placeholder = placeholder || '';
-                inputEl.value = '';
-                inputEl.type = isPassword ? 'password' : 'text';
-                document.getElementById('modal-eye-btn').classList.toggle('hidden', !isPassword);
-                document.getElementById('modal-eye-icon').className = 'fas fa-eye-slash';
-                setTimeout(() => inputEl.focus(), 100);
-            } else { document.getElementById('modal-desc').innerText = desc || ''; }
-            
-            document.getElementById('btn-modal-confirm').innerText = btnText || 'Simpan';
+            const inputEl = document.getElementById('modal-input');
+            inputEl.value = ''; inputEl.placeholder = placeholder || ''; inputEl.type = isPassword ? 'password' : 'text';
+            document.getElementById('modal-input-container').style.display = isInput ? 'block' : 'none';
+            document.getElementById('modal-eye-btn').style.display = isPassword ? 'block' : 'none';
             modalCallback = onConfirm;
-            document.getElementById('custom-modal').classList.remove('hidden');
-            document.getElementById('custom-modal').classList.add('flex');
+            document.getElementById('custom-modal').classList.remove('hidden'); document.getElementById('custom-modal').classList.add('flex');
+            if(isInput) setTimeout(() => inputEl.focus(), 100);
         }
-
-        function closeModal() {
-            document.getElementById('custom-modal').classList.add('hidden');
-            document.getElementById('custom-modal').classList.remove('flex');
-            modalCallback = null;
-        }
-
+        function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); document.getElementById('custom-modal').classList.remove('flex'); }
         function toggleModalPassword() {
-            const input = document.getElementById('modal-input');
-            const icon = document.getElementById('modal-eye-icon');
-            if (input.type === 'password') { input.type = 'text'; icon.className = 'fas fa-eye'; }
-            else { input.type = 'password'; icon.className = 'fas fa-eye-slash'; }
+            const inp = document.getElementById('modal-input'), icn = document.getElementById('modal-eye-icon');
+            if(inp.type === 'password') { inp.type = 'text'; icn.className = 'fas fa-eye'; } 
+            else { inp.type = 'password'; icn.className = 'fas fa-eye-slash'; }
         }
-
-        document.getElementById('btn-modal-confirm').addEventListener('click', () => {
-            if (modalCallback) modalCallback(document.getElementById('modal-input').value);
-            closeModal();
-        });
+        document.getElementById('btn-modal-confirm').addEventListener('click', () => { if(modalCallback) modalCallback(document.getElementById('modal-input').value); closeModal(); });
 
         function promptAdminLogin() {
             if(isAdmin) {
-                isAdmin = false; showToast("Sesi Admin Berakhir.");
-                document.getElementById('admin-icon').className = 'fas fa-lock text-sm';
-                document.getElementById('admin-icon').parentElement.classList.remove('text-gold-500');
-                document.getElementById('admin-icon').parentElement.classList.add('text-slate-600');
-                return;
+                isAdmin = false; showToast("Admin Logout.");
+                document.getElementById('admin-icon').className = 'fas fa-lock text-sm'; document.getElementById('admin-icon').parentElement.classList.replace('text-gold-500', 'text-slate-600'); return;
             }
-            openModal({
-                title: 'Otorisasi Admin', isInput: true, isPassword: true, placeholder: 'Masukkan sandi rahasia...',
-                onConfirm: (val) => {
-                    if(val === 'ngopsinoznet') {
-                        isAdmin = true; showToast("Akses Admin Dibuka!");
-                        document.getElementById('admin-icon').className = 'fas fa-unlock text-sm';
-                        document.getElementById('admin-icon').parentElement.classList.remove('text-slate-600');
-                        document.getElementById('admin-icon').parentElement.classList.add('text-gold-500');
-                    } else {
-                        showToast("Sandi tidak valid!");
-                    }
-                }
-            });
+            openModal({ title: 'Sandi Admin', isInput: true, isPassword: true, onConfirm: (val) => {
+                if(val === 'ngopsinoznet') {
+                    isAdmin = true; showToast("Akses Terbuka!");
+                    document.getElementById('admin-icon').className = 'fas fa-unlock text-sm'; document.getElementById('admin-icon').parentElement.classList.replace('text-slate-600', 'text-gold-500');
+                } else showToast("Sandi Salah!");
+            }});
         }
 
         function navigateTo(pageId) {
-            ['page-cover', 'page-toc', 'page-detail'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-                document.getElementById(id).classList.remove('flex');
-            });
-            document.getElementById(pageId).classList.remove('hidden');
-            document.getElementById(pageId).classList.add('flex');
-            if (pageId === 'page-toc') { renderToc(); stopAutoScroll(); }
-            window.scrollTo(0, 0); 
+            ['page-cover', 'page-toc', 'page-detail'].forEach(id => { document.getElementById(id).style.display = 'none'; });
+            document.getElementById(pageId).style.display = pageId === 'page-detail' ? 'flex' : 'flex';
+            if(pageId === 'page-toc') renderToc();
         }
 
-        // DESAIN DAFTAR ISI (KARTU ELEGAN)
         function renderToc() {
-            const container = document.getElementById('toc-container');
-            container.innerHTML = '';
-            document.getElementById('btn-add-toc').classList.toggle('hidden', !isAdmin);
-
+            const container = document.getElementById('toc-container'); container.innerHTML = '';
+            document.getElementById('btn-add-toc').style.display = isAdmin ? 'block' : 'none';
             appData.forEach((item, index) => {
                 if(!item) return;
                 const btn = document.createElement('div');
-                // Desain Kartu Mewah
-                btn.className = 'glass-card flex items-center p-5 rounded-2xl cursor-pointer hover:bg-white/5 transition-all duration-300 group';
+                btn.className = 'bg-royal-dark/60 border border-gold-500/20 p-4 rounded-xl shadow-md flex items-center justify-between cursor-pointer hover:bg-royal-base';
                 btn.onclick = () => openDetail(item.id);
-                
-                // Ornamen Lingkaran Angka
-                const numberDiv = document.createElement('div');
-                numberDiv.className = 'w-10 h-10 rounded-full border-2 border-gold-500/50 flex items-center justify-center font-serif text-gold-400 font-bold mr-4 group-hover:bg-gold-500 group-hover:text-royal-dark transition-colors shrink-0';
-                numberDiv.innerText = index + 1;
-
-                const titleSpan = document.createElement('span');
-                titleSpan.className = 'font-serif text-lg text-slate-200 tracking-wide w-full';
-                let titleText = item.title ? item.title.toString() : "Halaman Baru";
-                titleSpan.innerText = titleText.replace(/^\d+[\.\-]?\s*/, '');
-                
-                const iconDiv = document.createElement('div');
-                iconDiv.className = 'text-gold-500/30 group-hover:text-gold-400 transition-colors shrink-0 ml-2';
-                iconDiv.innerHTML = '<i class="fas fa-chevron-right"></i>';
-
-                btn.appendChild(numberDiv);
-                btn.appendChild(titleSpan);
-                btn.appendChild(iconDiv);
+                btn.innerHTML = `<div class="flex items-center"><div class="w-8 h-8 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-sm mr-3 border border-gold-500/30">${index+1}</div><span class="font-serif text-slate-100">${(item.title||'').replace(/^\d+[\.\-]?\s*/, '')}</span></div><i class="fas fa-chevron-right text-gold-500/50 text-xs"></i>`;
                 container.appendChild(btn);
             });
         }
 
         function promptNewToc() {
-            openModal({
-                title: 'Tambah Doa Baru', isInput: true, placeholder: 'Ketik judul doa...',
-                onConfirm: (val) => {
-                    if (val && val.trim() !== "") {
-                        appData.push({ id: Date.now(), title: val, content: '<div style="text-align:center;">Mulai ketik di sini...</div>' });
-                        saveData(); showToast('Halaman berhasil ditambahkan!');
-                    }
-                }
-            });
+            openModal({ title: 'Tambah Doa', isInput: true, onConfirm: (val) => {
+                if(val) { appData.push({ id: Date.now(), title: val, content: '<div style="text-align:center;">Ketik di sini...</div>' }); saveData(); showToast('Ditambahkan!'); }
+            }});
         }
 
         function openDetail(id) {
-            currentActiveId = id;
-            const item = appData.find(x => x.id === id);
-            if (!item) return;
-
-            document.getElementById('detail-title').innerText = (item.title||"").toString().replace(/^\d+[\.\-]?\s*/, '');
+            currentActiveId = id; const item = appData.find(x => x.id === id); if(!item) return;
+            document.getElementById('detail-title').innerText = (item.title||'').replace(/^\d+[\.\-]?\s*/, '');
             const contentEl = document.getElementById('detail-content');
-            contentEl.innerHTML = item.content || "";
-            contentEl.style.fontSize = baseFontSize + 'px';
-            
-            // Terapkan default line-height jika ada
+            contentEl.innerHTML = item.content || ""; contentEl.style.fontSize = baseFontSize + 'px';
             if(contentEl.dataset.lh) changeLineHeight(contentEl.dataset.lh);
-
-            document.getElementById('btn-edit-mode').classList.toggle('hidden', !isAdmin);
-            
+            document.getElementById('btn-edit-mode').style.display = isAdmin ? 'block' : 'none';
             isEditorActive = false;
-            document.getElementById('reader-features').classList.remove('hidden');
-            document.getElementById('reader-features').classList.add('flex');
-            document.getElementById('admin-features').classList.add('hidden');
-            document.getElementById('admin-features').classList.remove('flex');
-            
-            const btnEdit = document.getElementById('btn-edit-mode');
-            const iconEdit = document.getElementById('edit-icon');
-            iconEdit.className = 'fas fa-pen text-lg';
-            btnEdit.classList.remove('text-gold-400');
-            btnEdit.classList.add('text-slate-500');
-            
+            document.getElementById('reader-features').classList.replace('hidden', 'flex');
+            document.getElementById('admin-features').classList.replace('flex', 'hidden');
+            document.getElementById('edit-icon').className = 'fas fa-pen';
+            document.getElementById('btn-edit-mode').classList.replace('text-gold-400', 'text-slate-500');
             contentEl.setAttribute('contenteditable', 'false');
-
-            // Sesuaikan spacer agar pas
-            document.getElementById('spacer').style.height = document.getElementById('toolbar-wrapper').offsetHeight + 'px';
-
             navigateTo('page-detail');
         }
 
         function promptEditTitle() {
-            if(!isEditorActive) { showToast("Aktifkan ikon Pensil terlebih dahulu."); return; }
-            const item = appData.find(x => x.id === currentActiveId);
-            if(!item) return;
-            openModal({
-                title: 'Ubah Judul', isInput: true, placeholder: 'Ketik judul baru...',
-                onConfirm: (val) => {
-                    if(val) {
-                        item.title = val;
-                        document.getElementById('detail-title').innerText = val.replace(/^\d+[\.\-]?\s*/, '');
-                        saveData(); showToast('Judul berhasil diubah!');
-                    }
-                }
-            });
-            setTimeout(() => { document.getElementById('modal-input').value = (item.title||"").toString().replace(/^\d+[\.\-]?\s*/, ''); }, 50);
+            if(!isEditorActive) return showToast("Aktifkan mode edit.");
+            const item = appData.find(x => x.id === currentActiveId); if(!item) return;
+            openModal({ title: 'Ubah Judul', isInput: true, onConfirm: (val) => {
+                if(val){ item.title = val; document.getElementById('detail-title').innerText = val; saveData(); showToast('Berhasil diubah!'); }
+            }});
+            setTimeout(() => document.getElementById('modal-input').value = item.title, 50);
         }
 
         function promptDeleteCurrent() {
-            openModal({
-                title: 'Peringatan Hapus', isInput: false, desc: 'Anda yakin ingin menghapus doa ini secara permanen?', btnText: 'Hapus Permanen',
-                onConfirm: () => {
-                    appData = appData.filter(x => x.id !== currentActiveId);
-                    saveData(); navigateTo('page-toc'); showToast('Halaman dihapus.');
-                }
-            });
+            openModal({ title: 'Hapus Halaman?', isInput: false, onConfirm: () => {
+                appData = appData.filter(x => x.id !== currentActiveId); saveData(); navigateTo('page-toc'); showToast('Dihapus!');
+            }});
         }
 
         function toggleEditor() {
             isEditorActive = !isEditorActive;
-            const readerBar = document.getElementById('reader-features');
-            const adminBar = document.getElementById('admin-features');
-            const contentEl = document.getElementById('detail-content');
-            const btnEdit = document.getElementById('btn-edit-mode');
-            const iconEdit = document.getElementById('edit-icon');
-            const spacer = document.getElementById('spacer');
-            
+            const rBar = document.getElementById('reader-features'), aBar = document.getElementById('admin-features'), contentEl = document.getElementById('detail-content'), btnEdit = document.getElementById('btn-edit-mode'), iconEdit = document.getElementById('edit-icon');
             if (isEditorActive) {
-                readerBar.classList.remove('flex'); readerBar.classList.add('hidden');
-                adminBar.classList.remove('hidden'); adminBar.classList.add('flex');
-                
-                iconEdit.className = 'fas fa-save text-xl';
-                btnEdit.classList.remove('text-slate-500'); btnEdit.classList.add('text-gold-400');
-                
-                contentEl.setAttribute('contenteditable', 'true');
-                contentEl.focus(); 
-                spacer.style.height = document.getElementById('toolbar-wrapper').offsetHeight + 'px';
-                showToast("Mode Edit Aktif.");
+                rBar.classList.replace('flex', 'hidden'); aBar.classList.replace('hidden', 'flex');
+                iconEdit.className = 'fas fa-save'; btnEdit.classList.replace('text-slate-500', 'text-gold-400');
+                contentEl.setAttribute('contenteditable', 'true'); contentEl.focus(); showToast("Mode Edit.");
             } else {
-                adminBar.classList.remove('flex'); adminBar.classList.add('hidden');
-                readerBar.classList.remove('hidden'); readerBar.classList.add('flex');
-                
-                iconEdit.className = 'fas fa-pen text-lg';
-                btnEdit.classList.remove('text-gold-400'); btnEdit.classList.add('text-slate-500');
-                
-                contentEl.setAttribute('contenteditable', 'false');
-                saveCurrentContent(); 
-                spacer.style.height = document.getElementById('toolbar-wrapper').offsetHeight + 'px';
-                
-                // Pastikan toolbar kembali fixed setelah keyboard turun
-                toolbar.style.position = 'fixed';
-                toolbar.style.top = '0px';
-                
-                showToast("Tersimpan ke Cloud.");
+                aBar.classList.replace('flex', 'hidden'); rBar.classList.replace('hidden', 'flex');
+                iconEdit.className = 'fas fa-pen'; btnEdit.classList.replace('text-gold-400', 'text-slate-500');
+                contentEl.setAttribute('contenteditable', 'false'); saveCurrentContent(); showToast("Tersimpan.");
             }
         }
 
@@ -530,96 +317,47 @@
             saveCurrentContent();
         }
 
-        // ==========================================
-        // PERBAIKAN MUTLAK FITUR JARAK BARIS 
-        // ==========================================
         function changeLineHeight(forceValue = null) {
             const contentEl = document.getElementById('detail-content');
             let currentLH = parseFloat(contentEl.dataset.lh) || 2.0;
             let nextLH = forceValue ? forceValue : (currentLH === 2.0 ? 2.5 : (currentLH === 2.5 ? 3.0 : 2.0));
             contentEl.dataset.lh = nextLH;
-            
-            // Membuat Tag Style Khusus (Memaksa semua teks di dalam editor berubah)
             let styleTag = document.getElementById('force-line-height');
-            if (!styleTag) {
-                styleTag = document.createElement('style');
-                styleTag.id = 'force-line-height';
-                document.head.appendChild(styleTag);
-            }
-            // !important akan mengalahkan semua kode bawaan dari teks yang kamu copas
+            if(!styleTag) { styleTag = document.createElement('style'); styleTag.id = 'force-line-height'; document.head.appendChild(styleTag); }
             styleTag.innerHTML = `#detail-content, #detail-content * { line-height: ${nextLH} !important; }`;
-            
-            if(!forceValue) {
-                saveCurrentContent(); 
-                showToast(`Spasi Diubah: ${nextLH}`);
-            }
+            if(!forceValue) { saveCurrentContent(); showToast(`Spasi: ${nextLH}`); }
         }
 
         function saveCurrentContent() {
-            if (!currentActiveId || !isAdmin) return;
+            if(!currentActiveId || !isAdmin) return;
             const itemIndex = appData.findIndex(x => x.id === currentActiveId);
-            if (itemIndex > -1) {
-                appData[itemIndex].content = document.getElementById('detail-content').innerHTML;
-                saveData(); 
-            }
+            if(itemIndex > -1) { appData[itemIndex].content = document.getElementById('detail-content').innerHTML; saveData(); }
         }
-
         document.getElementById('detail-content').addEventListener('input', () => { if(isEditorActive) saveCurrentContent(); });
 
         function changeFontSize(step) {
-            baseFontSize += step;
-            if(baseFontSize < 14) baseFontSize = 14;
-            if(baseFontSize > 60) baseFontSize = 60;
+            baseFontSize += step; if(baseFontSize < 14) baseFontSize = 14; if(baseFontSize > 60) baseFontSize = 60;
             document.getElementById('detail-content').style.fontSize = baseFontSize + 'px';
         }
 
-        // Hilangkan tombol ganti tema (Sudah fix elegan gelap)
-        function toggleTheme() { showToast("Tema telah dikunci pada mode Royal Emerald."); }
-
         let scrollInterval, isScrolling = false;
         function toggleAutoScroll() {
-            const btn = document.getElementById('btn-autoscroll');
-            if (isScrolling) {
-                clearInterval(scrollInterval); isScrolling = false;
-                btn.classList.remove('border-gold-400', 'text-white');
-                btn.classList.add('border-gold-600/30', 'text-slate-300');
-            } else {
-                isScrolling = true; 
-                btn.classList.remove('border-gold-600/30', 'text-slate-300');
-                btn.classList.add('border-gold-400', 'text-white');
-                scrollInterval = setInterval(() => { window.scrollBy({ top: 1, left: 0, behavior: 'auto' }); }, 60);
-            }
+            const btn = document.getElementById('btn-autoscroll'), container = document.getElementById('scroll-container');
+            if (isScrolling) { clearInterval(scrollInterval); isScrolling = false; btn.classList.replace('text-gold-400', 'text-slate-300'); } 
+            else { isScrolling = true; btn.classList.replace('text-slate-300', 'text-gold-400'); scrollInterval = setInterval(() => { container.scrollBy({ top: 1, left: 0, behavior: 'auto' }); }, 50); }
         }
-        function stopAutoScroll() { if (isScrolling) toggleAutoScroll(); }
 
         let wakeLock = null;
         async function toggleWakeLock() {
             const btn = document.getElementById('btn-wakelock');
             if ('wakeLock' in navigator) {
                 try {
-                    if (wakeLock !== null) {
-                        await wakeLock.release(); wakeLock = null;
-                        btn.classList.remove('border-gold-400', 'text-white');
-                        btn.classList.add('border-gold-600/30', 'text-slate-300');
-                    } else {
-                        wakeLock = await navigator.wakeLock.request('screen');
-                        btn.classList.remove('border-gold-600/30', 'text-slate-300');
-                        btn.classList.add('border-gold-400', 'text-white');
-                        wakeLock.addEventListener('release', () => { 
-                            wakeLock = null; 
-                            btn.classList.remove('border-gold-400', 'text-white');
-                            btn.classList.add('border-gold-600/30', 'text-slate-300');
-                        });
-                    }
-                } catch (err) { showToast('Gagal mengaktifkan kunci layar.'); }
-            } else { alert('Fitur layar selalu nyala tidak didukung HP ini.'); }
+                    if (wakeLock) { await wakeLock.release(); wakeLock = null; btn.classList.replace('text-gold-400', 'text-slate-300'); } 
+                    else { wakeLock = await navigator.wakeLock.request('screen'); btn.classList.replace('text-slate-300', 'text-gold-400'); wakeLock.addEventListener('release', () => { wakeLock = null; btn.classList.replace('text-gold-400', 'text-slate-300'); }); }
+                } catch(e) {}
+            }
         }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(()=>{});
-            });
-        }
+        if('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
     </script>
 </body>
 </html>
