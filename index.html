@@ -47,11 +47,10 @@
         }
     </script>
     <style>
-        /* PERBAIKAN 1: Kunci Body agar layar utama tidak bisa terdorong oleh keyboard */
+        /* PERBAIKAN: Layout Body Dikunci Total */
         html, body {
             margin: 0; padding: 0; 
-            width: 100%; height: 100%; 
-            position: fixed; 
+            width: 100vw; height: 100dvh; 
             overflow: hidden; 
             background: radial-gradient(ellipse at top, #064e3b, #022c22, #000000); 
             color: #f1f5f9;
@@ -73,9 +72,9 @@
         }
         .page.active { display: flex; }
 
-        /* PERBAIKAN 2: Header diset flex-none agar tidak menindih konten & selalu di atas */
+        /* PERBAIKAN: Header dipisah dari ruang konten, tidak akan tertumpuk */
         .header-area {
-            flex: none;
+            flex: none; /* Ukuran statis, tidak ikut tergencet */
             width: 100%;
             background: rgba(2, 44, 34, 0.95);
             border-bottom: 1px solid rgba(234, 179, 8, 0.2);
@@ -83,7 +82,7 @@
             z-index: 100;
         }
         
-        /* Area khusus teks yang bisa digulir */
+        /* Area teks murni yang bisa di-scroll */
         .scroll-area { 
             flex: 1; 
             overflow-y: auto; 
@@ -108,7 +107,7 @@
     <div class="app-container">
 
         <!-- TOAST & BANNER INSTALL PWA -->
-        <div id="toast" class="fixed top-16 left-1/2 transform -translate-x-1/2 bg-royal-dark border border-gold-500 text-gold-400 px-6 py-2 rounded-full shadow-lg z-[1000] opacity-0 pointer-events-none transition-opacity duration-300 font-semibold text-sm">Pesan</div>
+        <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-royal-dark border border-gold-500 text-gold-400 px-6 py-2 rounded-full shadow-lg z-[1000] opacity-0 pointer-events-none transition-opacity duration-300 font-semibold text-sm">Pesan</div>
 
         <div id="install-banner" class="fixed bottom-0 left-0 w-full bg-royal-dark/95 backdrop-blur border-t border-gold-500/50 p-4 hidden flex-row justify-between items-center z-[2000] shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
             <div class="flex items-center gap-3">
@@ -189,7 +188,7 @@
         <!-- HALAMAN 3: KONTEN (BACA & EDIT) -->
         <div id="page-detail" class="page">
             
-            <!-- HEADER (Di-set flex-none agar tidak ikut ter-scroll) -->
+            <!-- HEADER AREA (Fixed & Terkunci Absolut, tidak memblokir sentuhan) -->
             <div class="header-area">
                 <div class="flex justify-between items-center p-3 border-b border-gold-500/20">
                     <button onclick="navigateTo('page-toc')" class="text-gold-400 text-xl px-2"><i class="fas fa-arrow-left"></i></button>
@@ -206,10 +205,11 @@
                     <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-angle-double-down text-gold-500"></i> Scroll</button>
                 </div>
 
-                <!-- MENU EDIT ADMIN (Bisa di geser kiri-kanan sekarang) -->
+                <!-- MENU EDIT ADMIN -->
+                <!-- ontouchstart DIHAPUS. Menu bisa di geser (scroll horizontall) dengan normal -->
                 <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 border-b border-gold-500/30 shadow-inner">
                     
-                    <!-- Indikator Angka Font Size -->
+                    <!-- FONT SIZE DENGAN INDIKATOR PX -->
                     <div class="flex items-center bg-royal-dark border border-gold-500/30 rounded flex-shrink-0">
                         <button onclick="changeSelectedFontSize(-1)" class="px-2.5 py-1 text-gold-400 font-bold text-sm">A-</button>
                         <div class="w-px h-5 bg-gold-500/20"></div>
@@ -251,7 +251,7 @@
                 </div>
             </div>
 
-            <!-- AREA TEKS -->
+            <!-- AREA TEKS (Terpisah dan bebas scroll) -->
             <div class="scroll-area">
                 <div id="detail-content" class="content-area text-xl font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
             </div>
@@ -424,11 +424,11 @@
         }
 
         // =========================================================
-        // EDITOR PWA MOBILE HACKS (ANTI LOMPAT, ANTI HILANG FOKUS)
+        // EDITOR HACKS: ANTI LOMPAT & ANTI HILANG FOKUS
         // =========================================================
         const editorContent = document.getElementById('detail-content');
 
-        // Memperbarui indikator pixel pada layar admin
+        // Memperbarui indikator pixel font size secara real-time
         function updateFontSizeDisplay() {
             if(!savedRange || !isEditorActive) return;
             let node = savedRange.startContainer;
@@ -439,12 +439,13 @@
             }
         }
 
-        // Menyimpan memori posisi teks (selection memory)
+        // Menyimpan memori teks yang ditandai setiap kali berubah
         document.addEventListener('selectionchange', () => {
             if (!isEditorActive) return;
             const sel = window.getSelection();
             if (sel.rangeCount > 0) {
                 const range = sel.getRangeAt(0);
+                // Hanya ingat jika yang di-drag ada di dalam area teks
                 if (editorContent.contains(range.commonAncestorContainer)) {
                     savedRange = range.cloneRange();
                     if(!range.collapsed) updateFontSizeDisplay();
@@ -452,8 +453,8 @@
             }
         });
 
-        // Mengembalikan format tanpa memaksa layar melompat
-        function restoreSelectionSilently() {
+        // Mengembalikan drag yang hilang tanpa membuat layar melompat ke bawah
+        function getSavedSelection() {
             if (savedRange) {
                 const sel = window.getSelection();
                 sel.removeAllRanges();
@@ -463,8 +464,9 @@
             return window.getSelection();
         }
 
+        // Fungsi Global Eksekusi Edit
         function execCmd(command, value = null) {
-            restoreSelectionSilently(); 
+            getSavedSelection();
             if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
             document.execCommand('styleWithCSS', false, true);
             document.execCommand(command, false, value);
@@ -473,7 +475,7 @@
 
         function changeColor(color) {
             if(!color) return;
-            restoreSelectionSilently(); 
+            getSavedSelection();
             if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('foreColor', false, color);
@@ -482,12 +484,13 @@
 
         function changeFontFamily(fontName) {
             if(!fontName) return;
-            restoreSelectionSilently();
+            getSavedSelection();
             if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
             
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('fontName', false, fontName);
             
+            // Perbaikan kompatibilitas font browser
             editorContent.querySelectorAll('font[face]').forEach(el => {
                 el.style.fontFamily = el.getAttribute('face');
                 el.removeAttribute('face');
@@ -496,7 +499,7 @@
         }
 
         function changeSelectedFontSize(step) {
-            restoreSelectionSilently();
+            getSavedSelection();
             if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
 
             let node = savedRange.startContainer;
@@ -510,11 +513,9 @@
             document.execCommand("styleWithCSS", false, false);
             document.execCommand("fontSize", false, "7");
             
-            let modified = false;
             editorContent.querySelectorAll('font[size="7"]').forEach(f => {
                 f.removeAttribute('size');
                 f.style.fontSize = newSize + 'px';
-                modified = true;
             });
             
             editorContent.querySelectorAll('*').forEach(el => {
@@ -522,7 +523,6 @@
                 if(fs === '-webkit-xxx-large' || fs === 'xx-large' || fs === '48px' || el.getAttribute('size') === '7') {
                     el.style.fontSize = newSize + 'px';
                     el.removeAttribute('size');
-                    modified = true;
                 }
             });
 
@@ -532,10 +532,12 @@
         }
 
         function changeLineHeight() {
-            restoreSelectionSilently();
+            getSavedSelection();
             if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
             
             const lhSequence = [1.0, 1.5, 2.0, 2.5, 3.0]; 
+            
+            // Mencari wadah blok utama (DIV/P) tempat teks berada
             let node = savedRange.commonAncestorContainer;
             let blockNode = node.nodeType === 3 ? node.parentElement : node;
             
