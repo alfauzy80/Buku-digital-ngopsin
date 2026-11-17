@@ -132,7 +132,7 @@
         <!-- HALAMAN 3: KONTEN -->
         <div id="page-detail" class="hidden flex-1 flex flex-col h-screen overflow-hidden relative">
             
-            <!-- HEADER UTAMA (TERKUNCI DI ATAS) -->
+            <!-- HEADER UTAMA -->
             <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur shadow-sm z-50 flex-shrink-0">
                 <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
                     <button onclick="navigateTo('page-toc')" class="text-islamic-primary dark:text-islamic-light"><i class="fas fa-arrow-left text-xl"></i></button>
@@ -153,8 +153,13 @@
                 </div>
             </header>
 
-            <!-- MENU ADMIN EDIT (DI-FIXED-KAN TEPAT DI BAWAH HEADER, TIDAK AKAN IKUT SCROLL!) -->
-            <div id="admin-toolbar" class="hidden flex-wrap gap-1 p-2 bg-islamic-light dark:bg-slate-800 border-b border-islamic-primary/20 shadow-lg flex-shrink-0 z-40">
+            <!-- MENU ADMIN EDIT (DIBUAT STICKY TOP AGAR NGIKUTIN LAYAR ATAS, TIDAK TENGGELAM) -->
+            <div id="admin-toolbar" class="hidden flex-wrap gap-1 p-2 bg-islamic-light dark:bg-slate-800 border-b border-islamic-primary/20 shadow-xl flex-shrink-0 sticky top-0 z-40">
+                <!-- Undo & Redo -->
+                <button onclick="execCmd('undo')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm" title="Undo"><i class="fas fa-undo"></i></button>
+                <button onclick="execCmd('redo')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm" title="Redo"><i class="fas fa-redo"></i></button>
+                <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+
                 <button onclick="execCmd('decreaseFontSize')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold text-sm">A-</button>
                 <button onclick="execCmd('increaseFontSize')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold text-sm">A+</button>
                 <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
@@ -168,28 +173,29 @@
                 <button onclick="execCmd('justifyRight')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-right"></i></button>
                 <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
                 
-                <select onchange="execCmd('fontName', this.value)" class="px-1 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm outline-none max-w-[120px]">
+                <select onchange="execCmd('fontName', this.value)" class="px-1 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm outline-none max-w-[110px]">
                     <option value="Poppins">Poppins</option>
                     <option value="Arial">Arial</option>
-                    <option value="Amiri">Arab - Amiri</option>
-                    <option value="Lateef">Arab - Lateef</option>
-                    <option value="'Scheherazade New'">Arab - Scheherazade</option>
-                    <option value="Tajawal">Arab - Tajawal</option>
-                    <option value="'Reem Kufi'">Arab - Reem Kufi</option>
-                    <option value="'Arabic Typesetting', serif">Arab - Typesetting</option>
+                    <option value="Amiri">Amiri</option>
+                    <option value="Lateef">Lateef</option>
+                    <option value="'Scheherazade New'">Scheherazade</option>
+                    <option value="Tajawal">Tajawal</option>
+                    <option value="'Reem Kufi'">Reem Kufi</option>
                 </select>
                 
                 <input type="color" onchange="execCmd('foreColor', this.value)" class="w-7 h-7 p-0 border-0 rounded shadow-sm cursor-pointer" title="Warna Teks">
+                
+                <!-- Atur Jarak Baris (Line Height) -->
                 <button onclick="changeLineHeight()" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm" title="Jarak Baris"><i class="fas fa-text-height"></i></button>
                 
                 <div class="w-px h-6 bg-gray-300 mx-1 self-center flex-grow"></div>
                 <button onclick="promptDeleteCurrent()" class="px-2 py-1 bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 rounded shadow-sm text-sm">
-                    <i class="fas fa-trash"></i> Hapus
+                    <i class="fas fa-trash"></i>
                 </button>
             </div>
 
-            <!-- AREA KONTEN (HANYA BAGIAN INI YANG BISA DI-SCROLL, MENU EDIT AMAN DI ATAS) -->
-            <main class="flex-1 overflow-y-auto relative p-6 pb-24" id="scroll-container">
+            <!-- AREA KONTEN -->
+            <main class="flex-1 overflow-y-auto relative p-6 pb-32" id="scroll-container">
                 <div id="detail-content" class="content-area text-lg leading-relaxed min-h-[400px]" contenteditable="false" onblur="saveCurrentContent()"></div>
             </main>
         </div>
@@ -215,7 +221,6 @@
         let currentActiveId = null;
         let isEditorActive = false;
         let baseFontSize = 18;
-        let currentLineHeight = 1.6;
 
         const dbRef = database.ref('bukuSakuData');
         
@@ -232,7 +237,7 @@
 
                 if (appData.length === 0) {
                     appData = [
-                        { id: 1, title: '1. Mukadimah', content: '<div style="text-align: center;"><b>Bismillahirrohmanirrohim</b><br><br>Selamat datang di Buku Saku Digital Ngopsin Mabu Park.</div>' },
+                        { id: 1, title: '1. Mukadimah', content: '<div style="text-align: center; line-height: 1.6;"><b>Bismillahirrohmanirrohim</b><br><br>Selamat datang di Buku Saku Digital Ngopsin Mabu Park.</div>' },
                         { id: 2, title: '2. Marhaban', content: '<div style="font-family: Amiri; font-size: 32px; text-align: center; color: #0d9488; line-height: 2;">مَرْحَبًا يَانُوْرَ العَيْنِ<br>مَرْحَبًا جَدَّ الحُسَيْنِ</div><br><div style="text-align:center;">Silakan edit teks ini...</div>' }
                     ];
                     saveData(); 
@@ -360,7 +365,7 @@
                 title: 'Tambah Daftar Isi / Doa', isInput: true, placeholder: 'Judul Baru...',
                 onConfirm: (val) => {
                     if (val && val.trim() !== "") {
-                        appData.push({ id: Date.now(), title: val, content: '<div style="text-align:center;">Ketik di sini...</div>' });
+                        appData.push({ id: Date.now(), title: val, content: '<div style="text-align:center; line-height: 1.6;">Ketik di sini...</div>' });
                         saveData(); showToast('Halaman ditambahkan!');
                     }
                 }
@@ -378,7 +383,6 @@
             const contentEl = document.getElementById('detail-content');
             contentEl.innerHTML = item.content || "";
             contentEl.style.fontSize = baseFontSize + 'px';
-            contentEl.style.lineHeight = currentLineHeight;
 
             document.getElementById('btn-edit-mode').classList.toggle('hidden', !isAdmin);
             isEditorActive = false;
@@ -453,10 +457,14 @@
             saveCurrentContent();
         }
 
+        // PERBAIKAN FUNGSI JARAK BARIS (LINE HEIGHT LANGSUNG PADA ELEMEN TEKS)
         function changeLineHeight() {
-            currentLineHeight = currentLineHeight === 1.6 ? 2.0 : (currentLineHeight === 2.0 ? 2.5 : 1.6);
-            document.getElementById('detail-content').style.lineHeight = currentLineHeight;
+            const contentEl = document.getElementById('detail-content');
+            let currentLH = parseFloat(contentEl.style.lineHeight) || 1.6;
+            let nextLH = currentLH === 1.6 ? 2.0 : (currentLH === 2.0 ? 2.5 : 1.6);
+            contentEl.style.lineHeight = nextLH;
             saveCurrentContent();
+            showToast(`Jarak baris: ${nextLH}`);
         }
 
         function saveCurrentContent() {
