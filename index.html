@@ -26,23 +26,11 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Poppins', 'sans-serif'],
-                        arabic: ['Amiri', 'serif'],
-                    },
+                    fontFamily: { sans: ['Poppins', 'sans-serif'], arabic: ['Amiri', 'serif'] },
                     colors: {
-                        islamic: {
-                            light: '#e6f2f0',
-                            primary: '#0d9488', 
-                            dark: '#115e59',   
-                            gold: '#d97706',   
-                            night: '#0f172a'   
-                        }
+                        islamic: { light: '#e6f2f0', primary: '#0d9488', dark: '#115e59', gold: '#d97706', night: '#0f172a' }
                     },
-                    animation: {
-                        'twinkle': 'twinkle 3s ease-in-out infinite',
-                        'swing': 'swing 4s ease-in-out infinite'
-                    },
+                    animation: { 'twinkle': 'twinkle 3s ease-in-out infinite', 'swing': 'swing 4s ease-in-out infinite' },
                     keyframes: {
                         twinkle: { '0%, 100%': { opacity: 0.3 }, '50%': { opacity: 1 } },
                         swing: { '0%, 100%': { transform: 'rotate(-3deg)' }, '50%': { transform: 'rotate(3deg)' } }
@@ -59,20 +47,10 @@
         }
         .dark .bg-pattern {
             background-color: #0f172a;
-            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z' fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
         .content-area { outline: none; }
-        .content-area[contenteditable="true"]:focus {
-            border: 1px dashed #0d9488;
-            padding: 4px;
-            border-radius: 4px;
-        }
-        /* Sticky Toolbar Admin */
-        #admin-toolbar {
-            position: sticky;
-            top: 64px; /* Tepat di bawah header */
-            z-index: 40;
-        }
+        .content-area[contenteditable="true"]:focus { border: 1px dashed #0d9488; padding: 4px; border-radius: 4px; }
     </style>
 </head>
 <body class="bg-pattern text-slate-800 dark:text-slate-200 min-h-screen selection:bg-islamic-primary selection:text-white">
@@ -94,7 +72,6 @@
         </div>
     </div>
 
-    <!-- Container Utama -->
     <div id="app" class="max-w-md mx-auto min-h-screen bg-white/90 dark:bg-islamic-night/95 shadow-xl relative flex flex-col">
         
         <!-- HALAMAN 1: COVER -->
@@ -153,7 +130,9 @@
         </div>
 
         <!-- HALAMAN 3: KONTEN -->
-        <div id="page-detail" class="hidden flex-1 flex flex-col h-screen overflow-hidden">
+        <div id="page-detail" class="hidden flex-1 flex flex-col h-screen overflow-hidden relative">
+            
+            <!-- HEADER UTAMA (TERKUNCI DI ATAS) -->
             <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur shadow-sm z-50 flex-shrink-0">
                 <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
                     <button onclick="navigateTo('page-toc')" class="text-islamic-primary dark:text-islamic-light"><i class="fas fa-arrow-left text-xl"></i></button>
@@ -174,46 +153,44 @@
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto relative" id="scroll-container">
-                <!-- Toolbar Admin yang Sticky Menempel saat scroll -->
-                <div id="admin-toolbar" class="hidden flex-wrap gap-1 p-2 bg-islamic-light dark:bg-slate-800 border-b border-islamic-primary/20 shadow-md">
-                    <!-- Tambahan A- dan A+ untuk Admin di Menu Edit -->
-                    <button onclick="execCmd('decreaseFontSize')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold text-sm">A-</button>
-                    <button onclick="execCmd('increaseFontSize')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold text-sm">A+</button>
-                    <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+            <!-- MENU ADMIN EDIT (DI-FIXED-KAN TEPAT DI BAWAH HEADER, TIDAK AKAN IKUT SCROLL!) -->
+            <div id="admin-toolbar" class="hidden flex-wrap gap-1 p-2 bg-islamic-light dark:bg-slate-800 border-b border-islamic-primary/20 shadow-lg flex-shrink-0 z-40">
+                <button onclick="execCmd('decreaseFontSize')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold text-sm">A-</button>
+                <button onclick="execCmd('increaseFontSize')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold text-sm">A+</button>
+                <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
 
-                    <button onclick="execCmd('bold')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold">B</button>
-                    <button onclick="execCmd('italic')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm italic">I</button>
-                    <button onclick="execCmd('underline')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm underline">U</button>
-                    <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-                    <button onclick="execCmd('justifyLeft')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-left"></i></button>
-                    <button onclick="execCmd('justifyCenter')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-center"></i></button>
-                    <button onclick="execCmd('justifyRight')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-right"></i></button>
-                    <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
-                    
-                    <select onchange="execCmd('fontName', this.value)" class="px-1 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm outline-none max-w-[120px]">
-                        <option value="Poppins">Poppins</option>
-                        <option value="Arial">Arial</option>
-                        <option value="Amiri">Arab - Amiri</option>
-                        <option value="Lateef">Arab - Lateef</option>
-                        <option value="'Scheherazade New'">Arab - Scheherazade</option>
-                        <option value="Tajawal">Arab - Tajawal</option>
-                        <option value="'Reem Kufi'">Arab - Reem Kufi</option>
-                        <option value="'Arabic Typesetting', serif">Arab - Typesetting</option>
-                    </select>
-                    
-                    <input type="color" onchange="execCmd('foreColor', this.value)" class="w-7 h-7 p-0 border-0 rounded shadow-sm cursor-pointer" title="Warna Teks">
-                    <button onclick="changeLineHeight()" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm" title="Jarak Baris"><i class="fas fa-text-height"></i></button>
-                    
-                    <div class="w-px h-6 bg-gray-300 mx-1 self-center flex-grow"></div>
-                    <button onclick="promptDeleteCurrent()" class="px-2 py-1 bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 rounded shadow-sm text-sm">
-                        <i class="fas fa-trash"></i> Hapus
-                    </button>
-                </div>
+                <button onclick="execCmd('bold')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm font-bold">B</button>
+                <button onclick="execCmd('italic')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm italic">I</button>
+                <button onclick="execCmd('underline')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm underline">U</button>
+                <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+                <button onclick="execCmd('justifyLeft')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-left"></i></button>
+                <button onclick="execCmd('justifyCenter')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-center"></i></button>
+                <button onclick="execCmd('justifyRight')" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm"><i class="fas fa-align-right"></i></button>
+                <div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
                 
-                <div class="p-6">
-                    <div id="detail-content" class="content-area text-lg leading-relaxed min-h-[300px]" contenteditable="false" onblur="saveCurrentContent()"></div>
-                </div>
+                <select onchange="execCmd('fontName', this.value)" class="px-1 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm outline-none max-w-[120px]">
+                    <option value="Poppins">Poppins</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Amiri">Arab - Amiri</option>
+                    <option value="Lateef">Arab - Lateef</option>
+                    <option value="'Scheherazade New'">Arab - Scheherazade</option>
+                    <option value="Tajawal">Arab - Tajawal</option>
+                    <option value="'Reem Kufi'">Arab - Reem Kufi</option>
+                    <option value="'Arabic Typesetting', serif">Arab - Typesetting</option>
+                </select>
+                
+                <input type="color" onchange="execCmd('foreColor', this.value)" class="w-7 h-7 p-0 border-0 rounded shadow-sm cursor-pointer" title="Warna Teks">
+                <button onclick="changeLineHeight()" class="px-2 py-1 bg-white dark:bg-slate-700 rounded shadow-sm text-sm" title="Jarak Baris"><i class="fas fa-text-height"></i></button>
+                
+                <div class="w-px h-6 bg-gray-300 mx-1 self-center flex-grow"></div>
+                <button onclick="promptDeleteCurrent()" class="px-2 py-1 bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 rounded shadow-sm text-sm">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
+            </div>
+
+            <!-- AREA KONTEN (HANYA BAGIAN INI YANG BISA DI-SCROLL, MENU EDIT AMAN DI ATAS) -->
+            <main class="flex-1 overflow-y-auto relative p-6 pb-24" id="scroll-container">
+                <div id="detail-content" class="content-area text-lg leading-relaxed min-h-[400px]" contenteditable="false" onblur="saveCurrentContent()"></div>
             </main>
         </div>
     </div>
@@ -240,36 +217,41 @@
         let baseFontSize = 18;
         let currentLineHeight = 1.6;
 
-        // FITUR SINKRONISASI DATA DAN PENCEGAH ERROR DAFTAR ISI KOSONG
         const dbRef = database.ref('bukuSakuData');
+        
         dbRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            
-            // Format ulang jika data dari firebase berantakan
-            if (data && Array.isArray(data)) {
-                appData = data.filter(item => item !== null);
-            } else if (data && typeof data === 'object') {
-                appData = Object.values(data).filter(item => item !== null);
-            } else {
-                appData = [];
-            }
+            try {
+                const data = snapshot.val();
+                if (data && Array.isArray(data)) {
+                    appData = data.filter(item => item !== null);
+                } else if (data && typeof data === 'object') {
+                    appData = Object.values(data).filter(item => item !== null);
+                } else {
+                    appData = [];
+                }
 
-            // Jika Data Kosong Sama Sekali, isi dengan default
-            if (appData.length === 0) {
-                appData = [
-                    { id: 1, title: '1. Mukadimah', content: '<div style="text-align: center;"><b>Bismillahirrohmanirrohim</b><br><br>Selamat datang di Buku Saku Digital Ngopsin Mabu Park.</div>' },
-                    { id: 2, title: '2. Marhaban', content: '<div style="font-family: Amiri; font-size: 32px; text-align: center; color: #0d9488; line-height: 2;">مَرْحَبًا يَانُوْرَ العَيْنِ<br>مَرْحَبًا جَدَّ الحُسَيْنِ</div><br><div style="text-align:center;">Silakan edit teks ini...</div>' }
-                ];
-                saveData(); // Push kembali ke server
-            }
+                if (appData.length === 0) {
+                    appData = [
+                        { id: 1, title: '1. Mukadimah', content: '<div style="text-align: center;"><b>Bismillahirrohmanirrohim</b><br><br>Selamat datang di Buku Saku Digital Ngopsin Mabu Park.</div>' },
+                        { id: 2, title: '2. Marhaban', content: '<div style="font-family: Amiri; font-size: 32px; text-align: center; color: #0d9488; line-height: 2;">مَرْحَبًا يَانُوْرَ العَيْنِ<br>مَرْحَبًا جَدَّ الحُسَيْنِ</div><br><div style="text-align:center;">Silakan edit teks ini...</div>' }
+                    ];
+                    saveData(); 
+                }
 
-            if (!document.getElementById('page-toc').classList.contains('hidden')) renderToc();
-            if (!document.getElementById('page-detail').classList.contains('hidden') && !isEditorActive) {
-                if(currentActiveId) openDetail(currentActiveId);
+                if (!document.getElementById('page-toc').classList.contains('hidden')) renderToc();
+                if (!document.getElementById('page-detail').classList.contains('hidden') && !isEditorActive) {
+                    if(currentActiveId) openDetail(currentActiveId);
+                }
+            } catch (err) {
+                console.error(err);
             }
         });
 
-        function saveData() { dbRef.set(appData); }
+        function saveData() { 
+            dbRef.set(appData).catch((error) => {
+                showToast("GAGAL MENYIMPAN! Periksa Rules Firebase.");
+            });
+        }
 
         function showToast(msg) {
             const toast = document.getElementById('toast');
@@ -357,13 +339,15 @@
             document.getElementById('btn-add-toc').classList.toggle('hidden', !isAdmin);
 
             appData.forEach((item, index) => {
+                if(!item) return;
                 const btn = document.createElement('div');
                 btn.className = 'flex items-center justify-between bg-white dark:bg-slate-800 p-4 rounded-xl shadow border-l-4 border-islamic-primary cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition';
                 btn.onclick = () => openDetail(item.id);
 
                 const titleSpan = document.createElement('span');
                 titleSpan.className = 'font-semibold text-lg w-full';
-                let cleanTitle = item.title.replace(/^\d+[\.\-]?\s*/, '');
+                let titleText = item.title ? item.title.toString() : "Halaman Baru";
+                let cleanTitle = titleText.replace(/^\d+[\.\-]?\s*/, '');
                 titleSpan.innerText = `${index + 1}. ${cleanTitle}`;
                 
                 btn.appendChild(titleSpan);
@@ -388,9 +372,11 @@
             const item = appData.find(x => x.id === id);
             if (!item) return;
 
-            document.getElementById('detail-title').innerText = item.title.replace(/^\d+[\.\-]?\s*/, '');
+            let titleText = item.title ? item.title.toString() : "";
+            document.getElementById('detail-title').innerText = titleText.replace(/^\d+[\.\-]?\s*/, '');
+            
             const contentEl = document.getElementById('detail-content');
-            contentEl.innerHTML = item.content;
+            contentEl.innerHTML = item.content || "";
             contentEl.style.fontSize = baseFontSize + 'px';
             contentEl.style.lineHeight = currentLineHeight;
 
@@ -406,6 +392,8 @@
         function promptEditTitle() {
             if(!isEditorActive) { showToast("Aktifkan icon pensil dulu."); return; }
             const item = appData.find(x => x.id === currentActiveId);
+            if(!item) return;
+            
             openModal({
                 title: 'Ubah Judul', isInput: true, placeholder: 'Ketik judul baru...',
                 onConfirm: (val) => {
@@ -416,7 +404,8 @@
                     }
                 }
             });
-            setTimeout(() => { document.getElementById('modal-input').value = item.title.replace(/^\d+[\.\-]?\s*/, ''); }, 50);
+            let titleText = item.title ? item.title.toString() : "";
+            setTimeout(() => { document.getElementById('modal-input').value = titleText.replace(/^\d+[\.\-]?\s*/, ''); }, 50);
         }
 
         function promptDeleteCurrent() {
@@ -452,7 +441,6 @@
 
         function execCmd(command, value = null) {
             if (command === 'increaseFontSize' || command === 'decreaseFontSize') {
-                // Manipulasi ukuran Font Admin lewat selection
                 let currentSize = document.queryCommandValue("fontSize") || 3;
                 let newSize = command === 'increaseFontSize' ? parseInt(currentSize) + 1 : parseInt(currentSize) - 1;
                 if(newSize > 7) newSize = 7;
@@ -527,7 +515,6 @@
             } else { showToast('Tidak didukung browser.'); }
         }
 
-        // --- PWA Service Worker Registration ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then(reg => {
