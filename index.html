@@ -6,8 +6,24 @@
     <title>Buku Saku Digital - Premium Edition</title>
     
     <meta name="theme-color" content="#022c22">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3389/3389081.png">
+    <link rel="apple-touch-icon" href="./logo.png">
+    
+    <!-- MANIFEST.JSON DIJADIKAN SATU DENGAN HTML -->
+    <link id="manifest-link" rel="manifest" href="">
+    <script>
+        const manifestJSON = {
+            "name": "Buku Saku Digital Ngopsin",
+            "short_name": "Buku Saku",
+            "description": "Buku saku digital dan kumpulan doa dengan sinkronisasi online.",
+            "start_url": "./index.html",
+            "display": "standalone",
+            "background_color": "#022c22",
+            "theme_color": "#064e3b",
+            "icons": [{"src": "./logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}]
+        };
+        const manifestBlob = new Blob([JSON.stringify(manifestJSON)], {type: 'application/manifest+json'});
+        document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
+    </script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -163,7 +179,6 @@
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 <button onmousedown="event.preventDefault()" onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs"><i class="fas fa-text-height"></i> Spasi</button>
                 
-                <!-- Pembaruan Color Picker: Menggunakan oninput untuk real-time update -->
                 <input type="color" oninput="restoreAndColor(this.value)" onchange="restoreAndColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
                 
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
@@ -290,15 +305,13 @@
             }
         }
 
-        // ============ FUNGSI PENGAMANAN SELEKSI OTOMATIS (AUTO-SAVE) ============
-        // Ini memastikan teks yang Anda drag tetap terikat meskipun muncul dialog dari HP
+        // ============ FUNGSI PENGAMANAN SELEKSI OTOMATIS ============
         document.addEventListener('selectionchange', () => {
             if (!isEditorActive) return;
             const sel = window.getSelection();
             if (sel.rangeCount > 0) {
                 const range = sel.getRangeAt(0);
                 const editor = document.getElementById('detail-content');
-                // Simpan seleksi HANYA jika yang diblok ada di dalam kotak teks editor
                 if (editor && editor.contains(range.commonAncestorContainer)) {
                     savedRange = range;
                 }
@@ -315,19 +328,19 @@
 
         // ============ FUNGSI EDIT MENU ============
         function execCmd(command, value = null) {
-            restoreSelection(); // Kembalikan blok teks yang tersimpan
+            restoreSelection(); 
             document.execCommand(command, false, value);
             saveCurrentContent();
         }
 
         function restoreAndColor(color) {
-            restoreSelection(); // Kembalikan blok teks yang tersimpan sebelum mewarnai
+            restoreSelection(); 
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('foreColor', false, color);
             saveCurrentContent();
         }
 
-        // ============ FUNGSI A+ / A- UNTUK ADMIN (TEKS YANG DITANDAI) ============
+        // ============ FUNGSI A+ / A- UNTUK ADMIN ============
         function changeSelectedFontSize(step) {
             restoreSelection();
             const sel = window.getSelection();
@@ -368,7 +381,7 @@
             if(modified) showToast("Ukuran teks: " + newSize + "px");
         }
 
-        // ============ FUNGSI A+ / A- GLOBAL UNTUK BACA (SELURUH HALAMAN) ============
+        // ============ FUNGSI A+ / A- GLOBAL UNTUK BACA ============
         function changeGlobalFontSize(step) {
             baseFontSize += step; 
             if(baseFontSize < 14) baseFontSize = 14; 
