@@ -29,7 +29,8 @@
     <style>
         body { 
             background: radial-gradient(ellipse at top, #064e3b, #022c22, #000000); 
-            color: #f1f5f9; margin: 0; padding: 0; height: 100dvh; overflow: hidden; -webkit-tap-highlight-color: transparent; 
+            color: #f1f5f9; margin: 0; padding: 0; min-height: 100vh;
+            -webkit-tap-highlight-color: transparent; 
         }
         
         .glass-header {
@@ -39,10 +40,12 @@
             z-index: 50;
         }
 
-        /* STRUKTUR ANTI KEYBOARD: Membagi layar jadi 2 bagian kaku */
-        #page-detail { display: flex; flex-direction: column; height: 100dvh; width: 100%; max-width: 28rem; margin: 0 auto; }
-        .fixed-top-area { flex-shrink: 0; width: 100%; } /* Area Menu (Tidak bisa scroll) */
-        .scrollable-text-area { flex-grow: 1; overflow-y: auto; padding: 1.5rem; padding-bottom: 10rem; } /* Area Teks (Bisa scroll) */
+        #page-detail { display: flex; flex-direction: column; min-height: 100vh; width: 100%; max-width: 28rem; margin: 0 auto; }
+        
+        /* HEADER STICKY: Menempel di atas dengan aman */
+        .sticky-top-area { position: sticky; top: 0; z-index: 100; width: 100%; }
+        
+        .scrollable-text-area { flex-grow: 1; padding: 1.5rem; padding-bottom: 50vh; } 
         
         .content-area { outline: none; min-height: 100%; }
         .content-area[contenteditable="true"]:focus { border: 1px dashed rgba(234, 179, 8, 0.5); border-radius: 8px; padding: 8px; background: rgba(255,255,255,0.02); }
@@ -71,15 +74,18 @@
         </div>
     </div>
 
-    <!-- HALAMAN 1: COVER (STABIL & IKON AMAN) -->
-    <div id="page-cover" class="flex flex-col items-center justify-center text-center h-[100dvh] relative px-6 w-full max-w-md mx-auto">
-        <!-- Ikon Lentera FontAwesome murni (Dijamin tidak broken) -->
+    <!-- HALAMAN 1: COVER -->
+    <!-- Dikunci h-[100dvh] dan overflow-hidden agar tidak goyang/naik-turun -->
+    <div id="page-cover" class="flex flex-col items-center justify-center text-center h-[100dvh] overflow-hidden relative px-6 w-full max-w-md mx-auto">
+        
         <div class="mb-6 relative">
-            <div class="absolute inset-0 bg-gold-500 blur-[40px] opacity-20 rounded-full"></div>
-            <i class="fas fa-lantern text-6xl text-gold-500 relative z-10 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]"></i>
+            <!-- Lingkaran blur di belakang sebagai hiasan, ikon lentera di depan tetap tajam -->
+            <div class="absolute inset-0 bg-gold-500 blur-[30px] opacity-20 rounded-full"></div>
+            <i class="fas fa-lantern text-6xl text-gold-500 relative z-10"></i>
         </div>
         
-        <h1 class="text-5xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-b from-gold-300 to-gold-500 mb-4 tracking-wide" style="text-shadow: 0 0 10px rgba(234,179,8,0.3);">Buku Saku</h1>
+        <!-- Judul tajam, tanpa shadow berlebihan -->
+        <h1 class="text-5xl font-serif font-bold text-gold-400 mb-4 tracking-wide drop-shadow-md">Buku Saku</h1>
         
         <div class="flex items-center gap-3 mb-4">
             <div class="h-px w-12 bg-gradient-to-r from-transparent to-gold-500"></div>
@@ -93,8 +99,8 @@
             Buka Kitab <i class="fas fa-book-open text-sm"></i>
         </button>
 
-        <!-- Ikon Gembok di ujung bawah layar (Fix) -->
-        <div class="absolute bottom-6 w-full text-center">
+        <!-- Tombol Admin dikunci posisi bottom dengan aman -->
+        <div class="absolute bottom-8 w-full text-center">
             <button onclick="promptAdminLogin()" class="p-3 text-slate-600 hover:text-gold-500 transition-colors">
                 <i id="admin-icon" class="fas fa-lock text-sm"></i>
             </button>
@@ -102,13 +108,13 @@
     </div>
 
     <!-- HALAMAN 2: DAFTAR ISI -->
-    <div id="page-toc" class="hidden flex-col h-[100dvh] w-full max-w-md mx-auto">
-        <header class="glass-header flex-shrink-0 p-4 flex justify-between items-center">
+    <div id="page-toc" class="hidden flex-col min-h-screen w-full max-w-md mx-auto relative">
+        <header class="sticky-top-area glass-header p-4 flex justify-between items-center">
             <button onclick="navigateTo('page-cover')" class="text-gold-500 text-xl"><i class="fas fa-arrow-left"></i></button>
             <h1 class="font-serif font-bold text-gold-400 tracking-widest">DAFTAR ISI</h1>
             <div class="w-6"></div>
         </header>
-        <main class="flex-grow overflow-y-auto p-6 pb-20">
+        <main class="flex-grow p-6 pb-20">
             <div class="flex justify-end mb-6">
                 <button id="btn-add-toc" onclick="promptNewToc()" class="hidden bg-gold-500 text-black font-bold rounded-full px-4 py-1.5 shadow-md text-sm"><i class="fas fa-plus mr-1"></i>Tambah</button>
             </div>
@@ -118,11 +124,11 @@
         </main>
     </div>
 
-    <!-- HALAMAN 3: KONTEN (ANTI KEYBOARD BUG) -->
+    <!-- HALAMAN 3: KONTEN -->
     <div id="page-detail" class="hidden">
         
-        <!-- AREA ATAS KAKU (Tidak akan tergulung atau hilang) -->
-        <div class="fixed-top-area glass-header">
+        <!-- HEADER STICKY -->
+        <div class="sticky-top-area glass-header">
             <!-- Navigasi -->
             <div class="flex justify-between items-center p-3 border-b border-gold-500/20">
                 <button onclick="navigateTo('page-toc')" class="text-gold-400 text-xl px-2"><i class="fas fa-arrow-left"></i></button>
@@ -146,9 +152,9 @@
                 </div>
             </div>
 
-            <!-- Menu Edit Admin (Sudah ada A- A+ dan Warna diperbaiki) -->
+            <!-- Menu Edit Admin (SEKARANG LENGKAP & BERFUNGSI) -->
             <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 border-b border-gold-500/30 shadow-inner">
-                <!-- A- dan A+ dikembalikan -->
+                <!-- A- dan A+ -->
                 <button onclick="changeFontSize(-2)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
                 <button onclick="changeFontSize(2)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
@@ -167,19 +173,28 @@
                 <button onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-right text-xs"></i></button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 
+                <!-- MENU GANTI FONT DIKEMBALIKAN -->
+                <select onchange="execCmd('fontName', this.value)" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
+                    <option value="Poppins">Poppins</option>
+                    <option value="Amiri">Amiri</option>
+                    <option value="Lateef">Lateef</option>
+                    <option value="Playfair Display">Playfair</option>
+                </select>
+
+                <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 <button onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs"><i class="fas fa-text-height"></i> Spasi</button>
                 
-                <!-- Perbaikan Warna Teks -->
-                <input type="color" onchange="execCmd('foreColor', this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
+                <!-- MENU GANTI WARNA DIPERBAIKI -->
+                <input type="color" onchange="changeTextColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
                 
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
                 <button onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
             </div>
         </div>
 
-        <!-- AREA TEKS (Bagian yang bisa di-scroll saat keyboard muncul) -->
-        <div class="scrollable-text-area" id="scroll-container">
-            <div id="detail-content" class="content-area text-xl text-gold-400 font-arabic" contenteditable="false" onblur="saveCurrentContent()"></div>
+        <!-- AREA TEKS SCROLL -->
+        <div class="scrollable-text-area">
+            <div id="detail-content" class="content-area text-xl font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
         </div>
 
     </div>
@@ -317,6 +332,14 @@
             saveCurrentContent();
         }
 
+        // PERBAIKAN GANTI WARNA TEKS AGAR BERFUNGSI BERKALI-KALI
+        function changeTextColor(color) {
+            document.execCommand('styleWithCSS', false, true);
+            document.execCommand('foreColor', false, color);
+            document.getElementById('detail-content').focus();
+            saveCurrentContent();
+        }
+
         function changeLineHeight(forceValue = null) {
             const contentEl = document.getElementById('detail-content');
             let currentLH = parseFloat(contentEl.dataset.lh) || 2.0;
@@ -338,11 +361,12 @@
         function changeFontSize(step) {
             baseFontSize += step; if(baseFontSize < 14) baseFontSize = 14; if(baseFontSize > 60) baseFontSize = 60;
             document.getElementById('detail-content').style.fontSize = baseFontSize + 'px';
+            saveCurrentContent();
         }
 
         let scrollInterval, isScrolling = false;
         function toggleAutoScroll() {
-            const btn = document.getElementById('btn-autoscroll'), container = document.getElementById('scroll-container');
+            const btn = document.getElementById('btn-autoscroll'), container = document.querySelector('.scrollable-text-area');
             if (isScrolling) { clearInterval(scrollInterval); isScrolling = false; btn.classList.replace('text-gold-400', 'text-slate-300'); } 
             else { isScrolling = true; btn.classList.replace('text-slate-300', 'text-gold-400'); scrollInterval = setInterval(() => { container.scrollBy({ top: 1, left: 0, behavior: 'auto' }); }, 50); }
         }
