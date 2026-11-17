@@ -11,7 +11,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Amiri:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Amiri:wght@400;700&family=Lateef:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -27,10 +27,9 @@
         }
     </script>
     <style>
-        /* Base Styling */
         body { 
             background: radial-gradient(ellipse at top, #064e3b, #022c22, #000000); 
-            color: #f1f5f9; margin: 0; padding: 0; height: 100dvh; overflow: hidden;
+            color: #f1f5f9; margin: 0; padding: 0; min-height: 100vh;
             -webkit-tap-highlight-color: transparent; 
         }
         
@@ -41,38 +40,13 @@
             z-index: 100;
         }
 
-        /* Flexbox Layout untuk Halaman Konten (Sticky Header & Scrollable Text) */
-        #page-detail { 
-            display: flex; 
-            flex-direction: column; 
-            height: 100dvh; 
-            width: 100%; 
-            max-width: 28rem; 
-            margin: 0 auto; 
-            overflow: hidden; /* Mencegah body scroll */
-        }
-        
-        .sticky-top-area { 
-            flex-shrink: 0; /* Header tidak akan menyusut */
-            width: 100%; 
-        }
-        
-        .scrollable-text-area { 
-            flex-grow: 1; /* Area teks mengisi sisa ruang */
-            overflow-y: auto; /* Hanya area teks ini yang bisa di-scroll */
-            padding: 1.5rem; 
-            padding-bottom: 50vh; 
-        } 
+        #page-detail { display: flex; flex-direction: column; height: 100dvh; width: 100%; max-width: 28rem; margin: 0 auto; overflow: hidden; }
+        .sticky-top-area { flex-shrink: 0; width: 100%; }
+        .scrollable-text-area { flex-grow: 1; overflow-y: auto; padding: 1.5rem; padding-bottom: 50vh; } 
         
         .content-area { outline: none; min-height: 100%; }
-        .content-area[contenteditable="true"]:focus { 
-            border: 1px dashed rgba(234, 179, 8, 0.5); 
-            border-radius: 8px; 
-            padding: 8px; 
-            background: rgba(255,255,255,0.02); 
-        }
+        .content-area[contenteditable="true"]:focus { border: 1px dashed rgba(234, 179, 8, 0.5); border-radius: 8px; padding: 8px; background: rgba(255,255,255,0.02); }
         
-        /* Scrollbar Styling */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #eab308; border-radius: 4px; }
@@ -80,10 +54,8 @@
 </head>
 <body class="selection:bg-gold-500 selection:text-royal-dark font-sans relative">
 
-    <!-- Komponen Pesan (Toast) -->
     <div id="toast" class="fixed top-16 left-1/2 transform -translate-x-1/2 bg-royal-dark border border-gold-500 text-gold-400 px-6 py-2 rounded-full shadow-lg z-[1000] opacity-0 pointer-events-none transition-opacity duration-300 font-semibold text-sm">Pesan</div>
 
-    <!-- Komponen Modal -->
     <div id="custom-modal" class="fixed inset-0 bg-black/80 z-[1000] hidden items-center justify-center px-4 backdrop-blur-sm">
         <div class="bg-royal-dark border border-gold-500/30 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <h3 id="modal-title" class="text-xl font-serif text-gold-400 mb-4">Judul</h3>
@@ -124,13 +96,13 @@
     </div>
 
     <!-- HALAMAN 2: DAFTAR ISI -->
-    <div id="page-toc" class="hidden flex-col h-[100dvh] w-full max-w-md mx-auto relative overflow-hidden">
-        <header class="sticky-top-area glass-header p-4 flex justify-between items-center">
+    <div id="page-toc" class="hidden flex-col min-h-screen w-full max-w-md mx-auto relative">
+        <header class="sticky top-0 glass-header p-4 flex justify-between items-center z-50">
             <button onclick="navigateTo('page-cover')" class="text-gold-500 text-xl"><i class="fas fa-arrow-left"></i></button>
             <h1 class="font-serif font-bold text-gold-400 tracking-widest">DAFTAR ISI</h1>
             <div class="w-6"></div>
         </header>
-        <main class="flex-grow overflow-y-auto p-6 pb-20">
+        <main class="flex-grow p-6 pb-20">
             <div class="flex justify-end mb-6">
                 <button id="btn-add-toc" onclick="promptNewToc()" class="hidden bg-gold-500 text-black font-bold rounded-full px-4 py-1.5 shadow-md text-sm"><i class="fas fa-plus mr-1"></i>Tambah</button>
             </div>
@@ -140,11 +112,10 @@
         </main>
     </div>
 
-    <!-- HALAMAN 3: KONTEN DETAIL -->
-    <!-- Flexbox Layout: Header Sticky (flex-shrink-0), Teks (flex-grow) -->
+    <!-- HALAMAN 3: KONTEN -->
     <div id="page-detail" class="hidden">
         
-        <!-- HEADER STICKY (Menu Baca / Menu Edit) -->
+        <!-- HEADER STICKY KUNCI ATAS -->
         <div class="sticky-top-area glass-header">
             <div class="flex justify-between items-center p-3 border-b border-gold-500/20">
                 <button onclick="navigateTo('page-toc')" class="text-gold-400 text-xl px-2"><i class="fas fa-arrow-left"></i></button>
@@ -152,86 +123,69 @@
                 <button id="btn-edit-mode" onclick="toggleEditor()" class="text-slate-500 hidden px-2"><i id="edit-icon" class="fas fa-pen"></i></button>
             </div>
 
-            <!-- FITUR PEMBACA -->
+            <!-- Menu Baca -->
             <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar border-b border-gold-500/20 items-center bg-black/20">
-                <button onclick="changeFontSize(-2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
-                <button onclick="changeFontSize(2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
+                <button onclick="changeGlobalFontSize(-2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
+                <button onclick="changeGlobalFontSize(2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
                 <button onclick="toggleWakeLock()" id="btn-wakelock" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-lightbulb text-gold-500"></i> Layar</button>
                 <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-angle-double-down text-gold-500"></i> Scroll</button>
             </div>
 
-            <!-- FITUR EDIT ADMIN -->
+            <!-- Menu Edit Admin -->
             <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 border-b border-gold-500/30 shadow-inner">
-                <button onclick="execCmd('undo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-undo text-xs"></i></button>
-                <button onclick="execCmd('redo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-redo text-xs"></i></button>
+                
+                <!-- onmousedown="event.preventDefault()" mengamankan teks dari lepas seleksi -->
+                <button onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(-1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
+                <button onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
 
-                <button onclick="execCmd('bold')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">B</button>
-                <button onclick="execCmd('italic')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 italic text-sm">I</button>
-                <button onclick="execCmd('underline')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 underline text-sm">U</button>
+                <button onmousedown="event.preventDefault()" onclick="execCmd('undo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-undo text-xs"></i></button>
+                <button onmousedown="event.preventDefault()" onclick="execCmd('redo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-redo text-xs"></i></button>
+                <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
+
+                <button onmousedown="event.preventDefault()" onclick="execCmd('bold')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">B</button>
+                <button onmousedown="event.preventDefault()" onclick="execCmd('italic')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 italic text-sm">I</button>
+                <button onmousedown="event.preventDefault()" onclick="execCmd('underline')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 underline text-sm">U</button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 
-                <button onclick="execCmd('justifyLeft')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-left text-xs"></i></button>
-                <button onclick="execCmd('justifyCenter')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-center text-xs"></i></button>
-                <button onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-right text-xs"></i></button>
+                <button onmousedown="event.preventDefault()" onclick="execCmd('justifyLeft')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-left text-xs"></i></button>
+                <button onmousedown="event.preventDefault()" onclick="execCmd('justifyCenter')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-center text-xs"></i></button>
+                <button onmousedown="event.preventDefault()" onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-right text-xs"></i></button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 
-                <!-- Opsi Font Family -->
-                <select onchange="execCmd('fontName', this.value)" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
+                <select onmousedown="saveSelection()" onchange="restoreAndExec('fontName', this.value)" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
                     <option value="Poppins">Poppins</option>
                     <option value="Amiri">Amiri</option>
                     <option value="Lateef">Lateef</option>
                     <option value="Playfair Display">Playfair</option>
                 </select>
 
-                <!-- BARU: Opsi Ukuran Font Teks Terseleksi (8px - 40px) -->
-                <select onchange="applyFontSizeToSelection(this.value)" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-16">
-                    <option value="" disabled selected>Ukr</option>
-                    <option value="8">8px</option>
-                    <option value="10">10px</option>
-                    <option value="12">12px</option>
-                    <option value="14">14px</option>
-                    <option value="16">16px</option>
-                    <option value="18">18px</option>
-                    <option value="20">20px</option>
-                    <option value="24">24px</option>
-                    <option value="28">28px</option>
-                    <option value="32">32px</option>
-                    <option value="40">40px</option>
-                </select>
-
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
-                <!-- BARU: Tombol Spasi Dinamis (1, 1.5, 2, 2.5, 3) -->
-                <button onclick="cycleLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs whitespace-nowrap"><i class="fas fa-text-height"></i> Spasi</button>
+                <button onmousedown="event.preventDefault()" onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs"><i class="fas fa-text-height"></i> Spasi</button>
                 
-                <input type="color" onchange="changeTextColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
+                <input type="color" onmousedown="saveSelection()" onchange="restoreAndColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
                 
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
-                <button onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
+                <button onmousedown="event.preventDefault()" onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
             </div>
         </div>
 
-        <!-- AREA KONTEN (Teks yang Bisa Di-scroll) -->
+        <!-- AREA KONTEN (Hanya bagian ini yang bergulir) -->
         <div class="scrollable-text-area">
-            <div id="detail-content" class="content-area font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
+            <div id="detail-content" class="content-area text-xl font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
         </div>
-
     </div>
 
-    <!-- LOGIK & SKRIP -->
     <script>
-        // Inisialisasi Firebase
         const firebaseConfig = { apiKey: "AIzaSyA40Q6eOPK5vKAq-q9w6OhoCTtanb6GlHI", authDomain: "buku-digital-ngopsin.firebaseapp.com", databaseURL: "https://buku-digital-ngopsin-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "buku-digital-ngopsin", storageBucket: "buku-digital-ngopsin.firebasestorage.app", messagingSenderId: "80687588401", appId: "1:80687588401:web:5bcfcbb2a3398556b16110" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const dbRef = database.ref('bukuSakuData');
 
-        // Variabel Global
-        let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false;
-        let baseFontSize = 22; // Ukuran Font Dasar
+        let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
+        let savedRange = null;
 
-        // Mendengarkan Perubahan Data dari Firebase
         dbRef.on('value', (snapshot) => {
             const data = snapshot.val();
             appData = data ? (Array.isArray(data) ? data.filter(i=>i) : Object.values(data).filter(i=>i)) : [];
@@ -244,17 +198,16 @@
         });
 
         function saveData() { dbRef.set(appData).catch(() => showToast("Gagal menyimpan.")); }
-        
         function showToast(msg) {
             const t = document.getElementById('toast'); t.innerText = msg; t.classList.remove('opacity-0');
             setTimeout(() => t.classList.add('opacity-0'), 2500);
         }
 
         let modalCallback = null;
-        function openModal({ title, isInput, isPassword, placeholder, onConfirm }) {
+        function openModal({ title, isInput, isPassword, onConfirm }) {
             document.getElementById('modal-title').innerText = title;
             const inputEl = document.getElementById('modal-input');
-            inputEl.value = ''; inputEl.placeholder = placeholder || ''; inputEl.type = isPassword ? 'password' : 'text';
+            inputEl.value = ''; inputEl.type = isPassword ? 'password' : 'text';
             document.getElementById('modal-input-container').style.display = isInput ? 'block' : 'none';
             document.getElementById('modal-eye-btn').style.display = isPassword ? 'block' : 'none';
             modalCallback = onConfirm;
@@ -269,7 +222,6 @@
         }
         document.getElementById('btn-modal-confirm').addEventListener('click', () => { if(modalCallback) modalCallback(document.getElementById('modal-input').value); closeModal(); });
 
-        // Fitur Login Admin
         function promptAdminLogin() {
             if(isAdmin) {
                 isAdmin = false; showToast("Admin Logout.");
@@ -283,14 +235,12 @@
             }});
         }
 
-        // Navigasi
         function navigateTo(pageId) {
             ['page-cover', 'page-toc', 'page-detail'].forEach(id => { document.getElementById(id).style.display = 'none'; });
             document.getElementById(pageId).style.display = 'flex';
             if(pageId === 'page-toc') renderToc();
         }
 
-        // Memuat Daftar Isi
         function renderToc() {
             const container = document.getElementById('toc-container'); container.innerHTML = '';
             document.getElementById('btn-add-toc').style.display = isAdmin ? 'block' : 'none';
@@ -310,18 +260,12 @@
             }});
         }
 
-        // Membuka Halaman Detail
         function openDetail(id) {
             currentActiveId = id; const item = appData.find(x => x.id === id); if(!item) return;
             document.getElementById('detail-title').innerText = (item.title||'').replace(/^\d+[\.\-]?\s*/, '');
             const contentEl = document.getElementById('detail-content');
-            
-            contentEl.innerHTML = item.content || ""; 
-            
-            // Set styles berdasarkan data yang tersimpan atau default
-            if(!contentEl.dataset.lh) contentEl.dataset.lh = "1.5"; // default spasi
-            updateReaderStyles();
-
+            contentEl.innerHTML = item.content || ""; contentEl.style.fontSize = baseFontSize + 'px';
+            if(contentEl.dataset.lh) changeLineHeightGlobal(contentEl.dataset.lh);
             document.getElementById('btn-edit-mode').style.display = isAdmin ? 'block' : 'none';
             isEditorActive = false;
             document.getElementById('reader-features').classList.replace('hidden', 'flex');
@@ -329,23 +273,7 @@
             document.getElementById('edit-icon').className = 'fas fa-pen';
             document.getElementById('btn-edit-mode').classList.replace('text-gold-400', 'text-slate-500');
             contentEl.setAttribute('contenteditable', 'false');
-            
             navigateTo('page-detail');
-        }
-
-        function promptEditTitle() {
-            if(!isEditorActive) return showToast("Aktifkan mode edit.");
-            const item = appData.find(x => x.id === currentActiveId); if(!item) return;
-            openModal({ title: 'Ubah Judul', isInput: true, onConfirm: (val) => {
-                if(val){ item.title = val; document.getElementById('detail-title').innerText = val; saveData(); showToast('Berhasil diubah!'); }
-            }});
-            setTimeout(() => document.getElementById('modal-input').value = item.title, 50);
-        }
-
-        function promptDeleteCurrent() {
-            openModal({ title: 'Hapus Halaman?', isInput: false, onConfirm: () => {
-                appData = appData.filter(x => x.id !== currentActiveId); saveData(); navigateTo('page-toc'); showToast('Dihapus!');
-            }});
         }
 
         function toggleEditor() {
@@ -362,147 +290,177 @@
             }
         }
 
-        // FUNGSI UMUM EKSEKUSI CMD EDITOR
+        // ============ FUNGSI PENGAMANAN SELEKSI ============
+        function saveSelection() {
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0) savedRange = sel.getRangeAt(0);
+        }
+        function restoreSelection() {
+            const sel = window.getSelection();
+            if (savedRange) { sel.removeAllRanges(); sel.addRange(savedRange); }
+        }
+
+        // ============ FUNGSI EDIT MENU ============
         function execCmd(command, value = null) {
             document.execCommand(command, false, value);
-            document.getElementById('detail-content').focus();
             saveCurrentContent();
         }
-
-        // MENGUBAH WARNA (Highlight Teks)
-        function changeTextColor(color) {
+        function restoreAndExec(cmd, val) {
+            restoreSelection(); document.execCommand(cmd, false, val); saveCurrentContent();
+        }
+        function restoreAndColor(color) {
+            restoreSelection();
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('foreColor', false, color);
-            document.getElementById('detail-content').focus();
             saveCurrentContent();
         }
 
-        // BARU: FUNGSI MENGUBAH UKURAN FONT PADA TEKS TERSELEKSI (8px - 40px)
-        function applyFontSizeToSelection(pxSize) {
-            if (!pxSize) return;
+        // ============ FUNGSI A+ / A- UNTUK ADMIN (TEKS YANG DITANDAI) ============
+        function changeSelectedFontSize(step) {
+            const sel = window.getSelection();
+            if (!sel.rangeCount || sel.isCollapsed) return showToast("Tandai (drag) teks dulu!");
+
+            let node = sel.anchorNode;
+            let parentEl = node.nodeType === 3 ? node.parentElement : node;
             
-            // Trik menggunakan <font size="7"> sebagai hook, lalu mengubahnya menjadi span dengan style
+            // Deteksi ukuran teks bawaan sebelum ditambah/dikurangi
+            let currentSize = parseInt(window.getComputedStyle(parentEl).fontSize) || 22;
+            let newSize = currentSize + step;
+            
+            if (newSize < 8) newSize = 8;
+            if (newSize > 40) newSize = 40;
+
+            // Beri penanda sementara
             document.execCommand("styleWithCSS", false, false);
-            document.execCommand("fontSize", false, "7"); 
+            document.execCommand("fontSize", false, "7");
             
-            const contentEl = document.getElementById('detail-content');
-            const fonts = contentEl.querySelectorAll('font[size="7"]');
+            let content = document.getElementById('detail-content');
+            let modified = false;
             
-            fonts.forEach(f => {
-                const span = document.createElement('span');
-                span.style.fontSize = pxSize + 'px';
-                span.innerHTML = f.innerHTML;
-                f.parentNode.replaceChild(span, f);
+            // Ubah penanda ukuran 7 menjadi ukuran pixel persis
+            content.querySelectorAll('font[size="7"]').forEach(f => {
+                f.removeAttribute('size');
+                f.style.fontSize = newSize + 'px';
+                modified = true;
             });
             
+            // Antisipasi format otomatis browser modern
+            content.querySelectorAll('*').forEach(el => {
+                let fs = el.style.fontSize;
+                if(fs === '-webkit-xxx-large' || fs === 'xx-large' || fs === '48px' || el.getAttribute('size') === '7') {
+                    el.style.fontSize = newSize + 'px';
+                    el.removeAttribute('size');
+                    modified = true;
+                }
+            });
+
             document.execCommand("styleWithCSS", false, true);
-            document.getElementById('detail-content').focus();
             saveCurrentContent();
+            if(modified) showToast("Ukuran teks: " + newSize + "px");
         }
 
-        // UPDATE GAYA BACA OTOMATIS: Spasi dan Ukuran Font Keseluruhan Skala Proporsional
-        function updateReaderStyles() {
-            const contentEl = document.getElementById('detail-content');
-            let currentLH = parseFloat(contentEl.dataset.lh) || 1.5;
-            
-            let styleTag = document.getElementById('dynamic-reader-styles');
-            if(!styleTag) { 
-                styleTag = document.createElement('style'); 
-                styleTag.id = 'dynamic-reader-styles'; 
-                document.head.appendChild(styleTag); 
-            }
-            
-            // Menerapkan font-size ke wadah, line-height dalam desimal (tanpa 'px') akan 
-            // men-scale jarak atas-bawah mengikuti ukuran font saat A+ atau A- ditekan.
-            styleTag.innerHTML = `
-                #detail-content { font-size: ${baseFontSize}px !important; line-height: ${currentLH} !important; }
-                #detail-content * { line-height: ${currentLH} !important; }
-            `;
-        }
-
-        // BARU: SIKLUS SPASI (1, 1.5, 2, 2.5, 3)
-        function cycleLineHeight() {
-            const contentEl = document.getElementById('detail-content');
-            let currentLH = parseFloat(contentEl.dataset.lh) || 1.5;
-            
-            // Putaran siklus: 1 -> 1.5 -> 2 -> 2.5 -> 3 -> 1
-            let nextLH = (currentLH === 1.0) ? 1.5 : 
-                         (currentLH === 1.5) ? 2.0 : 
-                         (currentLH === 2.0) ? 2.5 : 
-                         (currentLH === 2.5) ? 3.0 : 1.0;
-                         
-            contentEl.dataset.lh = nextLH;
-            updateReaderStyles();
-            saveCurrentContent();
-            showToast(`Spasi: ${nextLH}`);
-        }
-
-        // FUNGSI A- DAN A+ PEMBACA (Font Scaling Otomatis)
-        function changeFontSize(step) {
+        // ============ FUNGSI A+ / A- GLOBAL UNTUK BACA (SELURUH HALAMAN) ============
+        function changeGlobalFontSize(step) {
             baseFontSize += step; 
             if(baseFontSize < 14) baseFontSize = 14; 
             if(baseFontSize > 60) baseFontSize = 60;
             
-            updateReaderStyles(); // Spasi otomatis merenggang/menyusut proporsional
+            const contentEl = document.getElementById('detail-content');
+            contentEl.style.fontSize = baseFontSize + 'px';
+            
+            // Skala juga teks yang sudah diberi custom inline size oleh admin
+            contentEl.querySelectorAll('*').forEach(el => {
+                if(el.style.fontSize) {
+                    let current = parseInt(el.style.fontSize);
+                    if(current) {
+                        let ns = current + step;
+                        if(ns < 8) ns = 8; if(ns > 60) ns = 60;
+                        el.style.fontSize = ns + 'px';
+                    }
+                }
+            });
             saveCurrentContent();
         }
 
-        // SIMPAN KONTEN
+        // ============ FUNGSI SPASI (LINE HEIGHT) 1 s/d 3 ============
+        function changeLineHeight() {
+            const sel = window.getSelection();
+            const lhSequence = [1.0, 1.5, 2.0, 2.5, 3.0]; // Opsi: 1, 1.5, 2, 2.5, 3
+            
+            if (sel.rangeCount > 0 && !sel.isCollapsed) {
+                // Hanya pada paragraf yang diblok
+                let node = sel.anchorNode;
+                let blockNode = node.nodeType === 3 ? node.parentElement : node;
+                while (blockNode && blockNode.id !== 'detail-content' && blockNode.tagName !== 'DIV' && blockNode.tagName !== 'P') {
+                    blockNode = blockNode.parentElement;
+                }
+                if (!blockNode) blockNode = document.getElementById('detail-content');
+
+                let currentLH = parseFloat(blockNode.style.lineHeight) || 2.0;
+                let nextIndex = lhSequence.indexOf(currentLH) + 1;
+                if (nextIndex >= lhSequence.length || nextIndex < 0) nextIndex = 0;
+                
+                blockNode.style.lineHeight = lhSequence[nextIndex];
+                showToast(`Spasi Teks: ${lhSequence[nextIndex]}`);
+            } else {
+                // Terapkan ke semua jika tidak ada yang diblok
+                const contentEl = document.getElementById('detail-content');
+                let currentLH = parseFloat(contentEl.dataset.lh) || 2.0;
+                let nextIndex = lhSequence.indexOf(currentLH) + 1;
+                if (nextIndex >= lhSequence.length || nextIndex < 0) nextIndex = 0;
+                changeLineHeightGlobal(lhSequence[nextIndex]);
+                showToast(`Spasi Semua: ${lhSequence[nextIndex]}`);
+            }
+            saveCurrentContent();
+        }
+
+        function changeLineHeightGlobal(lh) {
+            const contentEl = document.getElementById('detail-content');
+            contentEl.dataset.lh = lh;
+            let styleTag = document.getElementById('force-line-height');
+            if(!styleTag) { styleTag = document.createElement('style'); styleTag.id = 'force-line-height'; document.head.appendChild(styleTag); }
+            styleTag.innerHTML = `#detail-content, #detail-content * { line-height: ${lh} !important; }`;
+        }
+
         function saveCurrentContent() {
             if(!currentActiveId || !isAdmin) return;
             const itemIndex = appData.findIndex(x => x.id === currentActiveId);
-            if(itemIndex > -1) { 
-                appData[itemIndex].content = document.getElementById('detail-content').innerHTML; 
-                saveData(); 
-            }
+            if(itemIndex > -1) { appData[itemIndex].content = document.getElementById('detail-content').innerHTML; saveData(); }
         }
-        
-        // Simpan ketika mengetik
-        document.getElementById('detail-content').addEventListener('input', () => { 
-            if(isEditorActive) saveCurrentContent(); 
-        });
+        document.getElementById('detail-content').addEventListener('input', () => { if(isEditorActive) saveCurrentContent(); });
 
-        // AUTO SCROLL
+        function promptEditTitle() {
+            if(!isEditorActive) return showToast("Aktifkan mode edit.");
+            const item = appData.find(x => x.id === currentActiveId); if(!item) return;
+            openModal({ title: 'Ubah Judul', isInput: true, onConfirm: (val) => {
+                if(val){ item.title = val; document.getElementById('detail-title').innerText = val; saveData(); showToast('Berhasil diubah!'); }
+            }});
+            setTimeout(() => document.getElementById('modal-input').value = item.title, 50);
+        }
+        function promptDeleteCurrent() {
+            openModal({ title: 'Hapus Halaman?', isInput: false, onConfirm: () => {
+                appData = appData.filter(x => x.id !== currentActiveId); saveData(); navigateTo('page-toc'); showToast('Dihapus!');
+            }});
+        }
+
         let scrollInterval, isScrolling = false;
         function toggleAutoScroll() {
             const btn = document.getElementById('btn-autoscroll'), container = document.querySelector('.scrollable-text-area');
-            if (isScrolling) { 
-                clearInterval(scrollInterval); 
-                isScrolling = false; 
-                btn.classList.replace('text-gold-400', 'text-slate-300'); 
-            } else { 
-                isScrolling = true; 
-                btn.classList.replace('text-slate-300', 'text-gold-400'); 
-                scrollInterval = setInterval(() => { container.scrollBy({ top: 1, left: 0, behavior: 'auto' }); }, 50); 
-            }
+            if (isScrolling) { clearInterval(scrollInterval); isScrolling = false; btn.classList.replace('text-gold-400', 'text-slate-300'); } 
+            else { isScrolling = true; btn.classList.replace('text-slate-300', 'text-gold-400'); scrollInterval = setInterval(() => { container.scrollBy({ top: 1, left: 0, behavior: 'auto' }); }, 50); }
         }
 
-        // WAKE LOCK (Supaya Layar Tidak Mati)
         let wakeLock = null;
         async function toggleWakeLock() {
             const btn = document.getElementById('btn-wakelock');
             if ('wakeLock' in navigator) {
                 try {
-                    if (wakeLock) { 
-                        await wakeLock.release(); 
-                        wakeLock = null; 
-                        btn.classList.replace('text-gold-400', 'text-slate-300'); 
-                    } else { 
-                        wakeLock = await navigator.wakeLock.request('screen'); 
-                        btn.classList.replace('text-slate-300', 'text-gold-400'); 
-                        wakeLock.addEventListener('release', () => { 
-                            wakeLock = null; 
-                            btn.classList.replace('text-gold-400', 'text-slate-300'); 
-                        }); 
-                    }
-                } catch(e) { showToast("Gagal menahan layar."); }
-            } else { showToast("Browser tidak mendukung Layar Nyala."); }
+                    if (wakeLock) { await wakeLock.release(); wakeLock = null; btn.classList.replace('text-gold-400', 'text-slate-300'); } 
+                    else { wakeLock = await navigator.wakeLock.request('screen'); btn.classList.replace('text-slate-300', 'text-gold-400'); wakeLock.addEventListener('release', () => { wakeLock = null; btn.classList.replace('text-gold-400', 'text-slate-300'); }); }
+                } catch(e) {}
+            }
         }
-
-        // Register Service Worker
-        if('serviceWorker' in navigator) { 
-            window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{})); 
-        }
+        if('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
     </script>
 </body>
 </html>
