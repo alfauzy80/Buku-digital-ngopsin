@@ -190,27 +190,26 @@
             </div>
 
             <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 border-b border-gold-500/30 shadow-inner">
-                <!-- Tambahan ontouchstart pada semua tombol menu agar tidak mencuri fokus teks -->
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(-1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
+                <!-- Semua tombol edit kini bersih dari ontouchstart pencegah klik. Mereka mengandalkan sistem memori -->
+                <button onclick="changeSelectedFontSize(-1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
+                <button onclick="changeSelectedFontSize(1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
 
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('undo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-undo text-xs"></i></button>
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('redo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-redo text-xs"></i></button>
+                <button onclick="execCmd('undo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-undo text-xs"></i></button>
+                <button onclick="execCmd('redo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-redo text-xs"></i></button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
 
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('bold')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">B</button>
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('italic')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 italic text-sm">I</button>
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('underline')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 underline text-sm">U</button>
+                <button onclick="execCmd('bold')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">B</button>
+                <button onclick="execCmd('italic')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 italic text-sm">I</button>
+                <button onclick="execCmd('underline')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 underline text-sm">U</button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('justifyLeft')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-left text-xs"></i></button>
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('justifyCenter')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-center text-xs"></i></button>
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-right text-xs"></i></button>
+                <button onclick="execCmd('justifyLeft')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-left text-xs"></i></button>
+                <button onclick="execCmd('justifyCenter')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-center text-xs"></i></button>
+                <button onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-right text-xs"></i></button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 
-                <!-- Font Dropdown: Otomatis kembali ke "Font" setelah dipilih agar bisa digunakan berkali-kali -->
-                <select ontouchstart="saveSelectionExplicitly()" onmousedown="saveSelectionExplicitly()" onchange="execCmd('fontName', this.value); this.selectedIndex=0;" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
+                <select onchange="changeFontFamily(this.value); this.selectedIndex=0;" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
                     <option value="" disabled selected>Font</option>
                     <option value="Poppins">Poppins</option>
                     <option value="Amiri">Amiri</option>
@@ -219,12 +218,12 @@
                 </select>
 
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs"><i class="fas fa-text-height"></i> Spasi</button>
+                <button onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs"><i class="fas fa-text-height"></i> Spasi</button>
                 
-                <input type="color" ontouchstart="saveSelectionExplicitly()" onmousedown="saveSelectionExplicitly()" oninput="restoreAndColor(this.value)" onchange="restoreAndColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
+                <input type="color" oninput="changeColor(this.value)" onchange="changeColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
                 
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
-                <button ontouchstart="event.preventDefault()" onmousedown="event.preventDefault()" onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
+                <button onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
             </div>
         </div>
 
@@ -298,7 +297,7 @@
             });
         }
 
-        // ============ SISTEM UI & EDITOR ============
+        // ============ SISTEM UI ============
         function saveData() { dbRef.set(appData).catch(() => showToast("Gagal menyimpan.")); }
         
         function showToast(msg) {
@@ -395,60 +394,68 @@
             }
         }
 
-        // ============ SISTEM PENGAMANAN SELEKSI (ANTI HILANG SAAT DRAG) ============
+        // ============ SISTEM PENGAMANAN SELEKSI TERBARU ============
         document.addEventListener('selectionchange', () => {
             if (!isEditorActive) return;
             const sel = window.getSelection();
             if (sel.rangeCount > 0) {
                 const range = sel.getRangeAt(0);
                 const editor = document.getElementById('detail-content');
-                // Clone range digunakan agar seleksi tersimpan kuat di memori
+                // HANYA menyimpan jika yang di-klik/drag berada murni di dalam kotak teks
                 if (editor && editor.contains(range.commonAncestorContainer)) {
                     savedRange = range.cloneRange();
                 }
             }
         });
 
-        // Dipanggil khusus untuk elemen <select> dan <input type="color">
-        function saveSelectionExplicitly() {
-            if (!isEditorActive) return;
+        // Wajib dipanggil sebelum mengeksekusi format apapun
+        function prepareEditorExecution() {
+            const editor = document.getElementById('detail-content');
+            editor.focus(); // Memaksa fokus kembali ke area teks
             const sel = window.getSelection();
-            if (sel.rangeCount > 0) {
-                const range = sel.getRangeAt(0);
-                const editor = document.getElementById('detail-content');
-                if (editor && editor.contains(range.commonAncestorContainer)) {
-                    savedRange = range.cloneRange();
-                }
-            }
-        }
-
-        function restoreSelection() {
             if (savedRange) {
-                const editor = document.getElementById('detail-content');
-                // PENTING: Memaksa fokus kembali ke kotak teks sebelum menerapkan perintah
-                editor.focus();
-                const sel = window.getSelection();
                 sel.removeAllRanges();
-                sel.addRange(savedRange);
+                sel.addRange(savedRange); // Terapkan ulang blok teks yang tersimpan
             }
+            return sel;
         }
 
+        // ============ FUNGSI EDIT MENU ============
         function execCmd(command, value = null) {
-            restoreSelection(); 
+            prepareEditorExecution();
+            document.execCommand('styleWithCSS', false, true);
             document.execCommand(command, false, value);
             saveCurrentContent();
         }
 
-        function restoreAndColor(color) {
-            restoreSelection(); 
+        function changeColor(color) {
+            if(!color) return;
+            const sel = prepareEditorExecution();
+            if (!sel.rangeCount || sel.isCollapsed) return showToast("Tandai (drag) teks dulu!");
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('foreColor', false, color);
             saveCurrentContent();
         }
 
+        function changeFontFamily(fontName) {
+            if(!fontName) return;
+            const sel = prepareEditorExecution();
+            if (!sel.rangeCount || sel.isCollapsed) return showToast("Tandai (drag) teks dulu!");
+            
+            document.execCommand('styleWithCSS', false, true);
+            document.execCommand('fontName', false, fontName);
+            
+            // Merapikan tag bawaan browser agar lebih aman
+            const editor = document.getElementById('detail-content');
+            editor.querySelectorAll('font[face]').forEach(el => {
+                el.style.fontFamily = el.getAttribute('face');
+                el.removeAttribute('face');
+            });
+            saveCurrentContent();
+        }
+
         function changeSelectedFontSize(step) {
-            restoreSelection();
-            const sel = window.getSelection();
+            const sel = prepareEditorExecution();
             if (!sel.rangeCount || sel.isCollapsed) return showToast("Tandai (drag) teks dulu!");
 
             let node = sel.anchorNode;
@@ -456,7 +463,6 @@
             
             let currentSize = parseInt(window.getComputedStyle(parentEl).fontSize) || 22;
             let newSize = currentSize + step;
-            
             if (newSize < 8) newSize = 8;
             if (newSize > 40) newSize = 40;
 
@@ -486,30 +492,8 @@
             if(modified) showToast("Ukuran teks: " + newSize + "px");
         }
 
-        function changeGlobalFontSize(step) {
-            baseFontSize += step; 
-            if(baseFontSize < 14) baseFontSize = 14; 
-            if(baseFontSize > 60) baseFontSize = 60;
-            
-            const contentEl = document.getElementById('detail-content');
-            contentEl.style.fontSize = baseFontSize + 'px';
-            
-            contentEl.querySelectorAll('*').forEach(el => {
-                if(el.style.fontSize) {
-                    let current = parseInt(el.style.fontSize);
-                    if(current) {
-                        let ns = current + step;
-                        if(ns < 8) ns = 8; if(ns > 60) ns = 60;
-                        el.style.fontSize = ns + 'px';
-                    }
-                }
-            });
-            saveCurrentContent();
-        }
-
         function changeLineHeight() {
-            restoreSelection();
-            const sel = window.getSelection();
+            const sel = prepareEditorExecution();
             const lhSequence = [1.0, 1.5, 2.0, 2.5, 3.0]; 
             
             if (sel.rangeCount > 0 && !sel.isCollapsed) {
@@ -534,6 +518,27 @@
                 changeLineHeightGlobal(lhSequence[nextIndex]);
                 showToast(`Spasi Semua: ${lhSequence[nextIndex]}`);
             }
+            saveCurrentContent();
+        }
+
+        function changeGlobalFontSize(step) {
+            baseFontSize += step; 
+            if(baseFontSize < 14) baseFontSize = 14; 
+            if(baseFontSize > 60) baseFontSize = 60;
+            
+            const contentEl = document.getElementById('detail-content');
+            contentEl.style.fontSize = baseFontSize + 'px';
+            
+            contentEl.querySelectorAll('*').forEach(el => {
+                if(el.style.fontSize) {
+                    let current = parseInt(el.style.fontSize);
+                    if(current) {
+                        let ns = current + step;
+                        if(ns < 8) ns = 8; if(ns > 60) ns = 60;
+                        el.style.fontSize = ns + 'px';
+                    }
+                }
+            });
             saveCurrentContent();
         }
 
