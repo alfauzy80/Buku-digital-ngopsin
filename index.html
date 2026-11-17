@@ -92,30 +92,35 @@
         </div>
     </div>
 
-    <!-- HALAMAN 1: COVER -->
-    <div id="page-cover" class="flex flex-col items-center justify-center text-center h-[100dvh] overflow-hidden relative px-6 w-full max-w-md mx-auto">
+    <!-- HALAMAN 1: COVER TERBARU DENGAN POSISI LOGO DITENGAH ATAS -->
+    <div id="page-cover" class="flex flex-col items-center h-[100dvh] overflow-hidden relative px-6 w-full max-w-md mx-auto">
         
-        <!-- LOGO DITEMPATKAN DI SINI (Tepat di atas teks) -->
-        <div class="mb-4 relative">
-            <div class="absolute inset-0 bg-gold-500 blur-[30px] opacity-20 rounded-full"></div>
-            <!-- Menggunakan ./logo.png agar nyambung dengan file di GitHub -->
-            <img src="./logo.png" alt="Logo" class="w-28 h-28 object-cover relative z-10 rounded-full border-2 border-gold-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+        <!-- AREA LOGO: Flex-grow membuatnya mendorong sisa konten ke bawah, menempatkan logo persis di tengah antara atas dan teks -->
+        <div class="flex-grow w-full flex items-center justify-center pt-8">
+            <div class="relative">
+                <div class="absolute inset-0 bg-gold-500 blur-[40px] opacity-25 rounded-full scale-110"></div>
+                <!-- Logo diperbesar (w-44 h-44 = 176px) -->
+                <img src="./logo.png" alt="Logo" class="w-44 h-44 object-cover relative z-10 rounded-full border-2 border-gold-500/50 shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+            </div>
         </div>
         
-        <h1 class="text-5xl font-serif font-bold text-gold-400 mb-4 tracking-wide drop-shadow-md">Buku Saku</h1>
-        
-        <div class="flex items-center gap-3 mb-4">
-            <div class="h-px w-12 bg-gradient-to-r from-transparent to-gold-500"></div>
-            <i class="fas fa-gem text-gold-500 text-[10px]"></i>
-            <div class="h-px w-12 bg-gradient-to-l from-transparent to-gold-500"></div>
+        <!-- AREA TEKS: Diposisikan di paruh bawah layar -->
+        <div class="flex-none flex flex-col items-center justify-center pb-24 w-full relative z-20 text-center">
+            <h1 class="text-5xl font-serif font-bold text-gold-400 mb-4 tracking-wide drop-shadow-md">Buku Saku</h1>
+            
+            <div class="flex items-center gap-3 mb-4">
+                <div class="h-px w-12 bg-gradient-to-r from-transparent to-gold-500"></div>
+                <i class="fas fa-gem text-gold-500 text-[10px]"></i>
+                <div class="h-px w-12 bg-gradient-to-l from-transparent to-gold-500"></div>
+            </div>
+            <h2 class="text-xs text-slate-300 tracking-[0.2em] uppercase mb-12">Ngopsin Mabu Park</h2>
+            
+            <button onclick="navigateTo('page-toc')" class="border border-gold-500 text-gold-400 font-serif italic py-3 px-10 rounded-full hover:bg-gold-500 hover:text-black transition-colors flex items-center gap-3 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+                Buka Kitab <i class="fas fa-book-open text-sm"></i>
+            </button>
         </div>
-        <h2 class="text-xs text-slate-300 tracking-[0.2em] uppercase mb-12">Ngopsin Mabu Park</h2>
-        
-        <button onclick="navigateTo('page-toc')" class="border border-gold-500 text-gold-400 font-serif italic py-3 px-10 rounded-full hover:bg-gold-500 hover:text-black transition-colors flex items-center gap-3 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
-            Buka Kitab <i class="fas fa-book-open text-sm"></i>
-        </button>
 
-        <div class="absolute bottom-8 w-full text-center">
+        <div class="absolute bottom-8 w-full text-center z-20">
             <button onclick="promptAdminLogin()" class="p-3 text-slate-600 hover:text-gold-500 transition-colors">
                 <i id="admin-icon" class="fas fa-lock text-sm"></i>
             </button>
