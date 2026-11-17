@@ -135,7 +135,6 @@
             <!-- Menu Edit Admin -->
             <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 border-b border-gold-500/30 shadow-inner">
                 
-                <!-- onmousedown="event.preventDefault()" mengamankan teks dari lepas seleksi -->
                 <button onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(-1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
                 <button onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
@@ -154,7 +153,7 @@
                 <button onmousedown="event.preventDefault()" onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0"><i class="fas fa-align-right text-xs"></i></button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 
-                <select onmousedown="saveSelection()" onchange="restoreAndExec('fontName', this.value)" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
+                <select onchange="execCmd('fontName', this.value)" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
                     <option value="Poppins">Poppins</option>
                     <option value="Amiri">Amiri</option>
                     <option value="Lateef">Lateef</option>
@@ -164,7 +163,8 @@
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 <button onmousedown="event.preventDefault()" onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs"><i class="fas fa-text-height"></i> Spasi</button>
                 
-                <input type="color" onmousedown="saveSelection()" onchange="restoreAndColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
+                <!-- Pembaruan Color Picker: Menggunakan oninput untuk real-time update -->
+                <input type="color" oninput="restoreAndColor(this.value)" onchange="restoreAndColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
                 
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
                 <button onmousedown="event.preventDefault()" onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0"><i class="fas fa-trash text-xs"></i></button>
@@ -290,26 +290,38 @@
             }
         }
 
-        // ============ FUNGSI PENGAMANAN SELEKSI ============
-        function saveSelection() {
+        // ============ FUNGSI PENGAMANAN SELEKSI OTOMATIS (AUTO-SAVE) ============
+        // Ini memastikan teks yang Anda drag tetap terikat meskipun muncul dialog dari HP
+        document.addEventListener('selectionchange', () => {
+            if (!isEditorActive) return;
             const sel = window.getSelection();
-            if (sel.rangeCount > 0) savedRange = sel.getRangeAt(0);
-        }
+            if (sel.rangeCount > 0) {
+                const range = sel.getRangeAt(0);
+                const editor = document.getElementById('detail-content');
+                // Simpan seleksi HANYA jika yang diblok ada di dalam kotak teks editor
+                if (editor && editor.contains(range.commonAncestorContainer)) {
+                    savedRange = range;
+                }
+            }
+        });
+
         function restoreSelection() {
-            const sel = window.getSelection();
-            if (savedRange) { sel.removeAllRanges(); sel.addRange(savedRange); }
+            if (savedRange) {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(savedRange);
+            }
         }
 
         // ============ FUNGSI EDIT MENU ============
         function execCmd(command, value = null) {
+            restoreSelection(); // Kembalikan blok teks yang tersimpan
             document.execCommand(command, false, value);
             saveCurrentContent();
         }
-        function restoreAndExec(cmd, val) {
-            restoreSelection(); document.execCommand(cmd, false, val); saveCurrentContent();
-        }
+
         function restoreAndColor(color) {
-            restoreSelection();
+            restoreSelection(); // Kembalikan blok teks yang tersimpan sebelum mewarnai
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('foreColor', false, color);
             saveCurrentContent();
@@ -317,34 +329,31 @@
 
         // ============ FUNGSI A+ / A- UNTUK ADMIN (TEKS YANG DITANDAI) ============
         function changeSelectedFontSize(step) {
+            restoreSelection();
             const sel = window.getSelection();
             if (!sel.rangeCount || sel.isCollapsed) return showToast("Tandai (drag) teks dulu!");
 
             let node = sel.anchorNode;
             let parentEl = node.nodeType === 3 ? node.parentElement : node;
             
-            // Deteksi ukuran teks bawaan sebelum ditambah/dikurangi
             let currentSize = parseInt(window.getComputedStyle(parentEl).fontSize) || 22;
             let newSize = currentSize + step;
             
             if (newSize < 8) newSize = 8;
             if (newSize > 40) newSize = 40;
 
-            // Beri penanda sementara
             document.execCommand("styleWithCSS", false, false);
             document.execCommand("fontSize", false, "7");
             
             let content = document.getElementById('detail-content');
             let modified = false;
             
-            // Ubah penanda ukuran 7 menjadi ukuran pixel persis
             content.querySelectorAll('font[size="7"]').forEach(f => {
                 f.removeAttribute('size');
                 f.style.fontSize = newSize + 'px';
                 modified = true;
             });
             
-            // Antisipasi format otomatis browser modern
             content.querySelectorAll('*').forEach(el => {
                 let fs = el.style.fontSize;
                 if(fs === '-webkit-xxx-large' || fs === 'xx-large' || fs === '48px' || el.getAttribute('size') === '7') {
@@ -368,7 +377,6 @@
             const contentEl = document.getElementById('detail-content');
             contentEl.style.fontSize = baseFontSize + 'px';
             
-            // Skala juga teks yang sudah diberi custom inline size oleh admin
             contentEl.querySelectorAll('*').forEach(el => {
                 if(el.style.fontSize) {
                     let current = parseInt(el.style.fontSize);
@@ -382,13 +390,13 @@
             saveCurrentContent();
         }
 
-        // ============ FUNGSI SPASI (LINE HEIGHT) 1 s/d 3 ============
+        // ============ FUNGSI SPASI (LINE HEIGHT) ============
         function changeLineHeight() {
+            restoreSelection();
             const sel = window.getSelection();
-            const lhSequence = [1.0, 1.5, 2.0, 2.5, 3.0]; // Opsi: 1, 1.5, 2, 2.5, 3
+            const lhSequence = [1.0, 1.5, 2.0, 2.5, 3.0]; 
             
             if (sel.rangeCount > 0 && !sel.isCollapsed) {
-                // Hanya pada paragraf yang diblok
                 let node = sel.anchorNode;
                 let blockNode = node.nodeType === 3 ? node.parentElement : node;
                 while (blockNode && blockNode.id !== 'detail-content' && blockNode.tagName !== 'DIV' && blockNode.tagName !== 'P') {
@@ -403,7 +411,6 @@
                 blockNode.style.lineHeight = lhSequence[nextIndex];
                 showToast(`Spasi Teks: ${lhSequence[nextIndex]}`);
             } else {
-                // Terapkan ke semua jika tidak ada yang diblok
                 const contentEl = document.getElementById('detail-content');
                 let currentLH = parseFloat(contentEl.dataset.lh) || 2.0;
                 let nextIndex = lhSequence.indexOf(currentLH) + 1;
