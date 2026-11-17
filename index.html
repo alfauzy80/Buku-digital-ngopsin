@@ -8,6 +8,9 @@
     <meta name="theme-color" content="#022c22">
     <link rel="apple-touch-icon" href="./logo.png">
     
+    <!-- Perintah PRELOAD agar logo langsung tampil tanpa loading/delay -->
+    <link rel="preload" href="./logo.png" as="image">
+    
     <!-- MANIFEST.JSON DIJADIKAN SATU DENGAN HTML -->
     <link id="manifest-link" rel="manifest" href="">
     <script>
@@ -91,11 +94,16 @@
 
     <!-- HALAMAN 1: COVER -->
     <div id="page-cover" class="flex flex-col items-center justify-center text-center h-[100dvh] overflow-hidden relative px-6 w-full max-w-md mx-auto">
-        <div class="mb-6 relative">
+        
+        <!-- LOGO DITEMPATKAN DI SINI (Tepat di atas teks) -->
+        <div class="mb-4 relative">
             <div class="absolute inset-0 bg-gold-500 blur-[30px] opacity-20 rounded-full"></div>
-            <i class="fas fa-lantern text-6xl text-gold-500 relative z-10"></i>
+            <!-- Menggunakan ./logo.png agar nyambung dengan file di GitHub -->
+            <img src="./logo.png" alt="Logo" class="w-28 h-28 object-cover relative z-10 rounded-full border-2 border-gold-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
         </div>
+        
         <h1 class="text-5xl font-serif font-bold text-gold-400 mb-4 tracking-wide drop-shadow-md">Buku Saku</h1>
+        
         <div class="flex items-center gap-3 mb-4">
             <div class="h-px w-12 bg-gradient-to-r from-transparent to-gold-500"></div>
             <i class="fas fa-gem text-gold-500 text-[10px]"></i>
@@ -134,7 +142,6 @@
     <!-- HALAMAN 3: KONTEN -->
     <div id="page-detail" class="hidden">
         
-        <!-- HEADER STICKY KUNCI ATAS -->
         <div class="sticky-top-area glass-header">
             <div class="flex justify-between items-center p-3 border-b border-gold-500/20">
                 <button onclick="navigateTo('page-toc')" class="text-gold-400 text-xl px-2"><i class="fas fa-arrow-left"></i></button>
@@ -142,7 +149,6 @@
                 <button id="btn-edit-mode" onclick="toggleEditor()" class="text-slate-500 hidden px-2"><i id="edit-icon" class="fas fa-pen"></i></button>
             </div>
 
-            <!-- Menu Baca -->
             <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar border-b border-gold-500/20 items-center bg-black/20">
                 <button onclick="changeGlobalFontSize(-2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
                 <button onclick="changeGlobalFontSize(2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
@@ -151,9 +157,7 @@
                 <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-angle-double-down text-gold-500"></i> Scroll</button>
             </div>
 
-            <!-- Menu Edit Admin -->
             <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 border-b border-gold-500/30 shadow-inner">
-                
                 <button onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(-1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
                 <button onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(1)" class="px-2.5 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
@@ -182,7 +186,6 @@
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                 <button onmousedown="event.preventDefault()" onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs"><i class="fas fa-text-height"></i> Spasi</button>
                 
-                <!-- Menggunakan oninput untuk real-time update warna -->
                 <input type="color" oninput="restoreAndColor(this.value)" onchange="restoreAndColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
                 
                 <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
@@ -190,7 +193,6 @@
             </div>
         </div>
 
-        <!-- AREA KONTEN (Hanya bagian ini yang bergulir) -->
         <div class="scrollable-text-area">
             <div id="detail-content" class="content-area text-xl font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
         </div>
@@ -309,7 +311,6 @@
             }
         }
 
-        // ============ FUNGSI PENGAMANAN SELEKSI OTOMATIS ============
         document.addEventListener('selectionchange', () => {
             if (!isEditorActive) return;
             const sel = window.getSelection();
@@ -330,7 +331,6 @@
             }
         }
 
-        // ============ FUNGSI EDIT MENU ============
         function execCmd(command, value = null) {
             restoreSelection(); 
             document.execCommand(command, false, value);
@@ -344,7 +344,6 @@
             saveCurrentContent();
         }
 
-        // ============ FUNGSI A+ / A- UNTUK ADMIN ============
         function changeSelectedFontSize(step) {
             restoreSelection();
             const sel = window.getSelection();
@@ -385,7 +384,6 @@
             if(modified) showToast("Ukuran teks: " + newSize + "px");
         }
 
-        // ============ FUNGSI A+ / A- GLOBAL UNTUK BACA ============
         function changeGlobalFontSize(step) {
             baseFontSize += step; 
             if(baseFontSize < 14) baseFontSize = 14; 
@@ -407,7 +405,6 @@
             saveCurrentContent();
         }
 
-        // ============ FUNGSI SPASI (LINE HEIGHT) ============
         function changeLineHeight() {
             restoreSelection();
             const sel = window.getSelection();
