@@ -47,9 +47,13 @@
         }
     </script>
     <style>
-        body { 
+        /* PERBAIKAN UTAMA: Mengunci body agar tidak bisa di-scroll sama sekali */
+        html, body {
+            margin: 0; padding: 0; 
+            width: 100vw; height: 100dvh; 
+            overflow: hidden; /* Mengunci scroll global */
             background: radial-gradient(ellipse at top, #064e3b, #022c22, #000000); 
-            color: #f1f5f9; margin: 0; padding: 0; min-height: 100vh;
+            color: #f1f5f9;
             -webkit-tap-highlight-color: transparent; 
         }
         
@@ -60,9 +64,31 @@
             z-index: 100;
         }
 
-        #page-detail { display: flex; flex-direction: column; height: 100dvh; width: 100%; max-width: 28rem; margin: 0 auto; overflow: hidden; }
+        /* PERBAIKAN UTAMA: Semua halaman diatur Absolute agar saling bertumpuk dan rapi */
+        .page-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: none; /* Disembunyikan secara default */
+            flex-direction: column;
+            max-width: 28rem;
+            margin: 0 auto;
+            right: 0; /* Untuk memastikan max-width berada di tengah */
+        }
+        
+        .page-container.active {
+            display: flex; /* Ditampilkan jika memiliki class active */
+        }
+
         .sticky-top-area { flex-shrink: 0; width: 100%; }
-        .scrollable-text-area { flex-grow: 1; overflow-y: auto; padding: 1.5rem; padding-bottom: 50vh; } 
+        
+        /* Area yang bisa di-scroll HANYA ini saja */
+        .scrollable-text-area { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding: 1.5rem; 
+            padding-bottom: 30vh; 
+        } 
         
         .content-area { outline: none; min-height: 100%; }
         .content-area[contenteditable="true"]:focus { border: 1px dashed rgba(234, 179, 8, 0.5); border-radius: 8px; padding: 8px; background: rgba(255,255,255,0.02); }
@@ -77,7 +103,7 @@
     <!-- TOAST NOTIFIKASI -->
     <div id="toast" class="fixed top-16 left-1/2 transform -translate-x-1/2 bg-royal-dark border border-gold-500 text-gold-400 px-6 py-2 rounded-full shadow-lg z-[1000] opacity-0 pointer-events-none transition-opacity duration-300 font-semibold text-sm">Pesan</div>
 
-    <!-- BANNER INSTALL PWA (Ditampilkan via Script saat terbuka di Browser) -->
+    <!-- BANNER INSTALL PWA -->
     <div id="install-banner" class="fixed bottom-0 left-0 w-full bg-royal-dark/95 backdrop-blur border-t border-gold-500/50 p-4 hidden flex-row justify-between items-center z-[2000] shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
         <div class="flex items-center gap-3">
             <img src="./icon-192.png" onerror="this.src='./logo.png'" alt="Icon" class="w-12 h-12 rounded-xl shadow-md border border-gold-500/30">
@@ -108,7 +134,8 @@
     </div>
 
     <!-- HALAMAN 1: COVER -->
-    <div id="page-cover" class="flex flex-col items-center h-[100dvh] overflow-hidden relative px-6 w-full max-w-md mx-auto">
+    <!-- PERUBAHAN: Ditambahkan class 'page-container' dan 'active' -->
+    <div id="page-cover" class="page-container active relative px-6">
         <div class="flex-grow w-full flex items-center justify-center pt-8">
             <div class="relative">
                 <div class="absolute inset-0 bg-gold-500 blur-[40px] opacity-25 rounded-full scale-110"></div>
@@ -130,7 +157,7 @@
             </button>
         </div>
 
-        <div class="absolute bottom-8 w-full text-center z-20">
+        <div class="absolute bottom-8 w-full text-center z-20 left-0">
             <button onclick="promptAdminLogin()" class="p-3 text-slate-600 hover:text-gold-500 transition-colors">
                 <i id="admin-icon" class="fas fa-lock text-sm"></i>
             </button>
@@ -138,13 +165,14 @@
     </div>
 
     <!-- HALAMAN 2: DAFTAR ISI -->
-    <div id="page-toc" class="hidden flex-col min-h-screen w-full max-w-md mx-auto relative">
-        <header class="sticky top-0 glass-header p-4 flex justify-between items-center z-50">
+    <!-- PERUBAHAN: Ditambahkan class 'page-container' -->
+    <div id="page-toc" class="page-container relative">
+        <header class="sticky-top-area glass-header p-4 flex justify-between items-center z-50">
             <button onclick="navigateTo('page-cover')" class="text-gold-500 text-xl"><i class="fas fa-arrow-left"></i></button>
             <h1 class="font-serif font-bold text-gold-400 tracking-widest">DAFTAR ISI</h1>
             <div class="w-6"></div>
         </header>
-        <main class="flex-grow p-6 pb-20">
+        <main class="scrollable-text-area p-6 pb-20">
             <div class="flex justify-end mb-6">
                 <button id="btn-add-toc" onclick="promptNewToc()" class="hidden bg-gold-500 text-black font-bold rounded-full px-4 py-1.5 shadow-md text-sm"><i class="fas fa-plus mr-1"></i>Tambah</button>
             </div>
@@ -155,7 +183,8 @@
     </div>
 
     <!-- HALAMAN 3: KONTEN -->
-    <div id="page-detail" class="hidden">
+    <!-- PERUBAHAN: Ditambahkan class 'page-container' -->
+    <div id="page-detail" class="page-container relative">
         <div class="sticky-top-area glass-header">
             <div class="flex justify-between items-center p-3 border-b border-gold-500/20">
                 <button onclick="navigateTo('page-toc')" class="text-gold-400 text-xl px-2"><i class="fas fa-arrow-left"></i></button>
@@ -229,8 +258,8 @@
                 appData = [{ id: 1, title: 'Mukadimah', content: '<div style="text-align: center;"><b style="font-family: \'Playfair Display\'; color: #facc15;">Bismillahirrohmanirrohim</b><br><br>Selamat datang di Buku Saku Digital.</div>' }];
                 saveData(); 
             }
-            if (document.getElementById('page-toc').style.display === 'flex') renderToc();
-            if (document.getElementById('page-detail').style.display === 'flex' && !isEditorActive && currentActiveId) openDetail(currentActiveId);
+            if (document.getElementById('page-toc').classList.contains('active')) renderToc();
+            if (document.getElementById('page-detail').classList.contains('active') && !isEditorActive && currentActiveId) openDetail(currentActiveId);
         });
 
         // ============ SISTEM INSTALL PWA & AUTO-UPDATE ============
@@ -238,7 +267,6 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Menampilkan banner notifikasi install di bawah layar
             const installBanner = document.getElementById('install-banner');
             installBanner.classList.remove('hidden');
             installBanner.classList.add('flex');
@@ -257,10 +285,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then((registration) => {
-                    // Pengecekan versi update secara otomatis saat aplikasi dibuka
                     registration.update();
-                    
-                    // Mendeteksi apabila admin mengubah file HTML dan Service Worker
                     registration.addEventListener('updatefound', () => {
                         const newWorker = registration.installing;
                         newWorker.addEventListener('statechange', () => {
@@ -273,7 +298,6 @@
                 }).catch(()=>{});
             });
 
-            // Mengamankan transisi saat update berhasil dipasang
             let refreshing;
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 if (refreshing) return;
@@ -322,9 +346,12 @@
             }});
         }
 
+        // PERBAIKAN: Fungsi Navigasi disesuaikan dengan class 'active'
         function navigateTo(pageId) {
-            ['page-cover', 'page-toc', 'page-detail'].forEach(id => { document.getElementById(id).style.display = 'none'; });
-            document.getElementById(pageId).style.display = 'flex';
+            ['page-cover', 'page-toc', 'page-detail'].forEach(id => { 
+                document.getElementById(id).classList.remove('active'); 
+            });
+            document.getElementById(pageId).classList.add('active');
             if(pageId === 'page-toc') renderToc();
         }
 
