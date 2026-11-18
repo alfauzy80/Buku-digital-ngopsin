@@ -201,7 +201,6 @@
                 </div>
 
                 <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar items-center bg-black/20">
-                    <!-- Tombol A- A+ Pembaca (Telah Aktif Kembali) -->
                     <button onclick="changeGlobalFontSize(-2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
                     <button onclick="changeGlobalFontSize(2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
@@ -317,7 +316,7 @@
             } else {
                 const currentTime = new Date().getTime();
                 if (currentTime - lastBackPressTime < 2000) {
-                    // Keluar aplikasi
+                    // Keluar
                 } else {
                     showToast("Tekan sekali lagi untuk keluar");
                     lastBackPressTime = currentTime;
@@ -515,6 +514,7 @@
             });
         }
 
+        // ============ FUNGSI HAPUS & SEMBUNYIKAN (DIKEMBALIKAN) ============
         function toggleVisibility(id, e) {
             e.stopPropagation();
             const item = appData.find(x => x.id === id);
@@ -525,6 +525,29 @@
                 renderToc(document.getElementById('search-input').value);
             }
         }
+
+        function promptDeleteToc(id, e) {
+            e.stopPropagation();
+            openModal({ title: 'Hapus Doa Ini Secara Permanen?', isInput: false, onConfirm: () => {
+                appData = appData.filter(x => x.id !== id); 
+                saveData(); 
+                showToast('Doa Berhasil Dihapus!');
+                renderToc(document.getElementById('search-input').value);
+            }});
+        }
+
+        // ============ FUNGSI TAMBAH BARU (DIKEMBALIKAN) ============
+        function promptNewToc() {
+            openModal({ title: 'Tambah Doa', isInput: true, onConfirm: (val) => {
+                if(val) { 
+                    appData.push({ id: Date.now(), title: val, content: '<div style="text-align:center;">Ketik di sini...</div>', hidden: false }); 
+                    saveData(); 
+                    showToast('Ditambahkan!'); 
+                    renderToc(document.getElementById('search-input').value);
+                }
+            }});
+        }
+
 
         function toggleFavoriteCurrent() {
             if(!currentActiveId) return;
