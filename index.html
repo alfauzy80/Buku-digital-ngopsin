@@ -177,7 +177,6 @@
                     
                     <button onclick="openChat()" class="relative text-gold-500/70 hover:text-gold-400 font-serif italic text-sm flex items-center gap-2 transition-colors px-4 py-2 mt-1">
                         <i class="fas fa-comments"></i> Ruang Obrolan
-                        <!-- BAGE NOTIFIKASI DIKEMBALIKAN KE SINI -->
                         <span id="chat-badge" class="hidden absolute -top-1.5 -right-3 bg-red-600 text-white text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full shadow-md border border-royal-dark min-w-[20px] items-center justify-center">0</span>
                     </button>
                 </div>
@@ -295,6 +294,8 @@
                 <div class="flex items-center gap-4">
                     <button onclick="promptChatName()" class="text-gold-500 text-sm hover:text-gold-400 transition-colors" title="Ubah Nama"><i class="fas fa-user-edit"></i></button>
                     <button onclick="promptSoundSelect()" class="text-gold-500 text-sm hover:text-gold-400 transition-colors" title="Pengaturan Suara"><i class="fas fa-volume-up"></i></button>
+                    <!-- Tombol Hapus Seluruh Riwayat Chat (Khusus Admin) -->
+                    <button id="btn-clear-chat" onclick="promptClearChat()" class="hidden text-red-500/80 hover:text-red-400 text-sm transition-colors" title="Hapus Semua Chat"><i class="fas fa-trash-alt"></i></button>
                 </div>
             </div>
             
@@ -338,8 +339,8 @@
         
         let initialChatLoaded = false;
         let unreadChatCount = 0;
+        let renderedMsgKeys = new Set();
 
-        // Inisialisasi AudioContext global
         window.chatAudioCtx = null;
 
         function saveFavorites() { localStorage.setItem('ngopsinFavorites', JSON.stringify(userFavorites)); }
@@ -347,6 +348,49 @@
 
         if ('Notification' in window && Notification.permission === 'default') {
             setTimeout(() => Notification.requestPermission(), 3000);
+        }
+
+        // PWA Install & Service Worker
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBanner = document.getElementById('install-banner');
+            installBanner.classList.remove('hidden');
+            installBanner.classList.add('flex');
+        });
+
+        document.getElementById('btn-install').addEventListener('click', async () => {
+            const installBanner = document.getElementById('install-banner');
+            installBanner.classList.replace('flex', 'hidden');
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            }
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then((registration) => {
+                    registration.update();
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                showToast("Pembaruan Tersedia! Memuat ulang...");
+                                setTimeout(() => window.location.reload(), 2000);
+                            }
+                        });
+                    });
+                }).catch(()=>{});
+            });
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
         }
 
         dbRef.on('value', (snapshot) => {
@@ -402,7 +446,7 @@
         }
 
         let modalCallback = null;
-        function openModal({ title, isInput, isPassword, isSelect, onConfirm }) {
+        function openModal({ title, isInput, isPassword, isSelect, confirmText, onConfirm }) {
             document.getElementById('modal-title').innerText = title;
             const inputEl = document.getElementById('modal-input');
             inputEl.value = ''; inputEl.type = isPassword ? 'password' : 'text';
@@ -410,6 +454,7 @@
             document.getElementById('modal-input-container').style.display = isInput ? 'block' : 'none';
             document.getElementById('modal-eye-btn').style.display = isPassword ? 'block' : 'none';
             document.getElementById('modal-select-container').style.display = isSelect ? 'block' : 'none';
+            document.getElementById('btn-modal-confirm').innerText = confirmText || 'Simpan';
             
             modalCallback = onConfirm;
             document.getElementById('custom-modal').classList.remove('hidden'); document.getElementById('custom-modal').classList.add('flex');
@@ -451,6 +496,11 @@
                 else { el.classList.add('hidden'); el.classList.remove('flex'); }
             });
             document.getElementById('btn-add-toc').style.display = isAdmin ? 'block' : 'none';
+            const btnClearChat = document.getElementById('btn-clear-chat');
+            if (btnClearChat) {
+                if (isAdmin) btnClearChat.classList.remove('hidden');
+                else btnClearChat.classList.add('hidden');
+            }
             if(document.getElementById('page-toc').classList.contains('active')) renderToc(document.getElementById('search-input').value);
         }
 
@@ -619,7 +669,7 @@
 
         function promptDeleteToc(id, e) {
             e.stopPropagation();
-            openModal({ title: 'Hapus Doa Ini Secara Permanen?', isInput: false, onConfirm: () => {
+            openModal({ title: 'Hapus Doa Ini Secara Permanen?', isInput: false, confirmText: 'Hapus', onConfirm: () => {
                 appData = appData.filter(x => x.id !== id); 
                 saveData(); 
                 showToast('Doa Berhasil Dihapus!');
@@ -904,6 +954,23 @@
         }
         editorContent.addEventListener('input', () => { if(isEditorActive) saveCurrentContent(); });
 
+        function promptEditTitle() {
+            if(!isEditorActive) return showToast("Aktifkan mode edit.");
+            const item = appData.find(x => x.id === currentActiveId); if(!item) return;
+            openModal({ title: 'Ubah Judul', isInput: true, onConfirm: (val) => {
+                if(val){ item.title = val; document.getElementById('detail-title').innerText = val; saveData(); showToast('Berhasil diubah!'); }
+            }});
+            setTimeout(() => document.getElementById('modal-input').value = item.title, 50);
+        }
+
+        function promptDeleteCurrent() {
+            openModal({ title: 'Hapus Halaman?', isInput: false, confirmText: 'Hapus', onConfirm: () => {
+                appData = appData.filter(x => x.id !== currentActiveId); saveData(); 
+                window.history.back();
+                showToast('Dihapus!');
+            }});
+        }
+
         let wakeLock = null;
         async function toggleWakeLock() {
             const btn = document.getElementById('btn-wakelock');
@@ -998,6 +1065,29 @@
             setTimeout(() => document.getElementById('modal-select').value = localStorage.getItem('ngopsinChatSound') || '1', 50);
         }
 
+        // ============ FITUR ADMIN: HAPUS SELURUH RIWAYAT CHAT ============
+        function promptClearChat() {
+            if (!isAdmin) return;
+            openModal({
+                title: 'Hapus Seluruh Riwayat Chat?',
+                isInput: false,
+                isPassword: false,
+                isSelect: false,
+                confirmText: 'Hapus',
+                onConfirm: () => {
+                    dbChatRef.remove()
+                        .then(() => {
+                            document.getElementById('chat-messages').innerHTML = '';
+                            renderedMsgKeys.clear();
+                            unreadChatCount = 0;
+                            updateChatBadge();
+                            showToast('Seluruh riwayat chat dihapus!');
+                        })
+                        .catch(() => showToast('Gagal menghapus riwayat chat.'));
+                }
+            });
+        }
+
         function handleChatImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1051,61 +1141,73 @@
             });
         }
 
-        // ============ SISTEM PEMUATAN CHAT AMAN (DIPERBAIKI) ============
+        // ============ SISTEM PEMUATAN & SINKRONISASI CHAT REAL-TIME ============
         const chatQuery = dbChatRef.limitToLast(100);
         
         chatQuery.once('value', (snapshot) => {
             snapshot.forEach(child => {
-                renderChatMessage(child.val());
+                renderedMsgKeys.add(child.key);
+                renderChatMessage(child.val(), child.key);
             });
             initialChatLoaded = true;
             setTimeout(scrollToBottomChat, 100);
             
             chatQuery.on('child_added', (newSnapshot) => {
-                // Jangan render ulang pesan lama jika Firebase memicu child_added ganda di memori lokal
-                if (!initialChatLoaded) return; 
+                if (renderedMsgKeys.has(newSnapshot.key)) return;
+                renderedMsgKeys.add(newSnapshot.key);
                 
                 const msg = newSnapshot.val();
+                renderChatMessage(msg, newSnapshot.key);
                 
-                // Mencegah duplikasi: Hanya proses pesan yang timestampnya lebih baru dari waktu load
-                const isMe = msg.name === chatName || (isAdmin && msg.isAdmin);
-                const isChatOpen = document.getElementById('page-chat').classList.contains('active');
-                
-                renderChatMessage(msg);
-                
-                if (!isMe) {
-                    if (!isChatOpen) {
-                        unreadChatCount++;
-                        updateChatBadge();
-                    }
+                if (initialChatLoaded) {
+                    const isMe = msg.name === chatName || (isAdmin && msg.isAdmin);
+                    const isChatOpen = document.getElementById('page-chat').classList.contains('active');
                     
-                    playCustomSound(); 
+                    if (!isMe) {
+                        if (!isChatOpen) {
+                            unreadChatCount++;
+                            updateChatBadge();
+                        }
+                        
+                        playCustomSound(); 
 
-                    if ('Notification' in window && Notification.permission === 'granted') {
-                        const safeName = (msg.name || 'Anonim').replace(/</g, "<").replace(/>/g, ">");
-                        const safeText = (msg.text || '').replace(/</g, "<").replace(/>/g, ">");
-                        let notifBody = msg.image ? "📷 Mengirim foto" : safeText;
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            const safeName = (msg.name || 'Anonim').replace(/</g, "<").replace(/>/g, ">");
+                            const safeText = (msg.text || '').replace(/</g, "<").replace(/>/g, ">");
+                            let notifBody = msg.image ? "📷 Mengirim foto" : safeText;
 
-                        try {
-                            if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-                                navigator.serviceWorker.ready.then(reg => {
-                                    reg.showNotification("💬 " + safeName, { 
-                                        body: notifBody, 
-                                        icon: './icon-192.png', 
-                                        badge: './icon-192.png', 
-                                        tag: 'chat-buku-saku',
-                                        renotify: true,
-                                        silent: false,
-                                        vibrate: [200, 100, 200]
+                            try {
+                                if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+                                    navigator.serviceWorker.ready.then(reg => {
+                                        reg.showNotification("💬 " + safeName, { 
+                                            body: notifBody, 
+                                            icon: './icon-192.png', 
+                                            badge: './icon-192.png', 
+                                            tag: 'chat-buku-saku',
+                                            renotify: true,
+                                            silent: false,
+                                            vibrate: [200, 100, 200]
+                                        });
                                     });
-                                });
-                            } else {
-                                new Notification("💬 " + safeName, { body: notifBody, icon: './icon-192.png' });
-                            }
-                        } catch (e) {}
+                                } else {
+                                    new Notification("💬 " + safeName, { body: notifBody, icon: './icon-192.png' });
+                                }
+                            } catch (e) {}
+                        }
                     }
                 }
             });
+        });
+
+        // Sinkronisasi penghapusan chat ke semua pengguna yang sedang aktif
+        dbChatRef.on('child_removed', (oldSnapshot) => {
+            renderedMsgKeys.delete(oldSnapshot.key);
+            const msgEl = document.getElementById('chat-msg-' + oldSnapshot.key);
+            if (msgEl) msgEl.remove();
+            if (renderedMsgKeys.size === 0) {
+                unreadChatCount = 0;
+                updateChatBadge();
+            }
         });
 
         function openChat() {
@@ -1118,6 +1220,7 @@
             } else {
                 if(isAdmin && !chatName) chatName = "Admin";
                 navigateTo('page-chat');
+                updateAdminUI();
                 
                 unreadChatCount = 0;
                 updateChatBadge();
@@ -1146,7 +1249,7 @@
             setTimeout(() => document.getElementById('modal-input').value = chatName || '', 50);
         }
 
-        function renderChatMessage(msg) {
+        function renderChatMessage(msg, key) {
             const isMe = msg.name === chatName || (isAdmin && msg.isAdmin);
             const bubbleAlign = isMe ? 'justify-end' : 'justify-start';
             const bubbleColor = isMe ? 'bg-gold-500 text-black' : 'bg-black/50 border border-gold-500/30 text-slate-200';
@@ -1167,7 +1270,7 @@
             }
 
             const html = `
-                <div class="flex w-full ${bubbleAlign}">
+                <div id="chat-msg-${key || ''}" class="flex w-full ${bubbleAlign}">
                     <div class="max-w-[80%] flex flex-col">
                         <span class="text-[10px] ${isMe ? 'text-right text-gold-500/70' : 'text-left text-slate-400'} mb-1 px-1">${safeName} ${adminBadge}</span>
                         <div class="${bubbleColor} px-3 py-2 rounded-2xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'} shadow-md">
