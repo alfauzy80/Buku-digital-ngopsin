@@ -130,7 +130,6 @@
             </div>
         </div>
 
-        <!-- IMAGE VIEWER MODAL (BARU) -->
         <div id="image-modal" class="fixed inset-0 bg-black/95 z-[3000] hidden flex-col items-center justify-center p-2 backdrop-blur-md transition-opacity" onclick="closeImageModal()">
             <button class="absolute top-6 right-6 text-slate-300 hover:text-white text-3xl"><i class="fas fa-times"></i></button>
             <img id="image-modal-img" src="" class="max-w-full max-h-full object-contain rounded-xl border border-gold-500/30 shadow-[0_0_30px_rgba(234,179,8,0.2)]">
@@ -304,17 +303,17 @@
                 </div>
             </div>
 
-            <!-- AREA INPUT CHAT DENGAN TOMBOL KAMERA (FOTO) -->
-            <div class="flex-none bg-royal-dark border-t border-gold-500/30 p-3 flex gap-2 items-center z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.5)]">
+            <!-- AREA INPUT CHAT DENGAN TOMBOL KAMERA (PERBAIKAN PADDING) -->
+            <div class="flex-none bg-royal-dark border-t border-gold-500/30 px-2 py-3 flex gap-2 items-center z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.5)]">
                 
-                <!-- Input File Tersembunyi (Bisa dari Galeri / Kamera) -->
-                <input type="file" id="chat-image-input" accept="image/*" class="hidden" onchange="handleChatImageUpload(event)">
+                <!-- Input File dengan capture="environment" untuk akses kamera langsung -->
+                <input type="file" id="chat-image-input" accept="image/*" capture="environment" class="hidden" onchange="handleChatImageUpload(event)">
                 
                 <button onclick="document.getElementById('chat-image-input').click()" class="text-gold-500 hover:text-gold-400 p-2 transition-colors flex-shrink-0" title="Kirim Foto">
                     <i class="fas fa-camera text-lg"></i>
                 </button>
 
-                <input type="text" id="chat-input" placeholder="Ketik pesan..." class="flex-grow bg-black/50 border border-gold-500/50 rounded-full px-4 py-2.5 text-white text-sm outline-none focus:border-gold-400" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                <input type="text" id="chat-input" placeholder="Ketik pesan..." class="flex-grow bg-black/50 border border-gold-500/50 rounded-full px-3 py-2.5 text-white text-sm outline-none focus:border-gold-400 min-w-0" onkeypress="if(event.key === 'Enter') sendChatMessage()">
                 
                 <button onclick="sendChatMessage()" class="bg-gold-500 text-black w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-md active:scale-95 transition-transform">
                     <i class="fas fa-paper-plane"></i>
@@ -1007,7 +1006,7 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 600; // Dikompres menjadi 600px agar database aman & ringan
+                    const MAX_WIDTH = 600; 
                     let width = img.width;
                     let height = img.height;
                     
@@ -1021,14 +1020,13 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // Convert ke Base64 dengan kompresi JPG 70%
                     const base64Data = canvas.toDataURL('image/jpeg', 0.7);
                     sendChatImage(base64Data);
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
-            event.target.value = ''; // Reset input agar bisa pilih foto yang sama lagi
+            event.target.value = ''; 
         }
 
         function sendChatImage(base64Image) {
@@ -1042,7 +1040,7 @@
 
             dbChatRef.push({
                 name: chatName || (isAdmin ? 'Admin' : 'Anonim'),
-                text: '', // Kosongkan teks karena hanya kirim foto
+                text: '', 
                 image: base64Image,
                 time: timeString,
                 isAdmin: isAdmin,
@@ -1050,8 +1048,6 @@
             });
         }
 
-
-        // Listener Pesan Masuk
         dbChatRef.limitToLast(100).on('child_added', (snapshot) => {
             const msg = snapshot.val();
             renderChatMessage(msg);
@@ -1072,7 +1068,6 @@
                         const safeName = (msg.name || 'Anonim').replace(/</g, "<").replace(/>/g, ">");
                         const safeText = (msg.text || '').replace(/</g, "<").replace(/>/g, ">");
                         
-                        // Cek apakah chat tersebut berupa teks biasa atau gambar
                         let notifBody = msg.image ? "📷 Mengirim foto" : safeText;
 
                         try {
@@ -1147,7 +1142,6 @@
 
             const safeName = (msg.name || 'Anonim').replace(/</g, "<").replace(/>/g, ">");
             
-            // Format Konten Obrolan (Foto atau Teks)
             let messageContent = '';
             if (msg.image) {
                 messageContent = `<img src="${msg.image}" class="rounded-lg w-full max-w-[200px] max-h-[250px] object-cover mb-1 cursor-pointer shadow-sm border border-gold-500/30" onclick="openImageModal('${msg.image}')" alt="Foto">`;
