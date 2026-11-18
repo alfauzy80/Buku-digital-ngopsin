@@ -6,10 +6,10 @@
     <title>Buku Saku Digital - Premium Edition</title>
     
     <meta name="theme-color" content="#022c22">
-    <!-- Diarahkan ke ikon full color yang baru -->
     <link rel="apple-touch-icon" href="./icon-512.png">
     
     <link rel="preload" href="./logo.png" as="image">
+    <!-- Pemanggilan Manifest PWA (Wajib terpisah agar bisa diinstal) -->
     <link rel="manifest" href="./manifest.json">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -123,23 +123,43 @@
             <div class="flex-grow w-full flex items-center justify-center pt-8">
                 <div class="relative">
                     <div class="absolute inset-0 bg-gold-500 blur-[40px] opacity-25 rounded-full scale-110"></div>
-                    <!-- Cover tetap memakai logo.png transparan agar membulat sempurna -->
                     <img src="./logo.png" alt="Logo" class="w-44 h-44 object-cover relative z-10 rounded-full border-2 border-gold-500/50 shadow-[0_0_20px_rgba(234,179,8,0.3)]">
                 </div>
             </div>
             
             <div class="flex-none flex flex-col items-center justify-center pb-24 w-full relative z-20 text-center">
-                <h1 class="text-5xl font-serif font-bold text-gold-400 mb-4 tracking-wide drop-shadow-md">Buku Saku</h1>
+                
+                <!-- Judul Editable -->
+                <div class="relative flex items-center justify-center mb-4">
+                    <h1 id="cover-title" class="text-5xl font-serif font-bold text-gold-400 tracking-wide drop-shadow-md">Buku Saku</h1>
+                    <button onclick="editCoverData('title')" class="cover-edit-icon hidden absolute -right-8 top-1 bg-royal-dark border border-gold-500/50 w-7 h-7 rounded-full shadow-md items-center justify-center text-gold-500 hover:bg-gold-500 hover:text-black">
+                        <i class="fas fa-pen text-[10px]"></i>
+                    </button>
+                </div>
+
                 <div class="flex items-center gap-3 mb-4">
                     <div class="h-px w-12 bg-gradient-to-r from-transparent to-gold-500"></div>
                     <i class="fas fa-gem text-gold-500 text-[10px]"></i>
                     <div class="h-px w-12 bg-gradient-to-l from-transparent to-gold-500"></div>
                 </div>
-                <h2 class="text-xs text-slate-300 tracking-[0.2em] uppercase mb-12">Ngopsin Mabu Park</h2>
                 
-                <button onclick="navigateTo('page-toc')" class="border border-gold-500 text-gold-400 font-serif italic py-3 px-10 rounded-full hover:bg-gold-500 hover:text-black transition-colors flex items-center gap-3 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
-                    Buka Kitab <i class="fas fa-book-open text-sm"></i>
-                </button>
+                <!-- Subjudul Editable -->
+                <div class="relative flex items-center justify-center mb-12">
+                    <h2 id="cover-subtitle" class="text-xs text-slate-300 tracking-[0.2em] uppercase">Ngopsin Mabu Park</h2>
+                    <button onclick="editCoverData('subtitle')" class="cover-edit-icon hidden absolute -right-8 -top-1.5 bg-royal-dark border border-gold-500/50 w-6 h-6 rounded-full shadow-md items-center justify-center text-gold-500 hover:bg-gold-500 hover:text-black">
+                        <i class="fas fa-pen text-[10px]"></i>
+                    </button>
+                </div>
+                
+                <!-- Tombol Editable -->
+                <div class="relative">
+                    <button onclick="navigateTo('page-toc')" class="border border-gold-500 text-gold-400 font-serif italic py-3 px-10 rounded-full hover:bg-gold-500 hover:text-black transition-colors flex items-center gap-3 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+                        <span id="cover-btnText">Buka Kitab</span> <i class="fas fa-book-open text-sm"></i>
+                    </button>
+                    <button onclick="editCoverData('btnText')" class="cover-edit-icon hidden absolute -top-3 -right-3 bg-royal-dark border border-gold-500 w-8 h-8 rounded-full shadow-md items-center justify-center text-gold-500 hover:bg-gold-500 hover:text-black">
+                        <i class="fas fa-pen text-xs"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="absolute bottom-8 w-full text-center z-20 left-0">
@@ -156,10 +176,17 @@
                 <h1 class="font-serif font-bold text-gold-400 tracking-widest">DAFTAR ISI</h1>
                 <div class="w-6"></div>
             </div>
-            <div class="content-scroll">
-                <div class="flex justify-end mb-6">
-                    <button id="btn-add-toc" onclick="promptNewToc()" class="hidden bg-gold-500 text-black font-bold rounded-full px-4 py-1.5 shadow-md text-sm"><i class="fas fa-plus mr-1"></i>Tambah</button>
+            <div class="content-scroll p-6 pb-20">
+                
+                <!-- KOLOM PENCARIAN & TOMBOL TAMBAH -->
+                <div class="flex gap-3 mb-6 items-center w-full">
+                    <div class="relative flex-grow">
+                        <input type="text" id="search-input" oninput="handleSearch(event)" placeholder="Cari judul..." class="w-full bg-black/40 border border-gold-500/30 text-gold-400 text-sm rounded-full px-4 py-2.5 outline-none focus:border-gold-500 transition-colors">
+                        <i class="fas fa-search absolute right-4 top-3 text-gold-500/50 text-sm"></i>
+                    </div>
+                    <button id="btn-add-toc" onclick="promptNewToc()" class="hidden bg-gold-500 text-black font-bold rounded-full px-4 py-2.5 shadow-md text-sm whitespace-nowrap"><i class="fas fa-plus mr-1"></i>Tambah</button>
                 </div>
+
                 <div id="toc-container" class="space-y-3">
                     <div class="text-center text-gold-500 py-10 font-serif animate-pulse">Memuat...</div>
                 </div>
@@ -226,7 +253,6 @@
                 </div>
             </div>
 
-            <!-- AREA TEKS MURNI -->
             <div class="content-scroll" id="scroll-container">
                 <div id="detail-content" class="editor-box text-xl font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
             </div>
@@ -235,15 +261,17 @@
     </div>
 
     <script>
-        // ============ SISTEM FIREBASE ============
+        // ============ SISTEM FIREBASE & DATA ============
         const firebaseConfig = { apiKey: "AIzaSyA40Q6eOPK5vKAq-q9w6OhoCTtanb6GlHI", authDomain: "buku-digital-ngopsin.firebaseapp.com", databaseURL: "https://buku-digital-ngopsin-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "buku-digital-ngopsin", storageBucket: "buku-digital-ngopsin.firebasestorage.app", messagingSenderId: "80687588401", appId: "1:80687588401:web:5bcfcbb2a3398556b16110" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const dbRef = database.ref('bukuSakuData');
+        const dbCoverRef = database.ref('bukuSakuCover'); // Database khusus Cover
 
         let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
         let savedRange = null;
 
+        // Menyinkronkan Data Daftar Isi & Doa
         dbRef.on('value', (snapshot) => {
             const data = snapshot.val();
             appData = data ? (Array.isArray(data) ? data.filter(i=>i) : Object.values(data).filter(i=>i)) : [];
@@ -253,6 +281,19 @@
             }
             if (document.getElementById('page-toc').classList.contains('active')) renderToc();
             if (document.getElementById('page-detail').classList.contains('active') && !isEditorActive && currentActiveId) openDetail(currentActiveId);
+        });
+
+        // Menyinkronkan Data Teks Cover
+        let coverData = { title: "Buku Saku", subtitle: "Ngopsin Mabu Park", btnText: "Buka Kitab" };
+        dbCoverRef.on('value', (snapshot) => {
+            if(snapshot.exists()) {
+                coverData = snapshot.val();
+                document.getElementById('cover-title').innerText = coverData.title;
+                document.getElementById('cover-subtitle').innerText = coverData.subtitle;
+                document.getElementById('cover-btnText').innerText = coverData.btnText;
+            } else {
+                dbCoverRef.set(coverData);
+            }
         });
 
         // ============ HISTORY API ============
@@ -347,17 +388,39 @@
         }
         document.getElementById('btn-modal-confirm').addEventListener('click', () => { if(modalCallback) modalCallback(document.getElementById('modal-input').value); closeModal(); });
 
+        function updateAdminUI() {
+            document.querySelectorAll('.cover-edit-icon').forEach(el => {
+                if (isAdmin) { el.classList.remove('hidden'); el.classList.add('flex'); } 
+                else { el.classList.add('hidden'); el.classList.remove('flex'); }
+            });
+            if(document.getElementById('page-toc').classList.contains('active')) renderToc();
+        }
+
         function promptAdminLogin() {
             if(isAdmin) {
                 isAdmin = false; showToast("Admin Logout.");
-                document.getElementById('admin-icon').className = 'fas fa-lock text-sm'; document.getElementById('admin-icon').parentElement.classList.replace('text-gold-500', 'text-slate-600'); return;
+                document.getElementById('admin-icon').className = 'fas fa-lock text-sm'; document.getElementById('admin-icon').parentElement.classList.replace('text-gold-500', 'text-slate-600'); 
+                updateAdminUI(); return;
             }
             openModal({ title: 'Sandi Admin', isInput: true, isPassword: true, onConfirm: (val) => {
                 if(val === 'ngopsinoznet') {
                     isAdmin = true; showToast("Akses Terbuka!");
                     document.getElementById('admin-icon').className = 'fas fa-unlock text-sm'; document.getElementById('admin-icon').parentElement.classList.replace('text-slate-600', 'text-gold-500');
+                    updateAdminUI();
                 } else showToast("Sandi Salah!");
             }});
+        }
+
+        // FUNGSI EDIT TEKS COVER OLEH ADMIN
+        function editCoverData(field) {
+            let fieldName = field === 'title' ? 'Judul Utama' : field === 'subtitle' ? 'Subjudul' : 'Teks Tombol';
+            openModal({ title: `Ubah ${fieldName}`, isInput: true, onConfirm: (val) => {
+                if(val) {
+                    coverData[field] = val;
+                    dbCoverRef.set(coverData).then(() => showToast('Berhasil disimpan!'));
+                }
+            }});
+            setTimeout(() => document.getElementById('modal-input').value = coverData[field], 50);
         }
 
         function navigateTo(pageId, isPopState = false) {
@@ -365,29 +428,49 @@
                 document.getElementById(id).classList.remove('active'); 
             });
             document.getElementById(pageId).classList.add('active');
-            if(pageId === 'page-toc') renderToc();
+            
+            if(pageId === 'page-toc') {
+                document.getElementById('search-input').value = ''; // Reset search bar
+                renderToc();
+            }
 
             if (!isPopState) {
                 window.history.pushState({ page: pageId }, "", "");
             }
         }
 
-        function renderToc() {
+        // FUNGSI SEARCH DI DAFTAR ISI
+        function handleSearch(e) { renderToc(e.target.value); }
+
+        function renderToc(searchQuery = '') {
             const container = document.getElementById('toc-container'); container.innerHTML = '';
             document.getElementById('btn-add-toc').style.display = isAdmin ? 'block' : 'none';
-            appData.forEach((item, index) => {
-                if(!item) return;
+            
+            // Logika Penyaringan
+            const filteredData = appData.filter(item => {
+                if(!item) return false;
+                const title = (item.title || '').toLowerCase();
+                return title.includes(searchQuery.toLowerCase());
+            });
+
+            if(filteredData.length === 0) {
+                container.innerHTML = `<div class="text-center text-slate-400 py-10 font-serif italic">Judul tidak ditemukan...</div>`;
+                return;
+            }
+
+            filteredData.forEach((item) => {
+                const originalIndex = appData.indexOf(item); // Agar nomor urut tidak berubah saat dicari
                 const btn = document.createElement('div');
                 btn.className = 'bg-royal-dark/60 border border-gold-500/20 p-4 rounded-xl shadow-md flex items-center justify-between cursor-pointer hover:bg-royal-base';
                 btn.onclick = () => openDetail(item.id);
-                btn.innerHTML = `<div class="flex items-center"><div class="w-8 h-8 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-sm mr-3 border border-gold-500/30">${index+1}</div><span class="font-serif text-slate-100">${(item.title||'').replace(/^\d+[\.\-]?\s*/, '')}</span></div><i class="fas fa-chevron-right text-gold-500/50 text-xs"></i>`;
+                btn.innerHTML = `<div class="flex items-center"><div class="w-8 h-8 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-sm mr-3 border border-gold-500/30">${originalIndex+1}</div><span class="font-serif text-slate-100">${(item.title||'').replace(/^\d+[\.\-]?\s*/, '')}</span></div><i class="fas fa-chevron-right text-gold-500/50 text-xs"></i>`;
                 container.appendChild(btn);
             });
         }
 
         function promptNewToc() {
             openModal({ title: 'Tambah Doa', isInput: true, onConfirm: (val) => {
-                if(val) { appData.push({ id: Date.now(), title: val, content: '<div style="text-align:center;">Ketik di sini...</div>' }); saveData(); showToast('Ditambahkan!'); }
+                if(val) { appData.push({ id: Date.now(), title: val, content: '<div style="text-align:center;">Ketik di sini...</div>' }); saveData(); showToast('Ditambahkan!'); renderToc(); }
             }});
         }
 
