@@ -6,11 +6,9 @@
     <title>Buku Saku Digital - Premium Edition</title>
     
     <meta name="theme-color" content="#022c22">
-    <!-- Diarahkan ke ikon full color yang baru -->
     <link rel="apple-touch-icon" href="./icon-512.png">
     
     <link rel="preload" href="./logo.png" as="image">
-    <!-- PEMANGGILAN MANIFEST YANG STANDAR & AMAN UNTUK INSTALLER -->
     <link rel="manifest" href="./manifest.json">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -130,7 +128,6 @@
             
             <div class="flex-none flex flex-col items-center justify-center pb-24 w-full relative z-20 text-center">
                 
-                <!-- Judul Editable -->
                 <div class="relative flex items-center justify-center mb-4">
                     <h1 id="cover-title" class="text-5xl font-serif font-bold text-gold-400 tracking-wide drop-shadow-md">Buku Saku</h1>
                     <button onclick="editCoverData('title')" class="cover-edit-icon hidden absolute -right-8 top-1 bg-royal-dark border border-gold-500/50 w-7 h-7 rounded-full shadow-md items-center justify-center text-gold-500 hover:bg-gold-500 hover:text-black">
@@ -144,7 +141,6 @@
                     <div class="h-px w-12 bg-gradient-to-l from-transparent to-gold-500"></div>
                 </div>
                 
-                <!-- Subjudul Editable -->
                 <div class="relative flex items-center justify-center mb-12">
                     <h2 id="cover-subtitle" class="text-xs text-slate-300 tracking-[0.2em] uppercase">Ngopsin Mabu Park</h2>
                     <button onclick="editCoverData('subtitle')" class="cover-edit-icon hidden absolute -right-8 -top-1.5 bg-royal-dark border border-gold-500/50 w-6 h-6 rounded-full shadow-md items-center justify-center text-gold-500 hover:bg-gold-500 hover:text-black">
@@ -152,7 +148,6 @@
                     </button>
                 </div>
                 
-                <!-- Tombol Editable -->
                 <div class="relative">
                     <button onclick="navigateTo('page-toc')" class="border border-gold-500 text-gold-400 font-serif italic py-3 px-10 rounded-full hover:bg-gold-500 hover:text-black transition-colors flex items-center gap-3 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
                         <span id="cover-btnText">Buka Kitab</span> <i class="fas fa-book-open text-sm"></i>
@@ -179,7 +174,6 @@
             </div>
             <div class="content-scroll p-6 pb-20">
                 
-                <!-- KOLOM PENCARIAN & TOMBOL TAMBAH -->
                 <div class="flex gap-3 mb-6 items-center w-full">
                     <div class="relative flex-grow">
                         <input type="text" id="search-input" oninput="handleSearch(event)" placeholder="Cari judul..." class="w-full bg-black/40 border border-gold-500/30 text-gold-400 text-sm rounded-full px-4 py-2.5 outline-none focus:border-gold-500 transition-colors">
@@ -254,7 +248,6 @@
                 </div>
             </div>
 
-            <!-- AREA TEKS MURNI -->
             <div class="content-scroll" id="scroll-container">
                 <div id="detail-content" class="editor-box text-xl font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
             </div>
@@ -263,7 +256,6 @@
     </div>
 
     <script>
-        // ============ SISTEM FIREBASE & DATA ============
         const firebaseConfig = { apiKey: "AIzaSyA40Q6eOPK5vKAq-q9w6OhoCTtanb6GlHI", authDomain: "buku-digital-ngopsin.firebaseapp.com", databaseURL: "https://buku-digital-ngopsin-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "buku-digital-ngopsin", storageBucket: "buku-digital-ngopsin.firebasestorage.app", messagingSenderId: "80687588401", appId: "1:80687588401:web:5bcfcbb2a3398556b16110" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -284,7 +276,6 @@
             if (document.getElementById('page-detail').classList.contains('active') && !isEditorActive && currentActiveId) openDetail(currentActiveId);
         });
 
-        // Cover Firebase Sync
         let coverData = { title: "Buku Saku", subtitle: "Ngopsin Mabu Park", btnText: "Buka Kitab" };
         dbCoverRef.on('value', (snapshot) => {
             if(snapshot.exists()) {
@@ -297,7 +288,6 @@
             }
         });
 
-        // ============ HISTORY API ============
         window.history.replaceState({ page: 'page-cover' }, "", "");
         let lastBackPressTime = 0;
 
@@ -308,7 +298,7 @@
             } else {
                 const currentTime = new Date().getTime();
                 if (currentTime - lastBackPressTime < 2000) {
-                    // Keluar aplikasi normal
+                    // Keluar
                 } else {
                     showToast("Tekan sekali lagi untuk keluar");
                     lastBackPressTime = currentTime;
@@ -317,7 +307,6 @@
             }
         });
 
-        // ============ PWA AUTO-INSTALL ============
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -360,7 +349,6 @@
             });
         }
 
-        // ============ SISTEM UI & FUNGSI BARU ============
         function saveData() { dbRef.set(appData).catch(() => showToast("Gagal menyimpan.")); }
         
         function showToast(msg) {
@@ -439,17 +427,17 @@
             }
         }
 
-        // FUNGSI SEARCH DI DAFTAR ISI
         function handleSearch(e) { renderToc(e.target.value); }
 
-        // FUNGSI RENDER DAFTAR ISI (DENGAN TOMBOL HIDE & DELETE UNTUK ADMIN)
+        // ============================================
+        // PERBAIKAN: PENOMORAN DINAMIS & BERURUTAN
+        // ============================================
         function renderToc(searchQuery = '') {
             const container = document.getElementById('toc-container'); container.innerHTML = '';
             document.getElementById('btn-add-toc').style.display = isAdmin ? 'block' : 'none';
             
             const filteredData = appData.filter(item => {
                 if(!item) return false;
-                // Jika bukan admin dan item disembunyikan, hilangkan dari daftar
                 if(!isAdmin && item.hidden) return false; 
                 
                 const title = (item.title || '').toLowerCase();
@@ -461,21 +449,23 @@
                 return;
             }
 
+            let validCounter = 1; // Penghitung dinamis
+
             filteredData.forEach((item) => {
-                const originalIndex = appData.indexOf(item);
+                // Admin melihat strip (-) untuk doa tersembunyi, sedangkan doa aktif dihitung berurutan
+                let displayNum = (isAdmin && item.hidden) ? '-' : validCounter++;
+                
                 const btn = document.createElement('div');
                 btn.className = 'bg-royal-dark/60 border border-gold-500/20 p-4 rounded-xl shadow-md flex items-center justify-between hover:bg-royal-base transition-colors';
                 
-                // Bagian Kiri (Nomor dan Judul yang bisa diklik)
                 let titleClass = item.hidden ? 'text-slate-500 italic line-through' : 'text-slate-100';
                 let titleHTML = `
                     <div class="flex items-center flex-grow cursor-pointer" onclick="openDetail(${item.id})">
-                        <div class="w-8 h-8 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-sm mr-3 border border-gold-500/30 flex-shrink-0">${originalIndex+1}</div>
+                        <div class="w-8 h-8 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-sm mr-3 border border-gold-500/30 flex-shrink-0">${displayNum}</div>
                         <span class="font-serif ${titleClass}">${(item.title||'').replace(/^\d+[\.\-]?\s*/, '')}</span>
                     </div>
                 `;
 
-                // Bagian Kanan (Tombol Aksi Khusus Admin atau Panah)
                 let actionHTML = '';
                 if (isAdmin) {
                     let eyeIcon = item.hidden ? 'fa-eye-slash text-slate-500' : 'fa-eye text-gold-500/80 hover:text-gold-400';
@@ -498,7 +488,6 @@
             });
         }
 
-        // Fungsi Admin Toggles (Hide/Unhide)
         function toggleVisibility(id, e) {
             e.stopPropagation();
             const item = appData.find(x => x.id === id);
@@ -510,7 +499,6 @@
             }
         }
 
-        // Fungsi Admin Hapus dari Daftar Isi
         function promptDeleteToc(id, e) {
             e.stopPropagation();
             openModal({ title: 'Hapus Doa Ini Secara Permanen?', isInput: false, onConfirm: () => {
@@ -563,9 +551,6 @@
             }
         }
 
-        // ============================================
-        // HACKS: ANTI LOMPAT & MEMORI SELEKSI TEKS
-        // ============================================
         const editorContent = document.getElementById('detail-content');
 
         function updateFontSizeDisplay() {
@@ -691,7 +676,6 @@
             saveCurrentContent();
         }
 
-        // ============ FITUR BACA ===========
         function changeGlobalFontSize(step) {
             baseFontSize += step; 
             if(baseFontSize < 14) baseFontSize = 14; 
