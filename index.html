@@ -53,6 +53,7 @@
             display: none; 
             flex-direction: column;
             width: 100%; height: 100%;
+            position: relative;
         }
         .page.active { display: flex; }
 
@@ -71,6 +72,7 @@
             -webkit-overflow-scrolling: touch; 
             padding: 1.5rem; 
             padding-bottom: 20vh; 
+            scroll-behavior: smooth;
         }
 
         .editor-box { outline: none; min-height: 100%; }
@@ -127,7 +129,6 @@
             </div>
             
             <div class="flex-none flex flex-col items-center justify-center pb-24 w-full relative z-20 text-center">
-                
                 <div class="relative flex items-center justify-center mb-4">
                     <h1 id="cover-title" class="text-5xl font-serif font-bold text-gold-400 tracking-wide drop-shadow-md">Buku Saku</h1>
                     <button onclick="editCoverData('title')" class="cover-edit-icon hidden absolute -right-8 top-1 bg-royal-dark border border-gold-500/50 w-7 h-7 rounded-full shadow-md items-center justify-center text-gold-500 hover:bg-gold-500 hover:text-black">
@@ -179,6 +180,9 @@
                         <input type="text" id="search-input" oninput="handleSearch(event)" placeholder="Cari judul..." class="w-full bg-black/40 border border-gold-500/30 text-gold-400 text-sm rounded-full px-4 py-2.5 outline-none focus:border-gold-500 transition-colors">
                         <i class="fas fa-search absolute right-4 top-3 text-gold-500/50 text-sm"></i>
                     </div>
+                    <!-- Tombol Susun Urutan (Bisa digunakan User & Admin) -->
+                    <button id="btn-reorder-mode" onclick="toggleReorderMode()" class="bg-royal-dark text-gold-500 border border-gold-500/50 rounded-full px-4 py-2.5 shadow-md text-sm whitespace-nowrap transition-colors"><i class="fas fa-sort mr-1"></i>Susun</button>
+                    <!-- Tombol Tambah (Hanya Admin) -->
                     <button id="btn-add-toc" onclick="promptNewToc()" class="hidden bg-gold-500 text-black font-bold rounded-full px-4 py-2.5 shadow-md text-sm whitespace-nowrap"><i class="fas fa-plus mr-1"></i>Tambah</button>
                 </div>
 
@@ -198,10 +202,17 @@
                     <button id="btn-edit-mode" onclick="toggleEditor()" class="text-slate-500 hidden px-2"><i id="edit-icon" class="fas fa-pen"></i></button>
                 </div>
 
+                <!-- MENU BACA (Ditambahkan Tombol Favorit & Share) -->
                 <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar items-center bg-black/20">
                     <button onclick="changeGlobalFontSize(-2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
                     <button onclick="changeGlobalFontSize(2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
+                    
+                    <!-- Fitur Baru: Favorit & Share -->
+                    <button onclick="toggleFavoriteCurrent()" id="btn-favorite" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="far fa-heart text-gold-500"></i> Favorit</button>
+                    <button onclick="shareCurrentDoa()" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-share-nodes text-gold-500"></i> Share</button>
+                    <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
+                    
                     <button onclick="toggleWakeLock()" id="btn-wakelock" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-lightbulb text-gold-500"></i> Layar</button>
                     <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-angle-double-down text-gold-500"></i> Scroll</button>
                 </div>
@@ -248,9 +259,13 @@
                 </div>
             </div>
 
-            <div class="content-scroll" id="scroll-container">
+            <!-- AREA TEKS MURNI -->
+            <div class="content-scroll relative" id="scroll-container">
                 <div id="detail-content" class="editor-box text-xl font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
             </div>
+            
+            <!-- Tombol Panah Scroll to Top -->
+            <button id="btn-scroll-top" onclick="scrollToTop()" class="hidden absolute bottom-8 right-6 bg-gold-500 text-royal-dark w-12 h-12 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.4)] items-center justify-center z-[100] hover:scale-105 transition-transform"><i class="fas fa-arrow-up text-xl"></i></button>
         </div>
 
     </div>
@@ -264,6 +279,14 @@
 
         let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
         let savedRange = null;
+
+        // ============ STATE LOKAL USER (FAVORIT & URUTAN KUSTOM) ============
+        let userFavorites = JSON.parse(localStorage.getItem('ngopsinFavorites')) || [];
+        let userCustomOrder = JSON.parse(localStorage.getItem('ngopsinOrder')) || [];
+        let isReorderMode = false;
+
+        function saveFavorites() { localStorage.setItem('ngopsinFavorites', JSON.stringify(userFavorites)); }
+        function saveCustomOrder() { localStorage.setItem('ngopsinOrder', JSON.stringify(userCustomOrder)); }
 
         dbRef.on('value', (snapshot) => {
             const data = snapshot.val();
@@ -307,48 +330,6 @@
             }
         });
 
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const installBanner = document.getElementById('install-banner');
-            installBanner.classList.remove('hidden');
-            installBanner.classList.add('flex');
-        });
-
-        document.getElementById('btn-install').addEventListener('click', async () => {
-            const installBanner = document.getElementById('install-banner');
-            installBanner.classList.replace('flex', 'hidden');
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                await deferredPrompt.userChoice;
-                deferredPrompt = null;
-            }
-        });
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then((registration) => {
-                    registration.update();
-                    registration.addEventListener('updatefound', () => {
-                        const newWorker = registration.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                showToast("Pembaruan Tersedia! Memuat ulang...");
-                                setTimeout(() => window.location.reload(), 2000);
-                            }
-                        });
-                    });
-                }).catch(()=>{});
-            });
-            let refreshing;
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (refreshing) return;
-                refreshing = true;
-                window.location.reload();
-            });
-        }
-
         function saveData() { dbRef.set(appData).catch(() => showToast("Gagal menyimpan.")); }
         
         function showToast(msg) {
@@ -382,6 +363,7 @@
                 if (isAdmin) { el.classList.remove('hidden'); el.classList.add('flex'); } 
                 else { el.classList.add('hidden'); el.classList.remove('flex'); }
             });
+            document.getElementById('btn-add-toc').style.display = isAdmin ? 'block' : 'none';
             if(document.getElementById('page-toc').classList.contains('active')) renderToc(document.getElementById('search-input').value);
         }
 
@@ -419,6 +401,9 @@
             
             if(pageId === 'page-toc') {
                 document.getElementById('search-input').value = ''; 
+                isReorderMode = false;
+                document.getElementById('btn-reorder-mode').classList.replace('bg-gold-500', 'bg-royal-dark');
+                document.getElementById('btn-reorder-mode').classList.replace('text-black', 'text-gold-500');
                 renderToc();
             }
 
@@ -429,17 +414,60 @@
 
         function handleSearch(e) { renderToc(e.target.value); }
 
-        // ============================================
-        // PERBAIKAN: PENOMORAN DINAMIS & BERURUTAN
-        // ============================================
+        // ============ FITUR USER: MODE SUSUN URUTAN ============
+        function toggleReorderMode() {
+            isReorderMode = !isReorderMode;
+            const btn = document.getElementById('btn-reorder-mode');
+            if(isReorderMode) {
+                btn.classList.replace('bg-royal-dark', 'bg-gold-500');
+                btn.classList.replace('text-gold-500', 'text-black');
+                showToast("Mode Susun Aktif");
+            } else {
+                btn.classList.replace('bg-gold-500', 'bg-royal-dark');
+                btn.classList.replace('text-black', 'text-gold-500');
+            }
+            renderToc(document.getElementById('search-input').value);
+        }
+
+        function moveItem(id, direction, e) {
+            e.stopPropagation();
+            
+            // Sinkronkan ID baru dari Firebase ke memori lokal jika belum ada
+            appData.forEach(item => {
+                if(!userCustomOrder.includes(item.id)) userCustomOrder.push(item.id);
+            });
+
+            const index = userCustomOrder.indexOf(id);
+            if (index < 0) return;
+
+            if (direction === 'up' && index > 0) {
+                [userCustomOrder[index - 1], userCustomOrder[index]] = [userCustomOrder[index], userCustomOrder[index - 1]];
+            } else if (direction === 'down' && index < userCustomOrder.length - 1) {
+                [userCustomOrder[index + 1], userCustomOrder[index]] = [userCustomOrder[index], userCustomOrder[index + 1]];
+            }
+            
+            saveCustomOrder();
+            renderToc(document.getElementById('search-input').value);
+        }
+
         function renderToc(searchQuery = '') {
             const container = document.getElementById('toc-container'); container.innerHTML = '';
-            document.getElementById('btn-add-toc').style.display = isAdmin ? 'block' : 'none';
             
-            const filteredData = appData.filter(item => {
+            // Urutkan data berdasarkan susunan kustom lokal User
+            let sortedData = [...appData];
+            if(userCustomOrder.length > 0) {
+                sortedData.sort((a, b) => {
+                    let indexA = userCustomOrder.indexOf(a.id);
+                    let indexB = userCustomOrder.indexOf(b.id);
+                    if (indexA === -1) indexA = 999999;
+                    if (indexB === -1) indexB = 999999;
+                    return indexA - indexB;
+                });
+            }
+
+            const filteredData = sortedData.filter(item => {
                 if(!item) return false;
                 if(!isAdmin && item.hidden) return false; 
-                
                 const title = (item.title || '').toLowerCase();
                 return title.includes(searchQuery.toLowerCase());
             });
@@ -449,25 +477,38 @@
                 return;
             }
 
-            let validCounter = 1; // Penghitung dinamis
+            let validCounter = 1; 
 
             filteredData.forEach((item) => {
-                // Admin melihat strip (-) untuk doa tersembunyi, sedangkan doa aktif dihitung berurutan
                 let displayNum = (isAdmin && item.hidden) ? '-' : validCounter++;
                 
                 const btn = document.createElement('div');
                 btn.className = 'bg-royal-dark/60 border border-gold-500/20 p-4 rounded-xl shadow-md flex items-center justify-between hover:bg-royal-base transition-colors';
                 
                 let titleClass = item.hidden ? 'text-slate-500 italic line-through' : 'text-slate-100';
+                
+                // Tambahkan tanda Favorit di daftar isi
+                let favIndicator = userFavorites.includes(item.id) ? `<i class="fas fa-heart text-red-500 ml-2 text-[10px] transform -translate-y-1"></i>` : '';
+
                 let titleHTML = `
                     <div class="flex items-center flex-grow cursor-pointer" onclick="openDetail(${item.id})">
                         <div class="w-8 h-8 rounded-full bg-gold-500/10 text-gold-400 flex items-center justify-center font-bold text-sm mr-3 border border-gold-500/30 flex-shrink-0">${displayNum}</div>
-                        <span class="font-serif ${titleClass}">${(item.title||'').replace(/^\d+[\.\-]?\s*/, '')}</span>
+                        <span class="font-serif ${titleClass}">${(item.title||'').replace(/^\d+[\.\-]?\s*/, '')}</span> ${favIndicator}
                     </div>
                 `;
 
                 let actionHTML = '';
-                if (isAdmin) {
+                
+                if (isReorderMode) {
+                    // Tombol Panah Mode Susun
+                    actionHTML = `
+                        <div class="flex items-center gap-2 flex-shrink-0 ml-3">
+                            <button onclick="moveItem(${item.id}, 'up', event)" class="w-8 h-8 rounded-full bg-royal-dark text-gold-400 flex items-center justify-center border border-gold-500/30 hover:bg-gold-500 hover:text-black transition-colors"><i class="fas fa-arrow-up"></i></button>
+                            <button onclick="moveItem(${item.id}, 'down', event)" class="w-8 h-8 rounded-full bg-royal-dark text-gold-400 flex items-center justify-center border border-gold-500/30 hover:bg-gold-500 hover:text-black transition-colors"><i class="fas fa-arrow-down"></i></button>
+                        </div>
+                    `;
+                } else if (isAdmin) {
+                    // Tombol Mata dan Hapus (Admin)
                     let eyeIcon = item.hidden ? 'fa-eye-slash text-slate-500' : 'fa-eye text-gold-500/80 hover:text-gold-400';
                     actionHTML = `
                         <div class="flex items-center gap-4 flex-shrink-0 ml-3">
@@ -520,6 +561,50 @@
             }});
         }
 
+        // ============ FITUR USER: FAVORIT & SHARE ============
+        function toggleFavoriteCurrent() {
+            if(!currentActiveId) return;
+            const index = userFavorites.indexOf(currentActiveId);
+            if(index > -1) {
+                userFavorites.splice(index, 1);
+                showToast("Dihapus dari Favorit");
+            } else {
+                userFavorites.push(currentActiveId);
+                showToast("Ditambahkan ke Favorit");
+            }
+            saveFavorites();
+            updateFavoriteBtnUI();
+        }
+
+        function updateFavoriteBtnUI() {
+            const btnFav = document.getElementById('btn-favorite');
+            if(userFavorites.includes(currentActiveId)) {
+                btnFav.innerHTML = '<i class="fas fa-heart text-red-500"></i> <span class="text-slate-300">Favorit</span>';
+                btnFav.classList.add('border-red-500/50');
+            } else {
+                btnFav.innerHTML = '<i class="far fa-heart text-gold-500"></i> <span class="text-slate-300">Favorit</span>';
+                btnFav.classList.remove('border-red-500/50');
+            }
+        }
+
+        function shareCurrentDoa() {
+            const item = appData.find(x => x.id === currentActiveId);
+            if(!item) return;
+            let cleanTitle = (item.title||'').replace(/^\d+[\.\-]?\s*/, '');
+            let shareText = `Baca ${cleanTitle} di Buku Saku Digital Ngopsin.`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: cleanTitle,
+                    text: shareText,
+                    url: window.location.href
+                }).catch(err => console.log('Share error:', err));
+            } else {
+                navigator.clipboard.writeText(shareText + " " + window.location.href);
+                showToast("Teks & Link disalin!");
+            }
+        }
+
         function openDetail(id) {
             currentActiveId = id; const item = appData.find(x => x.id === id); if(!item) return;
             document.getElementById('detail-title').innerText = (item.title||'').replace(/^\d+[\.\-]?\s*/, '');
@@ -533,9 +618,32 @@
             document.getElementById('edit-icon').className = 'fas fa-pen';
             document.getElementById('btn-edit-mode').classList.replace('text-gold-400', 'text-slate-500');
             contentEl.setAttribute('contenteditable', 'false');
+            updateFavoriteBtnUI(); // Perbarui Ikon Hati sesuai ID yang dibuka
             navigateTo('page-detail');
         }
 
+        // ============ FITUR USER: SCROLL TO TOP 80% ============
+        const scrollContainer = document.getElementById('scroll-container');
+        const btnScrollTop = document.getElementById('btn-scroll-top');
+
+        scrollContainer.addEventListener('scroll', function() {
+            const scrollPercent = (this.scrollTop / (this.scrollHeight - this.clientHeight)) * 100;
+            // Tampilkan panah jika kontennya panjang dan sudah di-scroll melewati 80%
+            if (this.scrollHeight > this.clientHeight && scrollPercent > 80) {
+                btnScrollTop.classList.remove('hidden');
+                btnScrollTop.classList.add('flex');
+            } else {
+                btnScrollTop.classList.remove('flex');
+                btnScrollTop.classList.add('hidden');
+            }
+        });
+
+        function scrollToTop() {
+            scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+
+        // ============ EDITOR HACKS: ANTI LOMPAT & MEMORI ============
         function toggleEditor() {
             isEditorActive = !isEditorActive;
             const rBar = document.getElementById('reader-features'), aBar = document.getElementById('admin-features'), contentEl = document.getElementById('detail-content'), btnEdit = document.getElementById('btn-edit-mode'), iconEdit = document.getElementById('edit-icon');
@@ -550,8 +658,6 @@
                 contentEl.setAttribute('contenteditable', 'false'); saveCurrentContent(); showToast("Tersimpan.");
             }
         }
-
-        const editorContent = document.getElementById('detail-content');
 
         function updateFontSizeDisplay() {
             if(!savedRange || !isEditorActive) return;
@@ -708,31 +814,7 @@
             if(itemIndex > -1) { appData[itemIndex].content = editorContent.innerHTML; saveData(); }
         }
         editorContent.addEventListener('input', () => { if(isEditorActive) saveCurrentContent(); });
-
-        function promptEditTitle() {
-            if(!isEditorActive) return showToast("Aktifkan mode edit.");
-            const item = appData.find(x => x.id === currentActiveId); if(!item) return;
-            openModal({ title: 'Ubah Judul', isInput: true, onConfirm: (val) => {
-                if(val){ item.title = val; document.getElementById('detail-title').innerText = val; saveData(); showToast('Berhasil diubah!'); }
-            }});
-            setTimeout(() => document.getElementById('modal-input').value = item.title, 50);
-        }
         
-        function promptDeleteCurrent() {
-            openModal({ title: 'Hapus Halaman?', isInput: false, onConfirm: () => {
-                appData = appData.filter(x => x.id !== currentActiveId); saveData(); 
-                window.history.back();
-                showToast('Dihapus!');
-            }});
-        }
-
-        let scrollInterval, isScrolling = false;
-        function toggleAutoScroll() {
-            const btn = document.getElementById('btn-autoscroll'), container = document.querySelector('#scroll-container');
-            if (isScrolling) { clearInterval(scrollInterval); isScrolling = false; btn.classList.replace('text-gold-400', 'text-slate-300'); } 
-            else { isScrolling = true; btn.classList.replace('text-slate-300', 'text-gold-400'); scrollInterval = setInterval(() => { container.scrollBy({ top: 1, left: 0, behavior: 'auto' }); }, 50); }
-        }
-
         let wakeLock = null;
         async function toggleWakeLock() {
             const btn = document.getElementById('btn-wakelock');
