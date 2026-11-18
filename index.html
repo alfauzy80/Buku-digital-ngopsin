@@ -142,19 +142,26 @@
                     <div class="h-px w-12 bg-gradient-to-l from-transparent to-gold-500"></div>
                 </div>
                 
-                <div class="relative flex items-center justify-center mb-12">
+                <div class="relative flex items-center justify-center mb-10">
                     <h2 id="cover-subtitle" class="text-xs text-slate-300 tracking-[0.2em] uppercase">Ngopsin Mabu Park</h2>
                     <button onclick="editCoverData('subtitle')" class="cover-edit-icon hidden absolute -right-8 -top-1.5 bg-royal-dark border border-gold-500/50 w-6 h-6 rounded-full shadow-md items-center justify-center text-gold-500 hover:bg-gold-500 hover:text-black">
                         <i class="fas fa-pen text-[10px]"></i>
                     </button>
                 </div>
                 
-                <div class="relative">
-                    <button onclick="navigateTo('page-toc')" class="border border-gold-500 text-gold-400 font-serif italic py-3 px-10 rounded-full hover:bg-gold-500 hover:text-black transition-colors flex items-center gap-3 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
-                        <span id="cover-btnText">Buka Kitab</span> <i class="fas fa-book-open text-sm"></i>
-                    </button>
-                    <button onclick="editCoverData('btnText')" class="cover-edit-icon hidden absolute -top-3 -right-3 bg-royal-dark border border-gold-500 w-8 h-8 rounded-full shadow-md items-center justify-center text-gold-500 hover:bg-gold-500 hover:text-black">
-                        <i class="fas fa-pen text-xs"></i>
+                <div class="relative flex flex-col items-center gap-5">
+                    <div class="relative">
+                        <button onclick="navigateTo('page-toc')" class="border border-gold-500 text-gold-400 font-serif italic py-3 px-10 rounded-full hover:bg-gold-500 hover:text-black transition-colors flex items-center gap-3 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
+                            <span id="cover-btnText">Buka Kitab</span> <i class="fas fa-book-open text-sm"></i>
+                        </button>
+                        <button onclick="editCoverData('btnText')" class="cover-edit-icon hidden absolute -top-3 -right-3 bg-royal-dark border border-gold-500 w-8 h-8 rounded-full shadow-md items-center justify-center text-gold-500 hover:bg-gold-500 hover:text-black">
+                            <i class="fas fa-pen text-xs"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- TOMBOL FITUR CHAT BARU -->
+                    <button onclick="openChat()" class="text-gold-500/70 hover:text-gold-400 font-serif italic text-sm flex items-center gap-2 transition-colors px-4 py-2">
+                        <i class="fas fa-comments"></i> Ruang Obrolan
                     </button>
                 </div>
             </div>
@@ -255,13 +262,32 @@
                 </div>
             </div>
 
-            <!-- AREA TEKS MURNI -->
             <div class="content-scroll relative" id="scroll-container">
                 <div id="detail-content" class="editor-box text-xl font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
             </div>
             
-            <!-- Tombol Panah Scroll to Top -->
             <button id="btn-scroll-top" onclick="scrollToTop()" class="hidden absolute bottom-8 right-6 bg-gold-500 text-royal-dark w-12 h-12 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.4)] items-center justify-center z-[100] hover:scale-105 transition-transform"><i class="fas fa-arrow-up text-xl"></i></button>
+        </div>
+
+        <!-- HALAMAN 4: RUANG CHAT BARU -->
+        <div id="page-chat" class="page">
+            <div class="header-fixed p-4 flex justify-between items-center">
+                <button onclick="window.history.back()" class="text-gold-500 text-xl"><i class="fas fa-arrow-left"></i></button>
+                <h1 class="font-serif font-bold text-gold-400 tracking-widest">OBROLAN</h1>
+                <button onclick="promptChatName()" class="text-gold-500 text-sm" title="Ubah Nama"><i class="fas fa-user-edit"></i></button>
+            </div>
+            
+            <div class="content-scroll p-4 pb-24" id="chat-scroll-container">
+                <div id="chat-messages" class="flex flex-col gap-2">
+                    <!-- Gelembung Chat akan muncul di sini -->
+                </div>
+            </div>
+
+            <!-- Footer Chat Input (Fixed di Bawah) -->
+            <div class="flex-none bg-royal-dark border-t border-gold-500/30 p-3 flex gap-2 items-center z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.5)]">
+                <input type="text" id="chat-input" placeholder="Ketik pesan..." class="flex-grow bg-black/50 border border-gold-500/50 rounded-full px-4 py-2.5 text-white text-sm outline-none focus:border-gold-400" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                <button onclick="sendChatMessage()" class="bg-gold-500 text-black w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-md active:scale-95 transition-transform"><i class="fas fa-paper-plane"></i></button>
+            </div>
         </div>
 
     </div>
@@ -272,13 +298,16 @@
         const database = firebase.database();
         const dbRef = database.ref('bukuSakuData');
         const dbCoverRef = database.ref('bukuSakuCover'); 
+        const dbChatRef = database.ref('bukuSakuChat'); // Ref Baru untuk Obrolan
 
         let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
         let savedRange = null;
 
         let userFavorites = JSON.parse(localStorage.getItem('ngopsinFavorites')) || [];
         let userCustomOrder = JSON.parse(localStorage.getItem('ngopsinOrder')) || [];
+        let chatName = localStorage.getItem('ngopsinChatName') || ''; 
         let isReorderMode = false;
+        let isChatLoaded = false;
 
         function saveFavorites() { localStorage.setItem('ngopsinFavorites', JSON.stringify(userFavorites)); }
         function saveCustomOrder() { localStorage.setItem('ngopsinOrder', JSON.stringify(userCustomOrder)); }
@@ -316,7 +345,7 @@
             } else {
                 const currentTime = new Date().getTime();
                 if (currentTime - lastBackPressTime < 2000) {
-                    // Keluar
+                    // Beri izin keluar
                 } else {
                     showToast("Tekan sekali lagi untuk keluar");
                     lastBackPressTime = currentTime;
@@ -389,7 +418,7 @@
         }
 
         function navigateTo(pageId, isPopState = false) {
-            ['page-cover', 'page-toc', 'page-detail'].forEach(id => { 
+            ['page-cover', 'page-toc', 'page-detail', 'page-chat'].forEach(id => { 
                 document.getElementById(id).classList.remove('active'); 
             });
             document.getElementById(pageId).classList.add('active');
@@ -514,7 +543,6 @@
             });
         }
 
-        // ============ FUNGSI HAPUS & SEMBUNYIKAN (DIKEMBALIKAN) ============
         function toggleVisibility(id, e) {
             e.stopPropagation();
             const item = appData.find(x => x.id === id);
@@ -536,7 +564,6 @@
             }});
         }
 
-        // ============ FUNGSI TAMBAH BARU (DIKEMBALIKAN) ============
         function promptNewToc() {
             openModal({ title: 'Tambah Doa', isInput: true, onConfirm: (val) => {
                 if(val) { 
@@ -547,7 +574,6 @@
                 }
             }});
         }
-
 
         function toggleFavoriteCurrent() {
             if(!currentActiveId) return;
@@ -614,7 +640,7 @@
         const btnScrollTop = document.getElementById('btn-scroll-top');
 
         scrollContainer.addEventListener('scroll', function() {
-            // Sensor Pintar: Muncul jika layar di-scroll melebihi 80% dari TINGGI LAYAR HP (Bukan panjang teks)
+            // Panah Pintar muncul jika layar HP di-scroll ke bawah melewati 80% dari tinggi viewport layar
             if (this.scrollTop > (this.clientHeight * 0.8)) {
                 btnScrollTop.classList.remove('hidden');
                 btnScrollTop.classList.add('flex');
@@ -644,7 +670,7 @@
             }
         }
 
-        // ============ EDITOR HACKS: ANTI LOMPAT & MEMORI ============
+        // ============ EDITOR HACKS ============
         const editorContent = document.getElementById('detail-content');
 
         function toggleEditor() {
@@ -785,7 +811,7 @@
             saveCurrentContent();
         }
 
-        // ============ FUNGSI A- A+ PEMBACA (RESTORED) ============
+        // ============ FUNGSI A- A+ PEMBACA ============
         function changeGlobalFontSize(step) {
             baseFontSize += step; 
             if(baseFontSize < 14) baseFontSize = 14; 
@@ -819,23 +845,6 @@
         }
         editorContent.addEventListener('input', () => { if(isEditorActive) saveCurrentContent(); });
 
-        function promptEditTitle() {
-            if(!isEditorActive) return showToast("Aktifkan mode edit.");
-            const item = appData.find(x => x.id === currentActiveId); if(!item) return;
-            openModal({ title: 'Ubah Judul', isInput: true, onConfirm: (val) => {
-                if(val){ item.title = val; document.getElementById('detail-title').innerText = val; saveData(); showToast('Berhasil diubah!'); }
-            }});
-            setTimeout(() => document.getElementById('modal-input').value = item.title, 50);
-        }
-        
-        function promptDeleteCurrent() {
-            openModal({ title: 'Hapus Halaman?', isInput: false, onConfirm: () => {
-                appData = appData.filter(x => x.id !== currentActiveId); saveData(); 
-                window.history.back();
-                showToast('Dihapus!');
-            }});
-        }
-
         let wakeLock = null;
         async function toggleWakeLock() {
             const btn = document.getElementById('btn-wakelock');
@@ -845,6 +854,90 @@
                     else { wakeLock = await navigator.wakeLock.request('screen'); btn.classList.replace('text-slate-300', 'text-gold-400'); wakeLock.addEventListener('release', () => { wakeLock = null; btn.classList.replace('text-gold-400', 'text-slate-300'); }); }
                 } catch(e) {}
             }
+        }
+
+        // ============ FITUR CHAT REAL-TIME ============
+        function openChat() {
+            if (!chatName && !isAdmin) {
+                promptChatName();
+            } else {
+                if(isAdmin && !chatName) chatName = "Admin";
+                navigateTo('page-chat');
+                loadChat();
+            }
+        }
+
+        function promptChatName() {
+            openModal({
+                title: 'Nama Anda (Untuk Obrolan)',
+                isInput: true,
+                onConfirm: (val) => {
+                    if (val && val.trim().length > 0) {
+                        chatName = val.trim();
+                        localStorage.setItem('ngopsinChatName', chatName);
+                        showToast('Nama tersimpan!');
+                        navigateTo('page-chat');
+                        loadChat();
+                    } else {
+                        showToast('Nama tidak boleh kosong!');
+                    }
+                }
+            });
+            setTimeout(() => document.getElementById('modal-input').value = chatName || '', 50);
+        }
+
+        function loadChat() {
+            if (isChatLoaded) { scrollToBottomChat(); return; }
+            isChatLoaded = true;
+            dbChatRef.limitToLast(100).on('child_added', (snapshot) => {
+                renderChatMessage(snapshot.val());
+            });
+        }
+
+        function renderChatMessage(msg) {
+            const isMe = msg.name === chatName || (isAdmin && msg.isAdmin);
+            const bubbleAlign = isMe ? 'justify-end' : 'justify-start';
+            const bubbleColor = isMe ? 'bg-gold-500 text-black' : 'bg-black/50 border border-gold-500/30 text-slate-200';
+            const adminBadge = msg.isAdmin ? '<i class="fas fa-check-circle text-[10px] ml-1 text-gold-500" title="Admin"></i>' : '';
+
+            const html = `
+                <div class="flex w-full ${bubbleAlign}">
+                    <div class="max-w-[80%] flex flex-col">
+                        <span class="text-[10px] ${isMe ? 'text-right text-gold-500/70' : 'text-left text-slate-400'} mb-1 px-1">${msg.name} ${adminBadge}</span>
+                        <div class="${bubbleColor} px-4 py-2 rounded-2xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'} shadow-md">
+                            <p class="text-[15px] font-sans whitespace-pre-wrap break-words">${msg.text}</p>
+                        </div>
+                        <span class="text-[9px] ${isMe ? 'text-right' : 'text-left'} text-slate-500 mt-1 px-1">${msg.time}</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('chat-messages').insertAdjacentHTML('beforeend', html);
+            scrollToBottomChat();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+            dbChatRef.push({
+                name: chatName || 'Anonim',
+                text: text,
+                time: timeString,
+                isAdmin: isAdmin,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            input.value = '';
+            input.focus();
+        }
+
+        function scrollToBottomChat() {
+            const chatScroll = document.getElementById('chat-scroll-container');
+            if (chatScroll) chatScroll.scrollTo({ top: chatScroll.scrollHeight, behavior: 'smooth' });
         }
     </script>
 </body>
