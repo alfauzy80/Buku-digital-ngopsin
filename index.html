@@ -177,6 +177,7 @@
                     
                     <button onclick="openChat()" class="relative text-gold-500/70 hover:text-gold-400 font-serif italic text-sm flex items-center gap-2 transition-colors px-4 py-2 mt-1">
                         <i class="fas fa-comments"></i> Ruang Obrolan
+                        <!-- BAGE NOTIFIKASI DIKEMBALIKAN KE SINI -->
                         <span id="chat-badge" class="hidden absolute -top-1.5 -right-3 bg-red-600 text-white text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full shadow-md border border-royal-dark min-w-[20px] items-center justify-center">0</span>
                     </button>
                 </div>
@@ -303,12 +304,8 @@
                 </div>
             </div>
 
-            <!-- AREA INPUT CHAT DENGAN TOMBOL KAMERA (PERBAIKAN PADDING) -->
             <div class="flex-none bg-royal-dark border-t border-gold-500/30 px-2 py-3 flex gap-2 items-center z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.5)]">
-                
-                <!-- Input File dengan capture="environment" untuk akses kamera langsung -->
                 <input type="file" id="chat-image-input" accept="image/*" capture="environment" class="hidden" onchange="handleChatImageUpload(event)">
-                
                 <button onclick="document.getElementById('chat-image-input').click()" class="text-gold-500 hover:text-gold-400 p-2 transition-colors flex-shrink-0" title="Kirim Foto">
                     <i class="fas fa-camera text-lg"></i>
                 </button>
@@ -339,8 +336,11 @@
         let chatName = localStorage.getItem('ngopsinChatName') || ''; 
         let isReorderMode = false;
         
-        let isInitialChatLoad = true;
+        let initialChatLoaded = false;
         let unreadChatCount = 0;
+
+        // Inisialisasi AudioContext global
+        window.chatAudioCtx = null;
 
         function saveFavorites() { localStorage.setItem('ngopsinFavorites', JSON.stringify(userFavorites)); }
         function saveCustomOrder() { localStorage.setItem('ngopsinOrder', JSON.stringify(userCustomOrder)); }
@@ -435,7 +435,6 @@
             closeModal(); 
         });
 
-        // FUNGSI MODAL GAMBAR FULLSCREEN
         function openImageModal(src) {
             document.getElementById('image-modal-img').src = src;
             document.getElementById('image-modal').classList.remove('hidden');
@@ -918,6 +917,7 @@
 
         function updateChatBadge() {
             const badge = document.getElementById('chat-badge');
+            if(!badge) return;
             if (unreadChatCount > 0) {
                 badge.innerText = unreadChatCount > 99 ? '99+' : unreadChatCount;
                 badge.classList.remove('hidden');
@@ -935,7 +935,11 @@
 
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if(!AudioContext) return;
-                const ctx = new AudioContext();
+                
+                if(!window.chatAudioCtx) window.chatAudioCtx = new AudioContext();
+                const ctx = window.chatAudioCtx;
+                if(ctx.state === 'suspended') ctx.resume();
+
                 const gain = ctx.createGain();
                 gain.connect(ctx.destination);
 
@@ -994,7 +998,6 @@
             setTimeout(() => document.getElementById('modal-select').value = localStorage.getItem('ngopsinChatSound') || '1', 50);
         }
 
-        // ============ FUNGSI KOMPRESI & UPLOAD FOTO CHAT ============
         function handleChatImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1048,13 +1051,27 @@
             });
         }
 
-        dbChatRef.limitToLast(100).on('child_added', (snapshot) => {
-            const msg = snapshot.val();
-            renderChatMessage(msg);
+        // ============ SISTEM PEMUATAN CHAT AMAN (DIPERBAIKI) ============
+        const chatQuery = dbChatRef.limitToLast(100);
+        
+        chatQuery.once('value', (snapshot) => {
+            snapshot.forEach(child => {
+                renderChatMessage(child.val());
+            });
+            initialChatLoaded = true;
+            setTimeout(scrollToBottomChat, 100);
             
-            if (!isInitialChatLoad) {
+            chatQuery.on('child_added', (newSnapshot) => {
+                // Jangan render ulang pesan lama jika Firebase memicu child_added ganda di memori lokal
+                if (!initialChatLoaded) return; 
+                
+                const msg = newSnapshot.val();
+                
+                // Mencegah duplikasi: Hanya proses pesan yang timestampnya lebih baru dari waktu load
                 const isMe = msg.name === chatName || (isAdmin && msg.isAdmin);
                 const isChatOpen = document.getElementById('page-chat').classList.contains('active');
+                
+                renderChatMessage(msg);
                 
                 if (!isMe) {
                     if (!isChatOpen) {
@@ -1067,7 +1084,6 @@
                     if ('Notification' in window && Notification.permission === 'granted') {
                         const safeName = (msg.name || 'Anonim').replace(/</g, "<").replace(/>/g, ">");
                         const safeText = (msg.text || '').replace(/</g, "<").replace(/>/g, ">");
-                        
                         let notifBody = msg.image ? "📷 Mengirim foto" : safeText;
 
                         try {
@@ -1089,11 +1105,7 @@
                         } catch (e) {}
                     }
                 }
-            }
-        });
-
-        dbChatRef.limitToLast(1).once('value', () => {
-            isInitialChatLoad = false;
+            });
         });
 
         function openChat() {
