@@ -9,6 +9,7 @@
     <link rel="apple-touch-icon" href="./logo.png">
     <link rel="preload" href="./logo.png" as="image">
     
+    <!-- MANIFEST PWA TERINTEGRASI (Perbaikan Ikon Full Size) -->
     <link id="manifest-link" rel="manifest" href="">
     <script>
         const manifestJSON = {
@@ -20,8 +21,9 @@
             "background_color": "#022c22",
             "theme_color": "#064e3b",
             "icons": [
-                {"src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
-                {"src": "./logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+                /* Menghapus kata 'maskable' agar ikon tampil full size (tidak mengecil) */
+                {"src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+                {"src": "./logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
             ]
         };
         const manifestBlob = new Blob([JSON.stringify(manifestJSON)], {type: 'application/manifest+json'});
@@ -289,7 +291,7 @@
             } else {
                 const currentTime = new Date().getTime();
                 if (currentTime - lastBackPressTime < 2000) {
-                    // Keluar aplikasi jika 2x ditekan
+                    // Keluar aplikasi secara alamiah
                 } else {
                     showToast("Tekan sekali lagi untuk keluar");
                     lastBackPressTime = currentTime;
@@ -297,6 +299,7 @@
                 }
             }
         });
+
 
         // ============ PWA AUTO-INSTALL ============
         let deferredPrompt;
@@ -445,11 +448,12 @@
             }
         }
 
-        // =========================================================
-        // EDITOR HACKS: ANTI LOMPAT & ANTI HILANG FOKUS (SEMPURNA)
-        // =========================================================
+        // =========================================================================
+        // EDITOR PWA MOBILE HACKS (ANTI LOMPAT, ANTI HILANG SELEKSI, ANTI MACET)
+        // =========================================================================
         const editorContent = document.getElementById('detail-content');
 
+        // Memperbarui indikator pixel font size secara real-time
         function updateFontSizeDisplay() {
             if(!savedRange || !isEditorActive) return;
             let node = savedRange.startContainer;
@@ -460,6 +464,7 @@
             }
         }
 
+        // Menyimpan memori posisi teks SETIAP KALI ada perubahan (pasif)
         document.addEventListener('selectionchange', () => {
             if (!isEditorActive) return;
             const sel = window.getSelection();
@@ -472,7 +477,7 @@
             }
         });
 
-        // Mengembalikan drag yang hilang tanpa fokus (sehingga layar HP tidak melompat ke bawah)
+        // Mengembalikan drag yang hilang tanpa membuat layar melompat ke bawah
         function getSavedSelection() {
             if (savedRange) {
                 const sel = window.getSelection();
@@ -483,6 +488,7 @@
             return window.getSelection();
         }
 
+        // Fungsi Global Eksekusi Edit
         function execCmd(command, value = null) {
             getSavedSelection();
             if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
@@ -508,6 +514,7 @@
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('fontName', false, fontName);
             
+            // Perbaikan kompatibilitas font browser
             editorContent.querySelectorAll('font[face]').forEach(el => {
                 el.style.fontFamily = el.getAttribute('face');
                 el.removeAttribute('face');
@@ -554,6 +561,8 @@
             if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
             
             const lhSequence = [1.0, 1.5, 2.0, 2.5, 3.0]; 
+            
+            // Mencari wadah blok utama (DIV/P) tempat teks berada
             let node = savedRange.commonAncestorContainer;
             let blockNode = node.nodeType === 3 ? node.parentElement : node;
             
