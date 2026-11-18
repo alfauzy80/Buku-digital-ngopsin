@@ -76,6 +76,10 @@
         }
 
         .editor-box { outline: none; min-height: 100%; }
+        .editor-box[contenteditable="true"] {
+            -webkit-user-select: text;
+            user-select: text;
+        }
         .editor-box[contenteditable="true"]:focus { 
             border: 1px dashed rgba(234, 179, 8, 0.5); 
             border-radius: 8px; padding: 8px; background: rgba(255,255,255,0.02); 
@@ -223,7 +227,7 @@
                     <button id="btn-edit-mode" onclick="toggleEditor()" class="text-slate-500 hidden px-2"><i id="edit-icon" class="fas fa-pen"></i></button>
                 </div>
 
-                <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar items-center bg-black/20">
+                <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar items-center bg-black/20 select-none">
                     <button onclick="changeGlobalFontSize(-2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
                     <button onclick="changeGlobalFontSize(2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
@@ -236,31 +240,31 @@
                     <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-angle-double-down text-gold-500"></i> Scroll</button>
                 </div>
 
-                <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 shadow-inner">
+                <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 shadow-inner select-none">
                     <div class="flex items-center bg-royal-dark border border-gold-500/30 rounded flex-shrink-0">
-                        <button onclick="changeSelectedFontSize(-1)" class="px-2.5 py-1 text-gold-400 font-bold text-sm hover:bg-gold-500/10 active:bg-gold-500/20 transition-colors">A-</button>
+                        <button onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(-1)" class="px-2.5 py-1 text-gold-400 font-bold text-sm hover:bg-gold-500/10 active:bg-gold-500/20 transition-colors">A-</button>
                         <div class="w-px h-5 bg-gold-500/20"></div>
                         <span id="font-size-display" class="text-xs text-gold-400 w-12 text-center font-mono font-bold">22px</span>
                         <div class="w-px h-5 bg-gold-500/20"></div>
-                        <button onclick="changeSelectedFontSize(1)" class="px-2.5 py-1 text-gold-400 font-bold text-sm hover:bg-gold-500/10 active:bg-gold-500/20 transition-colors">A+</button>
+                        <button onmousedown="event.preventDefault()" onclick="changeSelectedFontSize(1)" class="px-2.5 py-1 text-gold-400 font-bold text-sm hover:bg-gold-500/10 active:bg-gold-500/20 transition-colors">A+</button>
                     </div>
                     
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
-                    <button onclick="execCmd('undo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-undo text-xs"></i></button>
-                    <button onclick="execCmd('redo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-redo text-xs"></i></button>
+                    <button onmousedown="event.preventDefault()" onclick="execCmd('undo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-undo text-xs"></i></button>
+                    <button onmousedown="event.preventDefault()" onclick="execCmd('redo')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-redo text-xs"></i></button>
                     
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
-                    <button onclick="execCmd('bold')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm hover:bg-gold-500/10 active:bg-gold-500/20">B</button>
-                    <button onclick="execCmd('italic')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 italic text-sm hover:bg-gold-500/10 active:bg-gold-500/20">I</button>
-                    <button onclick="execCmd('underline')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 underline text-sm hover:bg-gold-500/10 active:bg-gold-500/20">U</button>
+                    <button onmousedown="event.preventDefault()" onclick="execCmd('bold')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm hover:bg-gold-500/10 active:bg-gold-500/20">B</button>
+                    <button onmousedown="event.preventDefault()" onclick="execCmd('italic')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 italic text-sm hover:bg-gold-500/10 active:bg-gold-500/20">I</button>
+                    <button onmousedown="event.preventDefault()" onclick="execCmd('underline')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 underline text-sm hover:bg-gold-500/10 active:bg-gold-500/20">U</button>
                     
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
-                    <button onclick="execCmd('justifyLeft')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-align-left text-xs"></i></button>
-                    <button onclick="execCmd('justifyCenter')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-align-center text-xs"></i></button>
-                    <button onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-align-right text-xs"></i></button>
+                    <button onmousedown="event.preventDefault()" onclick="execCmd('justifyLeft')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-align-left text-xs"></i></button>
+                    <button onmousedown="event.preventDefault()" onclick="execCmd('justifyCenter')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-align-center text-xs"></i></button>
+                    <button onmousedown="event.preventDefault()" onclick="execCmd('justifyRight')" class="w-8 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-align-right text-xs"></i></button>
                     
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
-                    <select onchange="changeFontFamily(this.value); this.selectedIndex=0;" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
+                    <select ontouchstart="captureEditorSelection()" onmousedown="captureEditorSelection()" onchange="changeFontFamily(this.value); this.selectedIndex=0;" class="px-1 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 text-sm outline-none w-20">
                         <option value="" disabled selected>Font</option>
                         <option value="Poppins">Poppins</option>
                         <option value="Amiri">Amiri</option>
@@ -269,12 +273,12 @@
                     </select>
 
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
-                    <button onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-text-height"></i> Spasi</button>
+                    <button onmousedown="event.preventDefault()" onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-text-height"></i> Spasi</button>
                     
-                    <input type="color" oninput="changeColor(this.value)" onchange="changeColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
+                    <input type="color" ontouchstart="captureEditorSelection()" onmousedown="captureEditorSelection()" onchange="changeColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
                     
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
-                    <button onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0 hover:bg-red-500/20 active:bg-red-500/40"><i class="fas fa-trash text-xs"></i></button>
+                    <button onmousedown="event.preventDefault()" onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0 hover:bg-red-500/20 active:bg-red-500/40"><i class="fas fa-trash text-xs"></i></button>
                 </div>
             </div>
 
@@ -330,6 +334,7 @@
 
         let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
         let savedRange = null;
+        let lastCursorRange = null;
 
         let userFavorites = JSON.parse(localStorage.getItem('ngopsinFavorites')) || [];
         let userCustomOrder = JSON.parse(localStorage.getItem('ngopsinOrder')) || [];
@@ -759,6 +764,8 @@
             if(contentEl.dataset.lh) changeLineHeightGlobal(contentEl.dataset.lh);
             document.getElementById('btn-edit-mode').style.display = isAdmin ? 'block' : 'none';
             isEditorActive = false;
+            savedRange = null;
+            lastCursorRange = null;
             document.getElementById('reader-features').classList.replace('hidden', 'flex');
             document.getElementById('admin-features').classList.replace('flex', 'hidden');
             document.getElementById('edit-icon').className = 'fas fa-pen';
@@ -801,6 +808,7 @@
             }
         }
 
+        // ============ EDITOR ANTI-HILANG DRAG / SELEKSI ============
         const editorContent = document.getElementById('detail-content');
 
         function toggleEditor() {
@@ -810,11 +818,17 @@
                 rBar.classList.replace('flex', 'hidden'); aBar.classList.replace('hidden', 'flex');
                 iconEdit.className = 'fas fa-save'; btnEdit.classList.replace('text-slate-500', 'text-gold-400');
                 editorContent.setAttribute('contenteditable', 'true'); 
+                savedRange = null;
+                lastCursorRange = null;
                 showToast("Mode Edit Aktif.");
             } else {
                 aBar.classList.replace('flex', 'hidden'); rBar.classList.replace('hidden', 'flex');
                 iconEdit.className = 'fas fa-pen'; btnEdit.classList.replace('text-gold-400', 'text-slate-500');
-                editorContent.setAttribute('contenteditable', 'false'); saveCurrentContent(); showToast("Tersimpan.");
+                editorContent.setAttribute('contenteditable', 'false');
+                savedRange = null;
+                lastCursorRange = null;
+                saveCurrentContent();
+                showToast("Tersimpan.");
             }
         }
 
@@ -828,49 +842,107 @@
             }
         }
 
-        document.addEventListener('selectionchange', () => {
+        // Hanya simpan savedRange saat benar-benar ada teks yang di-drag (tidak pernah tertimpa saat fokus hilang)
+        function captureEditorSelection() {
             if (!isEditorActive) return;
             const sel = window.getSelection();
-            if (sel.rangeCount > 0) {
+            if (sel && sel.rangeCount > 0) {
                 const range = sel.getRangeAt(0);
                 if (editorContent.contains(range.commonAncestorContainer)) {
-                    savedRange = range.cloneRange();
-                    if(!range.collapsed) updateFontSizeDisplay();
+                    lastCursorRange = range.cloneRange();
+                    if (!range.collapsed) {
+                        savedRange = range.cloneRange();
+                        updateFontSizeDisplay();
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('selectionchange', captureEditorSelection);
+        editorContent.addEventListener('touchend', () => setTimeout(captureEditorSelection, 60));
+        editorContent.addEventListener('mouseup', captureEditorSelection);
+        editorContent.addEventListener('keyup', captureEditorSelection);
+
+        // Hapus memori blok hanya jika user sengaja mengetuk area teks kosong di dalam editor
+        editorContent.addEventListener('click', () => {
+            if (!isEditorActive) return;
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount > 0) {
+                const range = sel.getRangeAt(0);
+                if (range.collapsed && editorContent.contains(range.commonAncestorContainer)) {
+                    savedRange = null;
+                    lastCursorRange = range.cloneRange();
                 }
             }
         });
 
-        function getSavedSelection() {
-            if (savedRange) {
-                const sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(savedRange);
-                return sel;
+        function restoreSavedSelection(allowCollapsed = false) {
+            // Cek dulu apakah saat ini browser sudah punya seleksi aktif di dalam editor
+            const liveSel = window.getSelection();
+            if (liveSel && liveSel.rangeCount > 0) {
+                const liveRange = liveSel.getRangeAt(0);
+                if (editorContent.contains(liveRange.commonAncestorContainer) && !liveRange.collapsed) {
+                    savedRange = liveRange.cloneRange();
+                    lastCursorRange = liveRange.cloneRange();
+                    return true;
+                }
             }
-            return window.getSelection();
+
+            const targetRange = (savedRange && !savedRange.collapsed)
+                ? savedRange
+                : (allowCollapsed ? lastCursorRange : null);
+
+            if (!targetRange) return false;
+            if (!editorContent.contains(targetRange.startContainer) || !editorContent.contains(targetRange.endContainer)) {
+                return false;
+            }
+
+            editorContent.focus({ preventScroll: true });
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(targetRange);
+            return true;
+        }
+
+        function refreshSavedRangeFromLive() {
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount > 0) {
+                const range = sel.getRangeAt(0);
+                if (editorContent.contains(range.commonAncestorContainer)) {
+                    lastCursorRange = range.cloneRange();
+                    if (!range.collapsed) {
+                        savedRange = range.cloneRange();
+                        updateFontSizeDisplay();
+                    }
+                }
+            }
         }
 
         function execCmd(command, value = null) {
-            getSavedSelection();
-            if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
+            const allowNoDrag = ['undo', 'redo', 'justifyLeft', 'justifyCenter', 'justifyRight'].includes(command);
+            if (allowNoDrag) {
+                if (!restoreSavedSelection(true)) editorContent.focus({ preventScroll: true });
+            } else {
+                if (!restoreSavedSelection(false)) return showToast("Tandai (drag) teks dulu!");
+            }
             document.execCommand('styleWithCSS', false, true);
             document.execCommand(command, false, value);
+            refreshSavedRangeFromLive();
             saveCurrentContent();
         }
 
         function changeColor(color) {
             if(!color) return;
-            getSavedSelection();
-            if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
+            if (!restoreSavedSelection(false)) return showToast("Tandai (drag) teks dulu!");
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('foreColor', false, color);
+            refreshSavedRangeFromLive();
             saveCurrentContent();
         }
 
         function changeFontFamily(fontName) {
             if(!fontName) return;
-            getSavedSelection();
-            if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
+            if (!restoreSavedSelection(false)) return showToast("Tandai (drag) teks dulu!");
             
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('fontName', false, fontName);
@@ -879,12 +951,12 @@
                 el.style.fontFamily = el.getAttribute('face');
                 el.removeAttribute('face');
             });
+            refreshSavedRangeFromLive();
             saveCurrentContent();
         }
 
         function changeSelectedFontSize(step) {
-            getSavedSelection();
-            if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
+            if (!restoreSavedSelection(false)) return showToast("Tandai (drag) teks dulu!");
 
             let node = savedRange.startContainer;
             let parentEl = node.nodeType === 3 ? node.parentElement : node;
@@ -897,9 +969,11 @@
             document.execCommand("styleWithCSS", false, false);
             document.execCommand("fontSize", false, "7");
             
+            const modifiedNodes = [];
             editorContent.querySelectorAll('font[size="7"]').forEach(f => {
                 f.removeAttribute('size');
                 f.style.fontSize = newSize + 'px';
+                modifiedNodes.push(f);
             });
             
             editorContent.querySelectorAll('*').forEach(el => {
@@ -907,21 +981,36 @@
                 if(fs === '-webkit-xxx-large' || fs === 'xx-large' || fs === '48px' || el.getAttribute('size') === '7') {
                     el.style.fontSize = newSize + 'px';
                     el.removeAttribute('size');
+                    if (!modifiedNodes.includes(el)) modifiedNodes.push(el);
                 }
             });
 
             document.execCommand("styleWithCSS", false, true);
             document.getElementById('font-size-display').innerText = newSize + 'px';
-            savedRange = window.getSelection().getRangeAt(0).cloneRange();
+
+            // Kunci kembali seleksi pada teks yang baru diubah agar bisa tekan A+/A- berulang kali
+            if (modifiedNodes.length > 0) {
+                const newRange = document.createRange();
+                newRange.setStartBefore(modifiedNodes[0]);
+                newRange.setEndAfter(modifiedNodes[modifiedNodes.length - 1]);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(newRange);
+                savedRange = newRange.cloneRange();
+                lastCursorRange = newRange.cloneRange();
+            } else {
+                refreshSavedRangeFromLive();
+            }
+
             saveCurrentContent();
         }
 
         function changeLineHeight() {
-            getSavedSelection();
-            if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
+            if (!restoreSavedSelection(true)) return showToast("Tandai (drag) teks dulu!");
             
+            const activeRange = (savedRange && !savedRange.collapsed) ? savedRange : lastCursorRange;
             const lhSequence = [1.0, 1.5, 2.0, 2.5, 3.0]; 
-            let node = savedRange.commonAncestorContainer;
+            let node = activeRange.commonAncestorContainer;
             let blockNode = node.nodeType === 3 ? node.parentElement : node;
             
             while (blockNode && blockNode.id !== 'detail-content' && !['DIV', 'P'].includes(blockNode.tagName)) {
@@ -1215,7 +1304,6 @@
                 const msgTime = msg.timestamp || 0;
                 if (msgTime > latestChatTimestamp) latestChatTimestamp = msgTime;
 
-                // Hitung pesan yang masuk saat aplikasi sedang tertutup
                 if (!isMyMessage(msg) && msgTime > lastReadChatTime) {
                     const isChatOpen = document.getElementById('page-chat').classList.contains('active');
                     if (!isChatOpen) {
@@ -1263,7 +1351,6 @@
             });
         });
 
-        // Sinkronisasi penghapusan chat ke semua pengguna yang sedang aktif
         dbChatRef.on('child_removed', (oldSnapshot) => {
             renderedMsgKeys.delete(oldSnapshot.key);
             const msgEl = document.getElementById('chat-msg-' + oldSnapshot.key);
