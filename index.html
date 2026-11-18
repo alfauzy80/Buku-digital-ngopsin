@@ -335,6 +335,9 @@
         let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
         let savedRange = null;
         let lastCursorRange = null;
+        let editHistory = [];
+        let editHistoryIndex = -1;
+        let historyTimer = null;
 
         let userFavorites = JSON.parse(localStorage.getItem('ngopsinFavorites')) || [];
         let userCustomOrder = JSON.parse(localStorage.getItem('ngopsinOrder')) || [];
@@ -354,7 +357,6 @@
 
         window.chatAudioCtx = null;
 
-        // Buka kunci AudioContext otomatis pada sentuhan pertama user
         function unlockAudioContext() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -808,8 +810,18 @@
             }
         }
 
-        // ============ EDITOR ANTI-HILANG DRAG / SELEKSI ============
+        // ============ EDITOR STABIL: A-/A+, SPASI PARAGRAF, FONT, WARNA & UNDO/REDO ============
         const editorContent = document.getElementById('detail-content');
+
+        function pushEditHistory() {
+            if (!isEditorActive) return;
+            const currentHTML = editorContent.innerHTML;
+            if (editHistory[editHistoryIndex] === currentHTML) return;
+            editHistory = editHistory.slice(0, editHistoryIndex + 1);
+            editHistory.push(currentHTML);
+            if (editHistory.length > 50) editHistory.shift();
+            editHistoryIndex = editHistory.length - 1;
+        }
 
         function toggleEditor() {
             isEditorActive = !isEditorActive;
@@ -820,6 +832,9 @@
                 editorContent.setAttribute('contenteditable', 'true'); 
                 savedRange = null;
                 lastCursorRange = null;
+                editHistory = [editorContent.innerHTML];
+                editHistoryIndex = 0;
+                document.getElementById('font-size-display').innerText = baseFontSize + 'px';
                 showToast("Mode Edit Aktif.");
             } else {
                 aBar.classList.replace('flex', 'hidden'); rBar.classList.replace('hidden', 'flex');
@@ -832,17 +847,93 @@
             }
         }
 
+        function getSelectedTextNodes(range) {
+            const textNodes = [];
+            if (!range) return textNodes;
+            const walker = document.createTreeWalker(
+                editorContent,
+                NodeFilter.SHOW_TEXT,
+                null
+            );
+            let n;
+            while ((n = walker.nextNode())) {
+                const len = n.nodeValue ? n.nodeValue.length : 0;
+                if (len === 0) continue;
+                try {
+                    if (range.comparePoint(n, len) < 0) continue;
+                    if (range.comparePoint(n, 0) > 0) continue;
+                } catch (e) {
+                    continue;
+                }
+                if (n === range.startContainer && range.startOffset >= len) continue;
+                if (n === range.endContainer && range.endOffset <= 0) continue;
+                textNodes.push(n);
+            }
+            return textNodes;
+        }
+
+        function splitAndGetSelectedTextNodes(range) {
+            const rawNodes = getSelectedTextNodes(range);
+            if (rawNodes.length === 0) return [];
+
+            const startContainer = range.startContainer;
+            const startOffset = range.startOffset;
+            const endContainer = range.endContainer;
+            const endOffset = range.endOffset;
+
+            const finalNodes = [];
+            for (let i = 0; i < rawNodes.length; i++) {
+                let node = rawNodes[i];
+                const s = (node === startContainer) ? startOffset : 0;
+                const e = (node === endContainer) ? endOffset : node.length;
+                if (e <= s) continue;
+                if (e < node.length) {
+                    node.splitText(e);
+                }
+                if (s > 0) {
+                    node = node.splitText(s);
+                }
+                finalNodes.push(node);
+            }
+            return finalNodes;
+        }
+
+        function hasOnlyChildNode(parent, target) {
+            for (let c = parent.firstChild; c; c = c.nextSibling) {
+                if (c === target) continue;
+                if (c.nodeType === 3 && c.nodeValue === '') continue;
+                return false;
+            }
+            return true;
+        }
+
+        function getReferenceElementFromRange(range) {
+            if (!range) return null;
+            if (!range.collapsed) {
+                const nodes = getSelectedTextNodes(range);
+                const meaningful = nodes.find(n => n.nodeValue.replace(/[\r\n\s]/g, '').length > 0) || nodes[0];
+                if (meaningful && meaningful.parentElement) return meaningful.parentElement;
+            }
+            const sc = range.startContainer;
+            if (sc.nodeType === 3) return sc.parentElement;
+            if (sc.nodeType === 1) {
+                const child = sc.childNodes[range.startOffset];
+                if (child) return child.nodeType === 3 ? child.parentElement : child;
+                return sc;
+            }
+            return editorContent;
+        }
+
         function updateFontSizeDisplay() {
-            if(!savedRange || !isEditorActive) return;
-            let node = savedRange.startContainer;
-            let parentEl = node.nodeType === 3 ? node.parentElement : node;
-            if(parentEl) {
-                let size = window.getComputedStyle(parentEl).fontSize;
-                document.getElementById('font-size-display').innerText = parseInt(size) + 'px';
+            if (!isEditorActive) return;
+            const activeRange = (savedRange && !savedRange.collapsed) ? savedRange : lastCursorRange;
+            const refEl = getReferenceElementFromRange(activeRange);
+            if (refEl) {
+                const size = Math.round(parseFloat(window.getComputedStyle(refEl).fontSize)) || baseFontSize;
+                document.getElementById('font-size-display').innerText = size + 'px';
             }
         }
 
-        // Hanya simpan savedRange saat benar-benar ada teks yang di-drag (tidak pernah tertimpa saat fokus hilang)
         function captureEditorSelection() {
             if (!isEditorActive) return;
             const sel = window.getSelection();
@@ -852,8 +943,8 @@
                     lastCursorRange = range.cloneRange();
                     if (!range.collapsed) {
                         savedRange = range.cloneRange();
-                        updateFontSizeDisplay();
                     }
+                    updateFontSizeDisplay();
                 }
             }
         }
@@ -863,7 +954,6 @@
         editorContent.addEventListener('mouseup', captureEditorSelection);
         editorContent.addEventListener('keyup', captureEditorSelection);
 
-        // Hapus memori blok hanya jika user sengaja mengetuk area teks kosong di dalam editor
         editorContent.addEventListener('click', () => {
             if (!isEditorActive) return;
             const sel = window.getSelection();
@@ -872,12 +962,12 @@
                 if (range.collapsed && editorContent.contains(range.commonAncestorContainer)) {
                     savedRange = null;
                     lastCursorRange = range.cloneRange();
+                    updateFontSizeDisplay();
                 }
             }
         });
 
         function restoreSavedSelection(allowCollapsed = false) {
-            // Cek dulu apakah saat ini browser sudah punya seleksi aktif di dalam editor
             const liveSel = window.getSelection();
             if (liveSel && liveSel.rangeCount > 0) {
                 const liveRange = liveSel.getRangeAt(0);
@@ -912,14 +1002,89 @@
                     lastCursorRange = range.cloneRange();
                     if (!range.collapsed) {
                         savedRange = range.cloneRange();
-                        updateFontSizeDisplay();
                     }
+                    updateFontSizeDisplay();
                 }
             }
         }
 
+        function applyInlineStyleToSelection(styleProp, styleVal) {
+            if (!restoreSavedSelection(false)) {
+                showToast("Tandai (drag) teks dulu!");
+                return false;
+            }
+
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0) {
+                showToast("Tandai (drag) teks dulu!");
+                return false;
+            }
+
+            const range = sel.getRangeAt(0);
+            const finalNodes = splitAndGetSelectedTextNodes(range);
+            if (finalNodes.length === 0) {
+                showToast("Tandai (drag) teks dulu!");
+                return false;
+            }
+
+            finalNodes.forEach(node => {
+                if (finalNodes.length > 1 && node.nodeValue.replace(/[\r\n]/g, '').length === 0) return;
+                const parent = node.parentElement;
+                if (parent && parent !== editorContent && (parent.tagName === 'SPAN' || parent.tagName === 'FONT') && hasOnlyChildNode(parent, node)) {
+                    if (styleProp === 'fontSize') parent.removeAttribute('size');
+                    if (styleProp === 'fontFamily') parent.removeAttribute('face');
+                    if (styleProp === 'color') parent.removeAttribute('color');
+                    parent.style[styleProp] = styleVal;
+                } else {
+                    const span = document.createElement('span');
+                    span.style[styleProp] = styleVal;
+                    node.parentNode.insertBefore(span, node);
+                    span.appendChild(node);
+                }
+            });
+
+            // Kunci kembali seleksi persis di dalam text node agar klik berulang selalu terbaca akurat
+            const newRange = document.createRange();
+            newRange.setStart(finalNodes[0], 0);
+            const lastNode = finalNodes[finalNodes.length - 1];
+            newRange.setEnd(lastNode, lastNode.length);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            savedRange = newRange.cloneRange();
+            lastCursorRange = newRange.cloneRange();
+
+            pushEditHistory();
+            saveCurrentContent();
+            return true;
+        }
+
         function execCmd(command, value = null) {
-            const allowNoDrag = ['undo', 'redo', 'justifyLeft', 'justifyCenter', 'justifyRight'].includes(command);
+            if (command === 'undo') {
+                if (editHistoryIndex > 0) {
+                    editHistoryIndex--;
+                    editorContent.innerHTML = editHistory[editHistoryIndex];
+                    savedRange = null;
+                    lastCursorRange = null;
+                    saveCurrentContent();
+                } else {
+                    showToast("Tidak ada riwayat undo.");
+                }
+                return;
+            }
+            if (command === 'redo') {
+                if (editHistoryIndex < editHistory.length - 1) {
+                    editHistoryIndex++;
+                    editorContent.innerHTML = editHistory[editHistoryIndex];
+                    savedRange = null;
+                    lastCursorRange = null;
+                    saveCurrentContent();
+                } else {
+                    showToast("Tidak ada riwayat redo.");
+                }
+                return;
+            }
+
+            const allowNoDrag = ['justifyLeft', 'justifyCenter', 'justifyRight'].includes(command);
             if (allowNoDrag) {
                 if (!restoreSavedSelection(true)) editorContent.focus({ preventScroll: true });
             } else {
@@ -928,105 +1093,113 @@
             document.execCommand('styleWithCSS', false, true);
             document.execCommand(command, false, value);
             refreshSavedRangeFromLive();
+            pushEditHistory();
             saveCurrentContent();
         }
 
         function changeColor(color) {
-            if(!color) return;
-            if (!restoreSavedSelection(false)) return showToast("Tandai (drag) teks dulu!");
-            document.execCommand('styleWithCSS', false, true);
-            document.execCommand('foreColor', false, color);
-            refreshSavedRangeFromLive();
-            saveCurrentContent();
+            if (!color) return;
+            applyInlineStyleToSelection('color', color);
         }
 
         function changeFontFamily(fontName) {
-            if(!fontName) return;
-            if (!restoreSavedSelection(false)) return showToast("Tandai (drag) teks dulu!");
-            
-            document.execCommand('styleWithCSS', false, true);
-            document.execCommand('fontName', false, fontName);
-            
-            editorContent.querySelectorAll('font[face]').forEach(el => {
-                el.style.fontFamily = el.getAttribute('face');
-                el.removeAttribute('face');
-            });
-            refreshSavedRangeFromLive();
-            saveCurrentContent();
+            if (!fontName) return;
+            applyInlineStyleToSelection('fontFamily', fontName);
         }
 
         function changeSelectedFontSize(step) {
             if (!restoreSavedSelection(false)) return showToast("Tandai (drag) teks dulu!");
 
-            let node = savedRange.startContainer;
-            let parentEl = node.nodeType === 3 ? node.parentElement : node;
-            
-            let currentSize = parseInt(window.getComputedStyle(parentEl).fontSize) || 22;
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0) return showToast("Tandai (drag) teks dulu!");
+
+            const range = sel.getRangeAt(0);
+            const refEl = getReferenceElementFromRange(range);
+            let currentSize = refEl ? Math.round(parseFloat(window.getComputedStyle(refEl).fontSize)) : baseFontSize;
+            if (!currentSize || isNaN(currentSize)) currentSize = 22;
+
             let newSize = currentSize + step;
             if (newSize < 8) newSize = 8;
             if (newSize > 40) newSize = 40;
 
-            document.execCommand("styleWithCSS", false, false);
-            document.execCommand("fontSize", false, "7");
-            
-            const modifiedNodes = [];
-            editorContent.querySelectorAll('font[size="7"]').forEach(f => {
-                f.removeAttribute('size');
-                f.style.fontSize = newSize + 'px';
-                modifiedNodes.push(f);
-            });
-            
-            editorContent.querySelectorAll('*').forEach(el => {
-                let fs = el.style.fontSize;
-                if(fs === '-webkit-xxx-large' || fs === 'xx-large' || fs === '48px' || el.getAttribute('size') === '7') {
-                    el.style.fontSize = newSize + 'px';
-                    el.removeAttribute('size');
-                    if (!modifiedNodes.includes(el)) modifiedNodes.push(el);
-                }
-            });
-
-            document.execCommand("styleWithCSS", false, true);
-            document.getElementById('font-size-display').innerText = newSize + 'px';
-
-            // Kunci kembali seleksi pada teks yang baru diubah agar bisa tekan A+/A- berulang kali
-            if (modifiedNodes.length > 0) {
-                const newRange = document.createRange();
-                newRange.setStartBefore(modifiedNodes[0]);
-                newRange.setEndAfter(modifiedNodes[modifiedNodes.length - 1]);
-                const sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(newRange);
-                savedRange = newRange.cloneRange();
-                lastCursorRange = newRange.cloneRange();
-            } else {
-                refreshSavedRangeFromLive();
+            if (applyInlineStyleToSelection('fontSize', newSize + 'px')) {
+                document.getElementById('font-size-display').innerText = newSize + 'px';
             }
-
-            saveCurrentContent();
         }
 
         function changeLineHeight() {
-            if (!restoreSavedSelection(true)) return showToast("Tandai (drag) teks dulu!");
-            
-            const activeRange = (savedRange && !savedRange.collapsed) ? savedRange : lastCursorRange;
-            const lhSequence = [1.0, 1.5, 2.0, 2.5, 3.0]; 
-            let node = activeRange.commonAncestorContainer;
-            let blockNode = node.nodeType === 3 ? node.parentElement : node;
-            
-            while (blockNode && blockNode.id !== 'detail-content' && !['DIV', 'P'].includes(blockNode.tagName)) {
-                blockNode = blockNode.parentElement;
-            }
-            if (!blockNode) blockNode = editorContent;
+            const hasSelection = restoreSavedSelection(true);
+            const sel = window.getSelection();
+            const activeRange = (hasSelection && sel && sel.rangeCount > 0)
+                ? sel.getRangeAt(0)
+                : ((savedRange && !savedRange.collapsed) ? savedRange : lastCursorRange);
 
-            let currentInline = parseFloat(blockNode.style.lineHeight) || parseFloat(blockNode.dataset.lh) || 2.0;
-            let nextIndex = lhSequence.indexOf(currentInline) + 1;
-            if (nextIndex >= lhSequence.length || nextIndex < 0) nextIndex = 0;
-            
-            let newLH = lhSequence[nextIndex];
-            blockNode.style.lineHeight = newLH;
-            blockNode.dataset.lh = newLH; 
-            
+            const blockTags = new Set(['DIV', 'P', 'LI', 'BLOCKQUOTE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
+            const findNearestBlock = (startNode) => {
+                let el = startNode && startNode.nodeType === 3 ? startNode.parentElement : startNode;
+                while (el && el !== editorContent && !blockTags.has(el.tagName)) {
+                    el = el.parentElement;
+                }
+                return (el && el !== editorContent && editorContent.contains(el)) ? el : null;
+            };
+
+            const targetBlocks = [];
+            const addBlock = (b) => {
+                if (b && !targetBlocks.includes(b)) targetBlocks.push(b);
+            };
+
+            if (activeRange) {
+                if (!activeRange.collapsed) {
+                    const textNodes = getSelectedTextNodes(activeRange);
+                    textNodes.forEach(tn => {
+                        if (tn.nodeValue.replace(/[\r\n\s]/g, '').length === 0) return;
+                        addBlock(findNearestBlock(tn));
+                    });
+                }
+                if (targetBlocks.length === 0) {
+                    addBlock(findNearestBlock(activeRange.startContainer));
+                }
+            }
+
+            // Jika teks langsung berada di dalam #detail-content tanpa <div>/<p>
+            if (targetBlocks.length === 0) {
+                targetBlocks.push(editorContent);
+            }
+
+            // Hapus override global lama jika ada agar spasi per-paragraf tidak terblokir
+            const oldForceStyle = document.getElementById('force-line-height');
+            if (oldForceStyle) oldForceStyle.remove();
+
+            const lhSequence = [1.0, 1.5, 2.0, 2.5, 3.0];
+            const firstBlock = targetBlocks[0];
+            let currentVal = parseFloat(firstBlock.dataset.lh) || parseFloat(firstBlock.style.lineHeight);
+            let nextIndex = 0;
+
+            if (!isNaN(currentVal)) {
+                const matchedIdx = lhSequence.findIndex(v => Math.abs(v - currentVal) < 0.05);
+                if (matchedIdx !== -1) {
+                    nextIndex = (matchedIdx + 1) % lhSequence.length;
+                } else {
+                    const higherIdx = lhSequence.findIndex(v => v > currentVal);
+                    nextIndex = higherIdx !== -1 ? higherIdx : 0;
+                }
+            } else {
+                // Default awal tampil sekitar 1.5 - 2.0, langsung pindah ke 2.0 agar perubahan langsung terasa
+                nextIndex = 2;
+            }
+
+            const newLH = lhSequence[nextIndex];
+            targetBlocks.forEach(block => {
+                block.style.lineHeight = String(newLH);
+                block.dataset.lh = String(newLH);
+                // Bersihkan line-height bawaan copy-paste pada elemen inline di dalam paragraf
+                block.querySelectorAll('span, font, b, i, u, strong, em').forEach(inlineEl => {
+                    if (inlineEl.style.lineHeight) inlineEl.style.lineHeight = '';
+                });
+            });
+
             showToast(`Spasi Paragraf: ${newLH}`);
+            pushEditHistory();
             saveCurrentContent();
         }
 
@@ -1051,9 +1224,7 @@
 
         function changeLineHeightGlobal(lh) {
             editorContent.dataset.lh = lh;
-            let styleTag = document.getElementById('force-line-height');
-            if(!styleTag) { styleTag = document.createElement('style'); styleTag.id = 'force-line-height'; document.head.appendChild(styleTag); }
-            styleTag.innerHTML = `#detail-content, #detail-content * { line-height: ${lh} !important; }`;
+            editorContent.style.lineHeight = String(lh);
         }
 
         function saveCurrentContent() {
@@ -1061,7 +1232,13 @@
             const itemIndex = appData.findIndex(x => x.id === currentActiveId);
             if(itemIndex > -1) { appData[itemIndex].content = editorContent.innerHTML; saveData(); }
         }
-        editorContent.addEventListener('input', () => { if(isEditorActive) saveCurrentContent(); });
+        editorContent.addEventListener('input', () => {
+            if(isEditorActive) {
+                clearTimeout(historyTimer);
+                historyTimer = setTimeout(pushEditHistory, 400);
+                saveCurrentContent();
+            }
+        });
 
         function promptEditTitle() {
             if(!isEditorActive) return showToast("Aktifkan mode edit.");
