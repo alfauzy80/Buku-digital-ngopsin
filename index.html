@@ -9,7 +9,6 @@
     <link rel="apple-touch-icon" href="./logo.png">
     <link rel="preload" href="./logo.png" as="image">
     
-    <!-- MANIFEST.JSON DIJADIKAN SATU DENGAN HTML -->
     <link id="manifest-link" rel="manifest" href="">
     <script>
         const manifestJSON = {
@@ -47,64 +46,68 @@
         }
     </script>
     <style>
+        /* Kunci Background Penuh */
         html, body {
             margin: 0; padding: 0; 
-            width: 100vw; height: 100dvh; 
+            width: 100%; height: 100%; 
+            position: fixed; 
+            top: 0; left: 0;
             overflow: hidden; 
             background: radial-gradient(ellipse at top, #064e3b, #022c22, #000000); 
             color: #f1f5f9;
             -webkit-tap-highlight-color: transparent; 
         }
 
-        .app-container {
-            width: 100%; height: 100%;
+        .app-wrapper {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
             max-width: 28rem;
             margin: 0 auto;
-            position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .page {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
             display: none; 
             flex-direction: column;
+            width: 100%; height: 100%;
         }
         .page.active { display: flex; }
 
-        .header-area {
-            flex: none; 
+        /* HEADER FIXED: Mengunci toolbar di atas (Sekarang Editor Menu masuk ke dalam box ini) */
+        .header-fixed {
+            flex: 0 0 auto; 
             width: 100%;
             background: rgba(2, 44, 34, 0.95);
             border-bottom: 1px solid rgba(234, 179, 8, 0.2);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            z-index: 100;
+            z-index: 50;
         }
-        
-        .scroll-area { 
-            flex: 1; 
+
+        /* SCROLL AREA KONTEN */
+        .content-scroll {
+            flex: 1 1 auto; 
             overflow-y: auto; 
-            -webkit-overflow-scrolling: touch;
+            -webkit-overflow-scrolling: touch; 
             padding: 1.5rem; 
-            padding-bottom: 50vh; 
-        } 
-        
-        .content-area { outline: none; min-height: 100%; }
-        .content-area[contenteditable="true"]:focus { 
+            padding-bottom: 20vh; 
+        }
+
+        .editor-box { outline: none; min-height: 100%; }
+        .editor-box[contenteditable="true"]:focus { 
             border: 1px dashed rgba(234, 179, 8, 0.5); 
             border-radius: 8px; padding: 8px; background: rgba(255,255,255,0.02); 
         }
         
-        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #eab308; border-radius: 4px; }
     </style>
 </head>
 <body class="selection:bg-gold-500 selection:text-royal-dark font-sans relative">
 
-    <div class="app-container">
-
-        <!-- TOAST & BANNER INSTALL PWA -->
-        <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-royal-dark border border-gold-500 text-gold-400 px-6 py-2 rounded-full shadow-lg z-[1000] opacity-0 pointer-events-none transition-opacity duration-300 font-semibold text-sm">Pesan</div>
+    <div class="app-wrapper">
+        <div id="toast" class="fixed top-16 left-1/2 transform -translate-x-1/2 bg-royal-dark border border-gold-500 text-gold-400 px-6 py-2 rounded-full shadow-lg z-[1000] opacity-0 pointer-events-none transition-opacity duration-300 font-semibold text-sm">Pesan</div>
 
         <div id="install-banner" class="fixed bottom-0 left-0 w-full bg-royal-dark/95 backdrop-blur border-t border-gold-500/50 p-4 hidden flex-row justify-between items-center z-[2000] shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
             <div class="flex items-center gap-3">
@@ -120,7 +123,6 @@
             </div>
         </div>
 
-        <!-- MODAL EDITOR / PASSWORD -->
         <div id="custom-modal" class="fixed inset-0 bg-black/80 z-[1000] hidden items-center justify-center px-4 backdrop-blur-sm">
             <div class="bg-royal-dark border border-gold-500/30 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
                 <h3 id="modal-title" class="text-xl font-serif text-gold-400 mb-4">Judul</h3>
@@ -136,7 +138,7 @@
         </div>
 
         <!-- HALAMAN 1: COVER -->
-        <div id="page-cover" class="page active px-6">
+        <div id="page-cover" class="page active relative px-6">
             <div class="flex-grow w-full flex items-center justify-center pt-8">
                 <div class="relative">
                     <div class="absolute inset-0 bg-gold-500 blur-[40px] opacity-25 rounded-full scale-110"></div>
@@ -167,13 +169,12 @@
 
         <!-- HALAMAN 2: DAFTAR ISI -->
         <div id="page-toc" class="page">
-            <div class="header-area p-4 flex justify-between items-center">
-                <!-- Tombol back UI sinkron dengan API History -->
+            <div class="header-fixed p-4 flex justify-between items-center">
                 <button onclick="window.history.back()" class="text-gold-500 text-xl"><i class="fas fa-arrow-left"></i></button>
                 <h1 class="font-serif font-bold text-gold-400 tracking-widest">DAFTAR ISI</h1>
                 <div class="w-6"></div>
             </div>
-            <div class="scroll-area p-6 pb-20">
+            <div class="content-scroll">
                 <div class="flex justify-end mb-6">
                     <button id="btn-add-toc" onclick="promptNewToc()" class="hidden bg-gold-500 text-black font-bold rounded-full px-4 py-1.5 shadow-md text-sm"><i class="fas fa-plus mr-1"></i>Tambah</button>
                 </div>
@@ -186,15 +187,16 @@
         <!-- HALAMAN 3: KONTEN (BACA & EDIT) -->
         <div id="page-detail" class="page">
             
-            <div class="header-area">
+            <!-- HEADER FIXED MEMBUNGKUS KESELURUHAN TOOLBAR MENU -->
+            <div class="header-fixed">
                 <div class="flex justify-between items-center p-3 border-b border-gold-500/20">
-                    <!-- Tombol back UI sinkron dengan API History -->
                     <button onclick="window.history.back()" class="text-gold-400 text-xl px-2"><i class="fas fa-arrow-left"></i></button>
                     <h1 id="detail-title" class="font-serif font-bold text-gold-400 truncate max-w-[200px]" ondblclick="if(isAdmin) promptEditTitle()">Judul</h1>
                     <button id="btn-edit-mode" onclick="toggleEditor()" class="text-slate-500 hidden px-2"><i id="edit-icon" class="fas fa-pen"></i></button>
                 </div>
 
-                <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar border-b border-gold-500/20 items-center bg-black/20">
+                <!-- MENU BACA -->
+                <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar items-center bg-black/20">
                     <button onclick="changeGlobalFontSize(-2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
                     <button onclick="changeGlobalFontSize(2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
@@ -202,7 +204,10 @@
                     <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-angle-double-down text-gold-500"></i> Scroll</button>
                 </div>
 
-                <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 border-b border-gold-500/30 shadow-inner">
+                <!-- MENU EDIT ADMIN -->
+                <!-- PENTING: Panel diletakkan di dalam header-fixed, jadi 100% anti ter-scroll! -->
+                <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 shadow-inner">
+                    
                     <div class="flex items-center bg-royal-dark border border-gold-500/30 rounded flex-shrink-0">
                         <button onclick="changeSelectedFontSize(-1)" class="px-2.5 py-1 text-gold-400 font-bold text-sm hover:bg-gold-500/10 active:bg-gold-500/20 transition-colors">A-</button>
                         <div class="w-px h-5 bg-gold-500/20"></div>
@@ -240,14 +245,13 @@
                     <input type="color" oninput="changeColor(this.value)" onchange="changeColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
                     
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
-                    <!-- Delete dengan fungsi Back API -->
                     <button onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0 hover:bg-red-500/20 active:bg-red-500/40"><i class="fas fa-trash text-xs"></i></button>
                 </div>
             </div>
 
-            <!-- AREA TEKS -->
-            <div class="scroll-area" id="scroll-container">
-                <div id="detail-content" class="content-area text-xl font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
+            <!-- AREA TEKS MURNI (Bebas Scrolling) -->
+            <div class="content-scroll" id="scroll-container">
+                <div id="detail-content" class="editor-box text-xl font-arabic" style="color: #facc15;" contenteditable="false" onblur="saveCurrentContent()"></div>
             </div>
         </div>
 
@@ -274,35 +278,25 @@
             if (document.getElementById('page-detail').classList.contains('active') && !isEditorActive && currentActiveId) openDetail(currentActiveId);
         });
 
-
-        // ==========================================
-        // HISTORY API (TOMBOL BACK HP FISIK)
-        // ==========================================
-        
-        // Simpan posisi layar pertama kali dimuat
+        // ============ HISTORY API (TOMBOL BACK HP FISIK) ============
         window.history.replaceState({ page: 'page-cover' }, "", "");
         let lastBackPressTime = 0;
 
         window.addEventListener('popstate', (e) => {
-            closeModal(); // Pastikan modal tertutup jika pengguna menekan tombol back
-            
+            closeModal();
             if (e.state && e.state.page) {
-                // Navigasi mundur antar halaman tanpa push memori baru
                 navigateTo(e.state.page, true);
             } else {
-                // Pengguna menekan tombol back pada halaman utama (cover)
                 const currentTime = new Date().getTime();
                 if (currentTime - lastBackPressTime < 2000) {
-                    // Biarkan keluar aplikasi dengan alami
+                    // Keluar aplikasi jika 2x ditekan
                 } else {
                     showToast("Tekan sekali lagi untuk keluar");
                     lastBackPressTime = currentTime;
-                    // Paksa masuk history 1x lagi untuk menjebak agar tidak keluar
                     window.history.pushState({ page: 'page-cover' }, "", "");
                 }
             }
         });
-
 
         // ============ PWA AUTO-INSTALL ============
         let deferredPrompt;
@@ -389,7 +383,6 @@
             }});
         }
 
-        // Modifikasi navigateTo agar bekerja dengan parameter history API
         function navigateTo(pageId, isPopState = false) {
             ['page-cover', 'page-toc', 'page-detail'].forEach(id => { 
                 document.getElementById(id).classList.remove('active'); 
@@ -397,7 +390,6 @@
             document.getElementById(pageId).classList.add('active');
             if(pageId === 'page-toc') renderToc();
 
-            // Push memori ke browser jika perpindahan bukan dari tombol back
             if (!isPopState) {
                 window.history.pushState({ page: pageId }, "", "");
             }
@@ -435,7 +427,7 @@
             document.getElementById('edit-icon').className = 'fas fa-pen';
             document.getElementById('btn-edit-mode').classList.replace('text-gold-400', 'text-slate-500');
             contentEl.setAttribute('contenteditable', 'false');
-            navigateTo('page-detail'); // Otomatis mendaftarkan page-detail ke History
+            navigateTo('page-detail');
         }
 
         function toggleEditor() {
@@ -453,12 +445,11 @@
             }
         }
 
-        // =========================================================================
-        // EDITOR PWA MOBILE HACKS (ANTI LOMPAT, ANTI HILANG SELEKSI, ANTI MACET)
-        // =========================================================================
+        // =========================================================
+        // EDITOR HACKS: ANTI LOMPAT & ANTI HILANG FOKUS (SEMPURNA)
+        // =========================================================
         const editorContent = document.getElementById('detail-content');
 
-        // Memperbarui indikator pixel font size secara real-time
         function updateFontSizeDisplay() {
             if(!savedRange || !isEditorActive) return;
             let node = savedRange.startContainer;
@@ -469,7 +460,6 @@
             }
         }
 
-        // Menyimpan memori posisi teks SETIAP KALI ada perubahan (pasif)
         document.addEventListener('selectionchange', () => {
             if (!isEditorActive) return;
             const sel = window.getSelection();
@@ -482,7 +472,7 @@
             }
         });
 
-        // Mengembalikan drag yang hilang tanpa membuat layar melompat ke bawah
+        // Mengembalikan drag yang hilang tanpa fokus (sehingga layar HP tidak melompat ke bawah)
         function getSavedSelection() {
             if (savedRange) {
                 const sel = window.getSelection();
@@ -493,7 +483,6 @@
             return window.getSelection();
         }
 
-        // Fungsi Global Eksekusi Edit
         function execCmd(command, value = null) {
             getSavedSelection();
             if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
@@ -519,7 +508,6 @@
             document.execCommand('styleWithCSS', false, true);
             document.execCommand('fontName', false, fontName);
             
-            // Perbaikan kompatibilitas font browser
             editorContent.querySelectorAll('font[face]').forEach(el => {
                 el.style.fontFamily = el.getAttribute('face');
                 el.removeAttribute('face');
@@ -566,8 +554,6 @@
             if (!savedRange || savedRange.collapsed) return showToast("Tandai (drag) teks dulu!");
             
             const lhSequence = [1.0, 1.5, 2.0, 2.5, 3.0]; 
-            
-            // Mencari wadah blok utama (DIV/P) tempat teks berada
             let node = savedRange.commonAncestorContainer;
             let blockNode = node.nodeType === 3 ? node.parentElement : node;
             
@@ -634,7 +620,7 @@
         function promptDeleteCurrent() {
             openModal({ title: 'Hapus Halaman?', isInput: false, onConfirm: () => {
                 appData = appData.filter(x => x.id !== currentActiveId); saveData(); 
-                window.history.back(); // Kembali ke daftar isi menggunakan History API
+                window.history.back();
                 showToast('Dihapus!');
             }});
         }
