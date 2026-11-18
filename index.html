@@ -159,9 +159,10 @@
                         </button>
                     </div>
                     
-                    <!-- TOMBOL FITUR CHAT BARU -->
-                    <button onclick="openChat()" class="text-gold-500/70 hover:text-gold-400 font-serif italic text-sm flex items-center gap-2 transition-colors px-4 py-2">
+                    <!-- TOMBOL RUANG OBROLAN DENGAN NOTIFIKASI MERAH (BADGE) -->
+                    <button onclick="openChat()" class="relative text-gold-500/70 hover:text-gold-400 font-serif italic text-sm flex items-center gap-2 transition-colors px-4 py-2 mt-1">
                         <i class="fas fa-comments"></i> Ruang Obrolan
+                        <span id="chat-badge" class="hidden absolute -top-1.5 -right-3 bg-red-600 text-white text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full shadow-md border border-royal-dark min-w-[20px] items-center justify-center">0</span>
                     </button>
                 </div>
             </div>
@@ -269,7 +270,7 @@
             <button id="btn-scroll-top" onclick="scrollToTop()" class="hidden absolute bottom-8 right-6 bg-gold-500 text-royal-dark w-12 h-12 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.4)] items-center justify-center z-[100] hover:scale-105 transition-transform"><i class="fas fa-arrow-up text-xl"></i></button>
         </div>
 
-        <!-- HALAMAN 4: RUANG CHAT BARU -->
+        <!-- HALAMAN 4: RUANG CHAT (OBROLAN) -->
         <div id="page-chat" class="page">
             <div class="header-fixed p-4 flex justify-between items-center">
                 <button onclick="window.history.back()" class="text-gold-500 text-xl"><i class="fas fa-arrow-left"></i></button>
@@ -279,11 +280,10 @@
             
             <div class="content-scroll p-4 pb-24" id="chat-scroll-container">
                 <div id="chat-messages" class="flex flex-col gap-2">
-                    <!-- Gelembung Chat akan muncul di sini -->
+                    <!-- Gelembung Chat Firebase -->
                 </div>
             </div>
 
-            <!-- Footer Chat Input (Fixed di Bawah) -->
             <div class="flex-none bg-royal-dark border-t border-gold-500/30 p-3 flex gap-2 items-center z-50 shadow-[0_-5px_15px_rgba(0,0,0,0.5)]">
                 <input type="text" id="chat-input" placeholder="Ketik pesan..." class="flex-grow bg-black/50 border border-gold-500/50 rounded-full px-4 py-2.5 text-white text-sm outline-none focus:border-gold-400" onkeypress="if(event.key === 'Enter') sendChatMessage()">
                 <button onclick="sendChatMessage()" class="bg-gold-500 text-black w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-md active:scale-95 transition-transform"><i class="fas fa-paper-plane"></i></button>
@@ -298,7 +298,7 @@
         const database = firebase.database();
         const dbRef = database.ref('bukuSakuData');
         const dbCoverRef = database.ref('bukuSakuCover'); 
-        const dbChatRef = database.ref('bukuSakuChat'); // Ref Baru untuk Obrolan
+        const dbChatRef = database.ref('bukuSakuChat'); 
 
         let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
         let savedRange = null;
@@ -307,7 +307,6 @@
         let userCustomOrder = JSON.parse(localStorage.getItem('ngopsinOrder')) || [];
         let chatName = localStorage.getItem('ngopsinChatName') || ''; 
         let isReorderMode = false;
-        let isChatLoaded = false;
 
         function saveFavorites() { localStorage.setItem('ngopsinFavorites', JSON.stringify(userFavorites)); }
         function saveCustomOrder() { localStorage.setItem('ngopsinOrder', JSON.stringify(userCustomOrder)); }
@@ -345,7 +344,7 @@
             } else {
                 const currentTime = new Date().getTime();
                 if (currentTime - lastBackPressTime < 2000) {
-                    // Beri izin keluar
+                    // Keluar otomatis
                 } else {
                     showToast("Tekan sekali lagi untuk keluar");
                     lastBackPressTime = currentTime;
@@ -640,7 +639,6 @@
         const btnScrollTop = document.getElementById('btn-scroll-top');
 
         scrollContainer.addEventListener('scroll', function() {
-            // Panah Pintar muncul jika layar HP di-scroll ke bawah melewati 80% dari tinggi viewport layar
             if (this.scrollTop > (this.clientHeight * 0.8)) {
                 btnScrollTop.classList.remove('hidden');
                 btnScrollTop.classList.add('flex');
@@ -811,7 +809,6 @@
             saveCurrentContent();
         }
 
-        // ============ FUNGSI A- A+ PEMBACA ============
         function changeGlobalFontSize(step) {
             baseFontSize += step; 
             if(baseFontSize < 14) baseFontSize = 14; 
@@ -856,14 +853,80 @@
             }
         }
 
-        // ============ FITUR CHAT REAL-TIME ============
+        // ============ FITUR CHAT REAL-TIME (DENGAN BADGE & SUARA) ============
+        let unreadChatCount = 0;
+        let isInitialChatLoad = true;
+
+        // Web Audio API: Notifikasi Suara Elegan Tanpa File Eksternal
+        function playNotificationSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if(!AudioContext) return;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime); 
+                osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1); 
+                gain.gain.setValueAtTime(0, ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.05);
+                gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        function updateChatBadge() {
+            const badge = document.getElementById('chat-badge');
+            if (unreadChatCount > 0) {
+                badge.innerText = unreadChatCount > 99 ? '99+' : unreadChatCount;
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+        }
+
+        // Engine chat global (Berjalan di latar belakang)
+        dbChatRef.limitToLast(100).on('child_added', (snapshot) => {
+            const msg = snapshot.val();
+            renderChatMessage(msg);
+            
+            // Logika untuk pesan baru (Bukan saat pertama kali loading)
+            if (!isInitialChatLoad) {
+                const isMe = msg.name === chatName || (isAdmin && msg.isAdmin);
+                const isChatOpen = document.getElementById('page-chat').classList.contains('active');
+                
+                if (!isMe) {
+                    if (!isChatOpen) {
+                        unreadChatCount++;
+                        updateChatBadge();
+                    }
+                    playNotificationSound(); // Bunyi 'Ting!'
+                }
+            }
+        });
+
+        // Tandai selesainya loading awal
+        dbChatRef.limitToLast(100).once('value', () => {
+            isInitialChatLoad = false;
+        });
+
         function openChat() {
             if (!chatName && !isAdmin) {
                 promptChatName();
             } else {
                 if(isAdmin && !chatName) chatName = "Admin";
                 navigateTo('page-chat');
-                loadChat();
+                
+                // Reset notifikasi badge merah saat chat dibuka
+                unreadChatCount = 0;
+                updateChatBadge();
+                
+                setTimeout(scrollToBottomChat, 50);
             }
         }
 
@@ -871,13 +934,13 @@
             openModal({
                 title: 'Nama Anda (Untuk Obrolan)',
                 isInput: true,
+                isPassword: false,
                 onConfirm: (val) => {
                     if (val && val.trim().length > 0) {
                         chatName = val.trim();
                         localStorage.setItem('ngopsinChatName', chatName);
                         showToast('Nama tersimpan!');
-                        navigateTo('page-chat');
-                        loadChat();
+                        openChat(); // Langsung buka chat setelah nama diisi
                     } else {
                         showToast('Nama tidak boleh kosong!');
                     }
@@ -886,26 +949,22 @@
             setTimeout(() => document.getElementById('modal-input').value = chatName || '', 50);
         }
 
-        function loadChat() {
-            if (isChatLoaded) { scrollToBottomChat(); return; }
-            isChatLoaded = true;
-            dbChatRef.limitToLast(100).on('child_added', (snapshot) => {
-                renderChatMessage(snapshot.val());
-            });
-        }
-
         function renderChatMessage(msg) {
             const isMe = msg.name === chatName || (isAdmin && msg.isAdmin);
             const bubbleAlign = isMe ? 'justify-end' : 'justify-start';
             const bubbleColor = isMe ? 'bg-gold-500 text-black' : 'bg-black/50 border border-gold-500/30 text-slate-200';
             const adminBadge = msg.isAdmin ? '<i class="fas fa-check-circle text-[10px] ml-1 text-gold-500" title="Admin"></i>' : '';
 
+            // Filter Anti-Hack (XSS Protection)
+            const safeName = (msg.name || 'Anonim').replace(/</g, "<").replace(/>/g, ">");
+            const safeText = (msg.text || '').replace(/</g, "<").replace(/>/g, ">");
+
             const html = `
                 <div class="flex w-full ${bubbleAlign}">
                     <div class="max-w-[80%] flex flex-col">
-                        <span class="text-[10px] ${isMe ? 'text-right text-gold-500/70' : 'text-left text-slate-400'} mb-1 px-1">${msg.name} ${adminBadge}</span>
+                        <span class="text-[10px] ${isMe ? 'text-right text-gold-500/70' : 'text-left text-slate-400'} mb-1 px-1">${safeName} ${adminBadge}</span>
                         <div class="${bubbleColor} px-4 py-2 rounded-2xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'} shadow-md">
-                            <p class="text-[15px] font-sans whitespace-pre-wrap break-words">${msg.text}</p>
+                            <p class="text-[15px] font-sans whitespace-pre-wrap break-words">${safeText}</p>
                         </div>
                         <span class="text-[9px] ${isMe ? 'text-right' : 'text-left'} text-slate-500 mt-1 px-1">${msg.time}</span>
                     </div>
