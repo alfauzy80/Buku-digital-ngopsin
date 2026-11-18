@@ -294,7 +294,6 @@
                 <div class="flex items-center gap-4">
                     <button onclick="promptChatName()" class="text-gold-500 text-sm hover:text-gold-400 transition-colors" title="Ubah Nama"><i class="fas fa-user-edit"></i></button>
                     <button onclick="promptSoundSelect()" class="text-gold-500 text-sm hover:text-gold-400 transition-colors" title="Pengaturan Suara"><i class="fas fa-volume-up"></i></button>
-                    <!-- Tombol Hapus Seluruh Riwayat Chat (Khusus Admin) -->
                     <button id="btn-clear-chat" onclick="promptClearChat()" class="hidden text-red-500/80 hover:text-red-400 text-sm transition-colors" title="Hapus Semua Chat"><i class="fas fa-trash-alt"></i></button>
                 </div>
             </div>
@@ -335,13 +334,34 @@
         let userFavorites = JSON.parse(localStorage.getItem('ngopsinFavorites')) || [];
         let userCustomOrder = JSON.parse(localStorage.getItem('ngopsinOrder')) || [];
         let chatName = localStorage.getItem('ngopsinChatName') || ''; 
+        let deviceId = localStorage.getItem('ngopsinDeviceId');
+        if (!deviceId) {
+            deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('ngopsinDeviceId', deviceId);
+        }
+        let lastReadChatTime = parseInt(localStorage.getItem('ngopsinLastReadChat')) || 0;
+        let latestChatTimestamp = 0;
+
         let isReorderMode = false;
-        
         let initialChatLoaded = false;
         let unreadChatCount = 0;
         let renderedMsgKeys = new Set();
 
         window.chatAudioCtx = null;
+
+        // Buka kunci AudioContext otomatis pada sentuhan pertama user
+        function unlockAudioContext() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                if (!window.chatAudioCtx) window.chatAudioCtx = new AudioContext();
+                if (window.chatAudioCtx.state === 'suspended') {
+                    window.chatAudioCtx.resume();
+                }
+            } catch (e) {}
+        }
+        document.addEventListener('touchstart', unlockAudioContext, { passive: true });
+        document.addEventListener('click', unlockAudioContext, { passive: true });
 
         function saveFavorites() { localStorage.setItem('ngopsinFavorites', JSON.stringify(userFavorites)); }
         function saveCustomOrder() { localStorage.setItem('ngopsinOrder', JSON.stringify(userCustomOrder)); }
@@ -982,6 +1002,11 @@
             }
         }
 
+        function isMyMessage(msg) {
+            if (msg.senderId) return msg.senderId === deviceId;
+            return msg.name === chatName || (isAdmin && msg.isAdmin);
+        }
+
         function updateChatBadge() {
             const badge = document.getElementById('chat-badge');
             if(!badge) return;
@@ -993,6 +1018,13 @@
                 badge.classList.add('hidden');
                 badge.classList.remove('flex');
             }
+        }
+
+        function markChatAsRead() {
+            unreadChatCount = 0;
+            lastReadChatTime = Math.max(Date.now(), latestChatTimestamp);
+            localStorage.setItem('ngopsinLastReadChat', lastReadChatTime.toString());
+            updateChatBadge();
         }
 
         function playCustomSound() {
@@ -1045,6 +1077,33 @@
             } catch(e) {}
         }
 
+        function showSystemNotification(msg) {
+            if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            const safeName = (msg.name || 'Anonim').replace(/</g, "<").replace(/>/g, ">");
+            const safeText = (msg.text || '').replace(/</g, "<").replace(/>/g, ">");
+            const notifBody = msg.image ? "📷 Mengirim foto" : safeText;
+
+            try {
+                if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification("💬 " + safeName, { 
+                            body: notifBody, 
+                            icon: './icon-192.png', 
+                            badge: './icon-192.png', 
+                            tag: 'chat-buku-saku',
+                            renotify: true,
+                            silent: false,
+                            vibrate: [200, 100, 200]
+                        });
+                    }).catch(() => {
+                        new Notification("💬 " + safeName, { body: notifBody, icon: './icon-192.png' });
+                    });
+                } else {
+                    new Notification("💬 " + safeName, { body: notifBody, icon: './icon-192.png' });
+                }
+            } catch (e) {}
+        }
+
         function promptSoundSelect() {
             if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
                 Notification.requestPermission();
@@ -1079,8 +1138,7 @@
                         .then(() => {
                             document.getElementById('chat-messages').innerHTML = '';
                             renderedMsgKeys.clear();
-                            unreadChatCount = 0;
-                            updateChatBadge();
+                            markChatAsRead();
                             showToast('Seluruh riwayat chat dihapus!');
                         })
                         .catch(() => showToast('Gagal menghapus riwayat chat.'));
@@ -1133,6 +1191,7 @@
 
             dbChatRef.push({
                 name: chatName || (isAdmin ? 'Admin' : 'Anonim'),
+                senderId: deviceId,
                 text: '', 
                 image: base64Image,
                 time: timeString,
@@ -1141,14 +1200,37 @@
             });
         }
 
-        // ============ SISTEM PEMUATAN & SINKRONISASI CHAT REAL-TIME ============
+        // ============ SISTEM PEMUATAN, BADGE & NOTIFIKASI CHAT REAL-TIME ============
         const chatQuery = dbChatRef.limitToLast(100);
         
         chatQuery.once('value', (snapshot) => {
+            let latestUnreadMsg = null;
+
             snapshot.forEach(child => {
+                const msg = child.val();
+                if (!msg) return;
                 renderedMsgKeys.add(child.key);
-                renderChatMessage(child.val(), child.key);
+                renderChatMessage(msg, child.key);
+
+                const msgTime = msg.timestamp || 0;
+                if (msgTime > latestChatTimestamp) latestChatTimestamp = msgTime;
+
+                // Hitung pesan yang masuk saat aplikasi sedang tertutup
+                if (!isMyMessage(msg) && msgTime > lastReadChatTime) {
+                    const isChatOpen = document.getElementById('page-chat').classList.contains('active');
+                    if (!isChatOpen) {
+                        unreadChatCount++;
+                        latestUnreadMsg = msg;
+                    }
+                }
             });
+
+            if (unreadChatCount > 0) {
+                updateChatBadge();
+                playCustomSound();
+                if (latestUnreadMsg) showSystemNotification(latestUnreadMsg);
+            }
+
             initialChatLoaded = true;
             setTimeout(scrollToBottomChat, 100);
             
@@ -1157,43 +1239,25 @@
                 renderedMsgKeys.add(newSnapshot.key);
                 
                 const msg = newSnapshot.val();
+                if (!msg) return;
                 renderChatMessage(msg, newSnapshot.key);
+
+                const msgTime = msg.timestamp || Date.now();
+                if (msgTime > latestChatTimestamp) latestChatTimestamp = msgTime;
                 
                 if (initialChatLoaded) {
-                    const isMe = msg.name === chatName || (isAdmin && msg.isAdmin);
                     const isChatOpen = document.getElementById('page-chat').classList.contains('active');
                     
-                    if (!isMe) {
+                    if (!isMyMessage(msg)) {
                         if (!isChatOpen) {
                             unreadChatCount++;
                             updateChatBadge();
+                        } else {
+                            markChatAsRead();
                         }
                         
                         playCustomSound(); 
-
-                        if ('Notification' in window && Notification.permission === 'granted') {
-                            const safeName = (msg.name || 'Anonim').replace(/</g, "<").replace(/>/g, ">");
-                            const safeText = (msg.text || '').replace(/</g, "<").replace(/>/g, ">");
-                            let notifBody = msg.image ? "📷 Mengirim foto" : safeText;
-
-                            try {
-                                if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-                                    navigator.serviceWorker.ready.then(reg => {
-                                        reg.showNotification("💬 " + safeName, { 
-                                            body: notifBody, 
-                                            icon: './icon-192.png', 
-                                            badge: './icon-192.png', 
-                                            tag: 'chat-buku-saku',
-                                            renotify: true,
-                                            silent: false,
-                                            vibrate: [200, 100, 200]
-                                        });
-                                    });
-                                } else {
-                                    new Notification("💬 " + safeName, { body: notifBody, icon: './icon-192.png' });
-                                }
-                            } catch (e) {}
-                        }
+                        showSystemNotification(msg);
                     }
                 }
             });
@@ -1221,9 +1285,7 @@
                 if(isAdmin && !chatName) chatName = "Admin";
                 navigateTo('page-chat');
                 updateAdminUI();
-                
-                unreadChatCount = 0;
-                updateChatBadge();
+                markChatAsRead();
                 
                 setTimeout(scrollToBottomChat, 50);
             }
@@ -1250,7 +1312,7 @@
         }
 
         function renderChatMessage(msg, key) {
-            const isMe = msg.name === chatName || (isAdmin && msg.isAdmin);
+            const isMe = isMyMessage(msg);
             const bubbleAlign = isMe ? 'justify-end' : 'justify-start';
             const bubbleColor = isMe ? 'bg-gold-500 text-black' : 'bg-black/50 border border-gold-500/30 text-slate-200';
             const adminBadge = msg.isAdmin ? '<i class="fas fa-check-circle text-[10px] ml-1 text-gold-500" title="Admin"></i>' : '';
@@ -1294,6 +1356,7 @@
 
             dbChatRef.push({
                 name: chatName || 'Anonim',
+                senderId: deviceId,
                 text: text,
                 time: timeString,
                 isAdmin: isAdmin,
