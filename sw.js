@@ -1,4 +1,4 @@
-const CACHE_NAME = "buku-saku-cache-v4";
+const CACHE_NAME = "buku-saku-cache-v5";
 const urlsToCache = [
   "./index.html",
   "./manifest.json",
