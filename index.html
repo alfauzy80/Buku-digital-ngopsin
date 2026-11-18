@@ -180,9 +180,7 @@
                         <input type="text" id="search-input" oninput="handleSearch(event)" placeholder="Cari judul..." class="w-full bg-black/40 border border-gold-500/30 text-gold-400 text-sm rounded-full px-4 py-2.5 outline-none focus:border-gold-500 transition-colors">
                         <i class="fas fa-search absolute right-4 top-3 text-gold-500/50 text-sm"></i>
                     </div>
-                    <!-- Tombol Susun Urutan (Bisa digunakan User & Admin) -->
                     <button id="btn-reorder-mode" onclick="toggleReorderMode()" class="bg-royal-dark text-gold-500 border border-gold-500/50 rounded-full px-4 py-2.5 shadow-md text-sm whitespace-nowrap transition-colors"><i class="fas fa-sort mr-1"></i>Susun</button>
-                    <!-- Tombol Tambah (Hanya Admin) -->
                     <button id="btn-add-toc" onclick="promptNewToc()" class="hidden bg-gold-500 text-black font-bold rounded-full px-4 py-2.5 shadow-md text-sm whitespace-nowrap"><i class="fas fa-plus mr-1"></i>Tambah</button>
                 </div>
 
@@ -202,13 +200,12 @@
                     <button id="btn-edit-mode" onclick="toggleEditor()" class="text-slate-500 hidden px-2"><i id="edit-icon" class="fas fa-pen"></i></button>
                 </div>
 
-                <!-- MENU BACA (Ditambahkan Tombol Favorit & Share) -->
                 <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar items-center bg-black/20">
+                    <!-- Tombol A- A+ Pembaca (Telah Aktif Kembali) -->
                     <button onclick="changeGlobalFontSize(-2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A-</button>
                     <button onclick="changeGlobalFontSize(2)" class="px-3 py-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 font-bold text-sm">A+</button>
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
                     
-                    <!-- Fitur Baru: Favorit & Share -->
                     <button onclick="toggleFavoriteCurrent()" id="btn-favorite" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="far fa-heart text-gold-500"></i> Favorit</button>
                     <button onclick="shareCurrentDoa()" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-share-nodes text-gold-500"></i> Share</button>
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
@@ -280,7 +277,6 @@
         let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
         let savedRange = null;
 
-        // ============ STATE LOKAL USER (FAVORIT & URUTAN KUSTOM) ============
         let userFavorites = JSON.parse(localStorage.getItem('ngopsinFavorites')) || [];
         let userCustomOrder = JSON.parse(localStorage.getItem('ngopsinOrder')) || [];
         let isReorderMode = false;
@@ -321,7 +317,7 @@
             } else {
                 const currentTime = new Date().getTime();
                 if (currentTime - lastBackPressTime < 2000) {
-                    // Keluar
+                    // Keluar aplikasi
                 } else {
                     showToast("Tekan sekali lagi untuk keluar");
                     lastBackPressTime = currentTime;
@@ -414,7 +410,6 @@
 
         function handleSearch(e) { renderToc(e.target.value); }
 
-        // ============ FITUR USER: MODE SUSUN URUTAN ============
         function toggleReorderMode() {
             isReorderMode = !isReorderMode;
             const btn = document.getElementById('btn-reorder-mode');
@@ -431,11 +426,7 @@
 
         function moveItem(id, direction, e) {
             e.stopPropagation();
-            
-            // Sinkronkan ID baru dari Firebase ke memori lokal jika belum ada
-            appData.forEach(item => {
-                if(!userCustomOrder.includes(item.id)) userCustomOrder.push(item.id);
-            });
+            appData.forEach(item => { if(!userCustomOrder.includes(item.id)) userCustomOrder.push(item.id); });
 
             const index = userCustomOrder.indexOf(id);
             if (index < 0) return;
@@ -453,7 +444,6 @@
         function renderToc(searchQuery = '') {
             const container = document.getElementById('toc-container'); container.innerHTML = '';
             
-            // Urutkan data berdasarkan susunan kustom lokal User
             let sortedData = [...appData];
             if(userCustomOrder.length > 0) {
                 sortedData.sort((a, b) => {
@@ -486,8 +476,6 @@
                 btn.className = 'bg-royal-dark/60 border border-gold-500/20 p-4 rounded-xl shadow-md flex items-center justify-between hover:bg-royal-base transition-colors';
                 
                 let titleClass = item.hidden ? 'text-slate-500 italic line-through' : 'text-slate-100';
-                
-                // Tambahkan tanda Favorit di daftar isi
                 let favIndicator = userFavorites.includes(item.id) ? `<i class="fas fa-heart text-red-500 ml-2 text-[10px] transform -translate-y-1"></i>` : '';
 
                 let titleHTML = `
@@ -500,7 +488,6 @@
                 let actionHTML = '';
                 
                 if (isReorderMode) {
-                    // Tombol Panah Mode Susun
                     actionHTML = `
                         <div class="flex items-center gap-2 flex-shrink-0 ml-3">
                             <button onclick="moveItem(${item.id}, 'up', event)" class="w-8 h-8 rounded-full bg-royal-dark text-gold-400 flex items-center justify-center border border-gold-500/30 hover:bg-gold-500 hover:text-black transition-colors"><i class="fas fa-arrow-up"></i></button>
@@ -508,7 +495,6 @@
                         </div>
                     `;
                 } else if (isAdmin) {
-                    // Tombol Mata dan Hapus (Admin)
                     let eyeIcon = item.hidden ? 'fa-eye-slash text-slate-500' : 'fa-eye text-gold-500/80 hover:text-gold-400';
                     actionHTML = `
                         <div class="flex items-center gap-4 flex-shrink-0 ml-3">
@@ -540,28 +526,6 @@
             }
         }
 
-        function promptDeleteToc(id, e) {
-            e.stopPropagation();
-            openModal({ title: 'Hapus Doa Ini Secara Permanen?', isInput: false, onConfirm: () => {
-                appData = appData.filter(x => x.id !== id); 
-                saveData(); 
-                showToast('Doa Berhasil Dihapus!');
-                renderToc(document.getElementById('search-input').value);
-            }});
-        }
-
-        function promptNewToc() {
-            openModal({ title: 'Tambah Doa', isInput: true, onConfirm: (val) => {
-                if(val) { 
-                    appData.push({ id: Date.now(), title: val, content: '<div style="text-align:center;">Ketik di sini...</div>', hidden: false }); 
-                    saveData(); 
-                    showToast('Ditambahkan!'); 
-                    renderToc(document.getElementById('search-input').value);
-                }
-            }});
-        }
-
-        // ============ FITUR USER: FAVORIT & SHARE ============
         function toggleFavoriteCurrent() {
             if(!currentActiveId) return;
             const index = userFavorites.indexOf(currentActiveId);
@@ -618,18 +582,17 @@
             document.getElementById('edit-icon').className = 'fas fa-pen';
             document.getElementById('btn-edit-mode').classList.replace('text-gold-400', 'text-slate-500');
             contentEl.setAttribute('contenteditable', 'false');
-            updateFavoriteBtnUI(); // Perbarui Ikon Hati sesuai ID yang dibuka
+            updateFavoriteBtnUI(); 
             navigateTo('page-detail');
         }
 
-        // ============ FITUR USER: SCROLL TO TOP 80% ============
+        // ============ SCROLL TO TOP & AUTO SCROLL ============
         const scrollContainer = document.getElementById('scroll-container');
         const btnScrollTop = document.getElementById('btn-scroll-top');
 
         scrollContainer.addEventListener('scroll', function() {
-            const scrollPercent = (this.scrollTop / (this.scrollHeight - this.clientHeight)) * 100;
-            // Tampilkan panah jika kontennya panjang dan sudah di-scroll melewati 80%
-            if (this.scrollHeight > this.clientHeight && scrollPercent > 80) {
+            // Sensor Pintar: Muncul jika layar di-scroll melebihi 80% dari TINGGI LAYAR HP (Bukan panjang teks)
+            if (this.scrollTop > (this.clientHeight * 0.8)) {
                 btnScrollTop.classList.remove('hidden');
                 btnScrollTop.classList.add('flex');
             } else {
@@ -642,20 +605,37 @@
             scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        let scrollInterval, isScrolling = false;
+        function toggleAutoScroll() {
+            const btn = document.getElementById('btn-autoscroll');
+            if (isScrolling) { 
+                clearInterval(scrollInterval); 
+                isScrolling = false; 
+                btn.classList.replace('text-gold-400', 'text-slate-300'); 
+            } else { 
+                isScrolling = true; 
+                btn.classList.replace('text-slate-300', 'text-gold-400'); 
+                scrollInterval = setInterval(() => { 
+                    scrollContainer.scrollBy({ top: 1, left: 0, behavior: 'auto' }); 
+                }, 50); 
+            }
+        }
 
         // ============ EDITOR HACKS: ANTI LOMPAT & MEMORI ============
+        const editorContent = document.getElementById('detail-content');
+
         function toggleEditor() {
             isEditorActive = !isEditorActive;
-            const rBar = document.getElementById('reader-features'), aBar = document.getElementById('admin-features'), contentEl = document.getElementById('detail-content'), btnEdit = document.getElementById('btn-edit-mode'), iconEdit = document.getElementById('edit-icon');
+            const rBar = document.getElementById('reader-features'), aBar = document.getElementById('admin-features'), btnEdit = document.getElementById('btn-edit-mode'), iconEdit = document.getElementById('edit-icon');
             if (isEditorActive) {
                 rBar.classList.replace('flex', 'hidden'); aBar.classList.replace('hidden', 'flex');
                 iconEdit.className = 'fas fa-save'; btnEdit.classList.replace('text-slate-500', 'text-gold-400');
-                contentEl.setAttribute('contenteditable', 'true'); 
+                editorContent.setAttribute('contenteditable', 'true'); 
                 showToast("Mode Edit Aktif.");
             } else {
                 aBar.classList.replace('flex', 'hidden'); rBar.classList.replace('hidden', 'flex');
                 iconEdit.className = 'fas fa-pen'; btnEdit.classList.replace('text-gold-400', 'text-slate-500');
-                contentEl.setAttribute('contenteditable', 'false'); saveCurrentContent(); showToast("Tersimpan.");
+                editorContent.setAttribute('contenteditable', 'false'); saveCurrentContent(); showToast("Tersimpan.");
             }
         }
 
@@ -782,6 +762,7 @@
             saveCurrentContent();
         }
 
+        // ============ FUNGSI A- A+ PEMBACA (RESTORED) ============
         function changeGlobalFontSize(step) {
             baseFontSize += step; 
             if(baseFontSize < 14) baseFontSize = 14; 
@@ -814,7 +795,24 @@
             if(itemIndex > -1) { appData[itemIndex].content = editorContent.innerHTML; saveData(); }
         }
         editorContent.addEventListener('input', () => { if(isEditorActive) saveCurrentContent(); });
+
+        function promptEditTitle() {
+            if(!isEditorActive) return showToast("Aktifkan mode edit.");
+            const item = appData.find(x => x.id === currentActiveId); if(!item) return;
+            openModal({ title: 'Ubah Judul', isInput: true, onConfirm: (val) => {
+                if(val){ item.title = val; document.getElementById('detail-title').innerText = val; saveData(); showToast('Berhasil diubah!'); }
+            }});
+            setTimeout(() => document.getElementById('modal-input').value = item.title, 50);
+        }
         
+        function promptDeleteCurrent() {
+            openModal({ title: 'Hapus Halaman?', isInput: false, onConfirm: () => {
+                appData = appData.filter(x => x.id !== currentActiveId); saveData(); 
+                window.history.back();
+                showToast('Dihapus!');
+            }});
+        }
+
         let wakeLock = null;
         async function toggleWakeLock() {
             const btn = document.getElementById('btn-wakelock');
