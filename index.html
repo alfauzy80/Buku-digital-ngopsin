@@ -14,6 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Amiri:wght@400;700&family=Lateef:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Mirza:wght@400;700&family=Markazi+Text:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -29,6 +30,22 @@
         }
     </script>
     <style>
+        @font-face {
+            font-family: 'Neirizi';
+            src: local('Neirizi'), url('./fonts/Neirizi.ttf') format('truetype');
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Arabic Typesetting';
+            src: local('Arabic Typesetting'), url('./fonts/arabtype.ttf') format('truetype');
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'LPMQ Isep Misbah';
+            src: local('LPMQ Isep Misbah'), local('LPMQ'), url('./fonts/LPMQ.ttf') format('truetype');
+            font-display: swap;
+        }
+
         html, body {
             margin: 0; padding: 0; 
             width: 100%; height: 100%; 
@@ -278,6 +295,11 @@
                         <option value="Amiri">Amiri</option>
                         <option value="Lateef">Lateef</option>
                         <option value="Playfair Display">Playfair</option>
+                        <option value="'Noto Naskh Arabic', serif">Nasakh / Naskhi</option>
+                        <option value="'Neirizi', 'Mirza', serif">Neirizi</option>
+                        <option value="'Aref Ruqaa', serif">Riq'ah</option>
+                        <option value="'Arabic Typesetting', 'Markazi Text', serif">Arabic Typesetting</option>
+                        <option value="'LPMQ Isep Misbah', 'Scheherazade New', serif">LPMQ Isep Misbah</option>
                     </select>
 
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
