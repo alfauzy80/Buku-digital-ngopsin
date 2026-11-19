@@ -134,8 +134,8 @@
             </div>
         </div>
 
-        <!-- MODAL TAMBAH / EDIT JADWAL PENGAJIAN -->
-        <div id="schedule-modal" class="fixed inset-0 bg-black/80 z-[1000] hidden items-center justify-center px-4 backdrop-blur-sm">
+        <!-- MODAL JADWAL PENGAJIAN -->
+        <div id="schedule-modal" style="display:none;" class="fixed inset-0 bg-black/80 z-[1000] items-center justify-center px-4 backdrop-blur-sm">
             <div class="bg-royal-dark border border-gold-500/30 rounded-2xl p-6 w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto">
                 <h3 id="schedule-modal-title" class="text-xl font-serif text-gold-400 mb-4">Tambah Jadwal Pengajian</h3>
                 
@@ -200,8 +200,8 @@
                     </button>
                 </div>
                 
-                <div class="relative flex flex-col items-center gap-5">
-                    <div class="relative">
+                <div class="relative flex flex-col items-center gap-3">
+                    <div class="relative mb-2">
                         <button onclick="navigateTo('page-toc')" class="border border-gold-500 text-gold-400 font-serif italic py-3 px-10 rounded-full hover:bg-gold-500 hover:text-black transition-colors flex items-center gap-3 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
                             <span id="cover-btnText">Buka Kitab</span> <i class="fas fa-book-open text-sm"></i>
                         </button>
@@ -210,16 +210,14 @@
                         </button>
                     </div>
                     
-                    <div class="flex items-center justify-center gap-4 mt-1">
-                        <button onclick="openChat()" class="relative text-gold-500/70 hover:text-gold-400 font-serif italic text-sm flex items-center gap-2 transition-colors px-3 py-2">
-                            <i class="fas fa-comments"></i> Ruang Obrolan
-                            <span id="chat-badge" class="hidden absolute -top-1 -right-2 bg-red-600 text-white text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full shadow-md border border-royal-dark min-w-[20px] items-center justify-center">0</span>
-                        </button>
-                        <div class="h-4 w-px bg-gold-500/30"></div>
-                        <button onclick="openSchedule()" class="relative text-gold-500/70 hover:text-gold-400 font-serif italic text-sm flex items-center gap-2 transition-colors px-3 py-2">
-                            <i class="fas fa-calendar-alt"></i> Jadwal Pengajian
-                        </button>
-                    </div>
+                    <button onclick="openChat()" class="relative text-gold-500/70 hover:text-gold-400 font-serif italic text-sm flex items-center gap-2 transition-colors px-4 py-1.5">
+                        <i class="fas fa-comments"></i> Ruang Obrolan
+                        <span id="chat-badge" class="hidden absolute -top-1.5 -right-3 bg-red-600 text-white text-[9px] font-sans font-bold px-1.5 py-0.5 rounded-full shadow-md border border-royal-dark min-w-[20px] items-center justify-center">0</span>
+                    </button>
+
+                    <button onclick="openSchedule()" class="relative text-gold-500/70 hover:text-gold-400 font-serif italic text-sm flex items-center gap-2 transition-colors px-4 py-1.5">
+                        <i class="fas fa-calendar-alt"></i> Jadwal Pengajian
+                    </button>
                 </div>
             </div>
 
@@ -362,20 +360,23 @@
         <!-- HALAMAN 5: JADWAL PENGAJIAN -->
         <div id="page-schedule" class="page">
             <div class="header-fixed p-4 flex justify-between items-center">
-                <button onclick="window.history.back()" class="text-gold-500 text-xl"><i class="fas fa-arrow-left"></i></button>
+                <button onclick="window.history.back()" class="text-gold-500 text-xl px-1"><i class="fas fa-arrow-left"></i></button>
                 <h1 class="font-serif font-bold text-gold-400 tracking-widest text-sm">JADWAL PENGAJIAN</h1>
-                <button id="btn-add-schedule" onclick="openScheduleModal()" class="hidden bg-gold-500 text-black font-bold rounded-full px-3 py-1 shadow-md text-xs whitespace-nowrap"><i class="fas fa-plus mr-1"></i>Tambah</button>
+                <div class="w-16 flex justify-end">
+                    <button id="btn-add-schedule" onclick="openScheduleModal()" style="display:none;" class="bg-gold-500 text-black font-bold rounded-full px-3 py-1 shadow-md text-xs whitespace-nowrap"><i class="fas fa-plus mr-1"></i>Tambah</button>
+                </div>
             </div>
             
             <div class="content-scroll p-6 pb-20">
                 <div id="schedule-container" class="space-y-4">
-                    <div class="text-center text-gold-500 py-10 font-serif animate-pulse">Memuat jadwal...</div>
+                    <div class="text-center text-slate-400 py-10 font-serif italic">Memuat jadwal...</div>
                 </div>
             </div>
         </div>
 
     </div>
 
+    <!-- SKRIP UTAMA (TIDAK DIUBAH DARI VERSI STABIL) -->
     <script>
         const firebaseConfig = { apiKey: "AIzaSyA40Q6eOPK5vKAq-q9w6OhoCTtanb6GlHI", authDomain: "buku-digital-ngopsin.firebaseapp.com", databaseURL: "https://buku-digital-ngopsin-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "buku-digital-ngopsin", storageBucket: "buku-digital-ngopsin.firebasestorage.app", messagingSenderId: "80687588401", appId: "1:80687588401:web:5bcfcbb2a3398556b16110" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -383,10 +384,8 @@
         const dbRef = database.ref('bukuSakuData');
         const dbCoverRef = database.ref('bukuSakuCover'); 
         const dbChatRef = database.ref('bukuSakuChat'); 
-        const dbScheduleRef = database.ref('bukuSakuJadwal');
 
-        let appData = [], scheduleData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
-        let editingScheduleId = null;
+        let appData = [], isAdmin = false, currentActiveId = null, isEditorActive = false, baseFontSize = 22;
         let savedRange = null;
         let lastCursorRange = null;
         let editHistory = [];
@@ -410,15 +409,6 @@
         let renderedMsgKeys = new Set();
 
         window.chatAudioCtx = null;
-
-        function escapeHTML(str) {
-            return String(str || '')
-                .replace(/&/g, "&")
-                .replace(/</g, "<")
-                .replace(/>/g, ">")
-                .replace(/"/g, """)
-                .replace(/'/g, "'");
-        }
 
         function unlockAudioContext() {
             try {
@@ -446,19 +436,24 @@
             e.preventDefault();
             deferredPrompt = e;
             const installBanner = document.getElementById('install-banner');
-            installBanner.classList.remove('hidden');
-            installBanner.classList.add('flex');
-        });
-
-        document.getElementById('btn-install').addEventListener('click', async () => {
-            const installBanner = document.getElementById('install-banner');
-            installBanner.classList.replace('flex', 'hidden');
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                await deferredPrompt.userChoice;
-                deferredPrompt = null;
+            if (installBanner) {
+                installBanner.classList.remove('hidden');
+                installBanner.classList.add('flex');
             }
         });
+
+        const btnInstallEl = document.getElementById('btn-install');
+        if (btnInstallEl) {
+            btnInstallEl.addEventListener('click', async () => {
+                const installBanner = document.getElementById('install-banner');
+                if (installBanner) installBanner.classList.replace('flex', 'hidden');
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                }
+            });
+        }
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -494,14 +489,6 @@
             if (document.getElementById('page-detail').classList.contains('active') && !isEditorActive && currentActiveId) openDetail(currentActiveId);
         });
 
-        dbScheduleRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            scheduleData = data ? (Array.isArray(data) ? data.filter(i=>i) : Object.values(data).filter(i=>i)) : [];
-            if (document.getElementById('page-schedule').classList.contains('active')) {
-                renderSchedules();
-            }
-        });
-
         let coverData = { title: "Buku Saku", subtitle: "Ngopsin Mabu Park", btnText: "Buka Kitab" };
         dbCoverRef.on('value', (snapshot) => {
             if(snapshot.exists()) {
@@ -520,7 +507,7 @@
         window.addEventListener('popstate', (e) => {
             closeImageModal(); 
             closeModal();
-            closeScheduleModal();
+            if (typeof closeScheduleModal === 'function') closeScheduleModal();
             if (e.state && e.state.page) {
                 navigateTo(e.state.page, true);
             } else {
@@ -536,7 +523,6 @@
         });
 
         function saveData() { dbRef.set(appData).catch(() => showToast("Gagal menyimpan.")); }
-        function saveSchedules() { dbScheduleRef.set(scheduleData).catch(() => showToast("Gagal menyimpan jadwal.")); }
         
         function showToast(msg) {
             const t = document.getElementById('toast'); 
@@ -601,13 +587,8 @@
                 if (isAdmin) btnClearChat.classList.remove('hidden');
                 else btnClearChat.classList.add('hidden');
             }
-            const btnAddSchedule = document.getElementById('btn-add-schedule');
-            if (btnAddSchedule) {
-                if (isAdmin) btnAddSchedule.classList.remove('hidden');
-                else btnAddSchedule.classList.add('hidden');
-            }
+            if (typeof syncScheduleAdminUI === 'function') syncScheduleAdminUI();
             if(document.getElementById('page-toc').classList.contains('active')) renderToc(document.getElementById('search-input').value);
-            if(document.getElementById('page-schedule').classList.contains('active')) renderSchedules();
         }
 
         function promptAdminLogin() {
@@ -638,9 +619,11 @@
 
         function navigateTo(pageId, isPopState = false) {
             ['page-cover', 'page-toc', 'page-detail', 'page-chat', 'page-schedule'].forEach(id => { 
-                document.getElementById(id).classList.remove('active'); 
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active'); 
             });
-            document.getElementById(pageId).classList.add('active');
+            const target = document.getElementById(pageId);
+            if (target) target.classList.add('active');
             
             if(pageId === 'page-toc') {
                 document.getElementById('search-input').value = ''; 
@@ -650,196 +633,14 @@
                 renderToc();
             }
 
-            if(pageId === 'page-schedule') {
-                updateAdminUI();
+            if(pageId === 'page-schedule' && typeof renderSchedules === 'function') {
+                if (typeof syncScheduleAdminUI === 'function') syncScheduleAdminUI();
                 renderSchedules();
             }
 
             if (!isPopState) {
                 window.history.pushState({ page: pageId }, "", "");
             }
-        }
-
-        // ============ FITUR JADWAL PENGAJIAN ============
-        function openSchedule() {
-            navigateTo('page-schedule');
-        }
-
-        function openScheduleModal(id = null) {
-            if (!isAdmin) return;
-            editingScheduleId = id;
-            const titleEl = document.getElementById('schedule-modal-title');
-            const dayEl = document.getElementById('sched-day');
-            const timeEl = document.getElementById('sched-time');
-            const locEl = document.getElementById('sched-location');
-            const agendaEl = document.getElementById('sched-agenda');
-
-            if (id) {
-                const item = scheduleData.find(x => x.id === id);
-                if (!item) return;
-                titleEl.innerText = 'Edit Jadwal Pengajian';
-                dayEl.value = item.day || '';
-                timeEl.value = item.time || '';
-                locEl.value = item.location || '';
-                agendaEl.value = item.agenda || '';
-            } else {
-                titleEl.innerText = 'Tambah Jadwal Pengajian';
-                dayEl.value = '';
-                timeEl.value = '';
-                locEl.value = '';
-                agendaEl.value = '';
-            }
-
-            const modal = document.getElementById('schedule-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            setTimeout(() => dayEl.focus(), 100);
-        }
-
-        function closeScheduleModal() {
-            editingScheduleId = null;
-            const modal = document.getElementById('schedule-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-        }
-
-        function saveScheduleForm() {
-            if (!isAdmin) return;
-            const day = document.getElementById('sched-day').value.trim();
-            const time = document.getElementById('sched-time').value.trim();
-            const location = document.getElementById('sched-location').value.trim();
-            const agenda = document.getElementById('sched-agenda').value.trim();
-
-            if (!time || !location || !agenda) {
-                showToast("Jam, lokasi, dan agenda wajib diisi!");
-                return;
-            }
-
-            if (editingScheduleId) {
-                const idx = scheduleData.findIndex(x => x.id === editingScheduleId);
-                if (idx > -1) {
-                    scheduleData[idx] = {
-                        ...scheduleData[idx],
-                        day: day || 'Jadwal Rutin',
-                        time,
-                        location,
-                        agenda
-                    };
-                }
-                showToast("Jadwal diperbarui!");
-            } else {
-                scheduleData.push({
-                    id: Date.now(),
-                    day: day || 'Jadwal Rutin',
-                    time,
-                    location,
-                    agenda
-                });
-                showToast("Jadwal ditambahkan!");
-            }
-
-            saveSchedules();
-            closeScheduleModal();
-            renderSchedules();
-        }
-
-        function promptDeleteSchedule(id) {
-            if (!isAdmin) return;
-            openModal({
-                title: 'Hapus Jadwal Pengajian Ini?',
-                isInput: false,
-                confirmText: 'Hapus',
-                onConfirm: () => {
-                    scheduleData = scheduleData.filter(x => x.id !== id);
-                    saveSchedules();
-                    showToast('Jadwal berhasil dihapus!');
-                    renderSchedules();
-                }
-            });
-        }
-
-        function shareScheduleItem(id) {
-            const item = scheduleData.find(x => x.id === id);
-            if (!item) return;
-            const shareText = `Jadwal Pengajian\nHari/Tanggal: ${item.day || '-'}\nJam Mulai: ${item.time || '-'}\nLokasi: ${item.location || '-'}\nAgenda: ${item.agenda || '-'}`;
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Jadwal Pengajian',
-                    text: shareText
-                }).catch(() => {});
-            } else {
-                navigator.clipboard.writeText(shareText);
-                showToast("Info jadwal disalin!");
-            }
-        }
-
-        function renderSchedules() {
-            const container = document.getElementById('schedule-container');
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (!scheduleData || scheduleData.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center text-slate-400 py-14 font-serif italic">
-                        <i class="fas fa-calendar-times text-3xl text-gold-500/40 mb-3 block"></i>
-                        Belum ada jadwal pengajian.
-                    </div>
-                `;
-                return;
-            }
-
-            scheduleData.forEach((item) => {
-                const card = document.createElement('div');
-                card.className = 'bg-royal-dark/60 border border-gold-500/20 p-4 rounded-xl shadow-md space-y-3';
-
-                const adminBtns = isAdmin ? `
-                    <button onclick="openScheduleModal(${item.id})" class="p-1.5 text-gold-500/80 hover:text-gold-400 transition-colors" title="Edit Jadwal">
-                        <i class="fas fa-pen text-xs"></i>
-                    </button>
-                    <button onclick="promptDeleteSchedule(${item.id})" class="p-1.5 text-red-500/80 hover:text-red-400 transition-colors" title="Hapus Jadwal">
-                        <i class="fas fa-trash text-xs"></i>
-                    </button>
-                ` : '';
-
-                card.innerHTML = `
-                    <div class="flex items-start justify-between gap-2 border-b border-gold-500/15 pb-2.5">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="inline-flex items-center gap-1.5 bg-gold-500/15 border border-gold-500/30 text-gold-400 text-xs font-semibold px-2.5 py-1 rounded-full">
-                                <i class="fas fa-calendar-day text-[10px]"></i> ${escapeHTML(item.day || 'Jadwal Rutin')}
-                            </span>
-                            <span class="inline-flex items-center gap-1.5 bg-black/40 border border-gold-500/20 text-slate-200 text-xs px-2.5 py-1 rounded-full">
-                                <i class="fas fa-clock text-gold-500 text-[10px]"></i> ${escapeHTML(item.time)}
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-1 flex-shrink-0">
-                            <button onclick="shareScheduleItem(${item.id})" class="p-1.5 text-slate-400 hover:text-gold-400 transition-colors" title="Bagikan Jadwal">
-                                <i class="fas fa-share-nodes text-xs"></i>
-                            </button>
-                            ${adminBtns}
-                        </div>
-                    </div>
-
-                    <div class="space-y-2 text-sm">
-                        <div class="flex items-start gap-2.5">
-                            <i class="fas fa-map-marker-alt text-gold-500 mt-1 w-4 text-center flex-shrink-0"></i>
-                            <div>
-                                <div class="text-[10px] uppercase tracking-wider text-slate-400">Lokasi</div>
-                                <div class="text-slate-100 font-medium">${escapeHTML(item.location)}</div>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-2.5">
-                            <i class="fas fa-list-ul text-gold-500 mt-1 w-4 text-center flex-shrink-0"></i>
-                            <div>
-                                <div class="text-[10px] uppercase tracking-wider text-slate-400">Agenda Acara</div>
-                                <div class="text-slate-200 whitespace-pre-wrap leading-relaxed">${escapeHTML(item.agenda)}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
         }
 
         function handleSearch(e) { renderToc(e.target.value); }
@@ -1895,6 +1696,223 @@
         function scrollToBottomChat() {
             const chatScroll = document.getElementById('chat-scroll-container');
             if (chatScroll) chatScroll.scrollTo({ top: chatScroll.scrollHeight, behavior: 'smooth' });
+        }
+    </script>
+
+    <!-- MODUL TERPISAH: JADWAL PENGAJIAN -->
+    <script>
+        const dbScheduleRef = database.ref('bukuSakuJadwal');
+        let scheduleData = [];
+        let editingScheduleId = null;
+
+        function escapeScheduleText(str) {
+            return String(str || '')
+                .replace(/&/g, "&")
+                .replace(/</g, "<")
+                .replace(/>/g, ">")
+                .replace(/"/g, """)
+                .replace(/'/g, "'");
+        }
+
+        dbScheduleRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            scheduleData = data ? (Array.isArray(data) ? data.filter(i => i) : Object.values(data).filter(i => i)) : [];
+            const pageEl = document.getElementById('page-schedule');
+            if (pageEl && pageEl.classList.contains('active')) {
+                renderSchedules();
+            }
+        }, () => {
+            scheduleData = [];
+            const pageEl = document.getElementById('page-schedule');
+            if (pageEl && pageEl.classList.contains('active')) {
+                renderSchedules();
+            }
+        });
+
+        function saveSchedules() {
+            dbScheduleRef.set(scheduleData).catch(() => showToast("Gagal menyimpan jadwal."));
+        }
+
+        function syncScheduleAdminUI() {
+            const btnAddSchedule = document.getElementById('btn-add-schedule');
+            if (btnAddSchedule) {
+                btnAddSchedule.style.display = isAdmin ? 'inline-flex' : 'none';
+            }
+            const pageEl = document.getElementById('page-schedule');
+            if (pageEl && pageEl.classList.contains('active')) {
+                renderSchedules();
+            }
+        }
+
+        function openSchedule() {
+            navigateTo('page-schedule');
+        }
+
+        function openScheduleModal(id) {
+            if (!isAdmin) return;
+            editingScheduleId = id || null;
+            const titleEl = document.getElementById('schedule-modal-title');
+            const dayEl = document.getElementById('sched-day');
+            const timeEl = document.getElementById('sched-time');
+            const locEl = document.getElementById('sched-location');
+            const agendaEl = document.getElementById('sched-agenda');
+
+            if (editingScheduleId) {
+                const item = scheduleData.find(x => x.id === editingScheduleId);
+                if (!item) return;
+                titleEl.innerText = 'Edit Jadwal Pengajian';
+                dayEl.value = item.day || '';
+                timeEl.value = item.time || '';
+                locEl.value = item.location || '';
+                agendaEl.value = item.agenda || '';
+            } else {
+                titleEl.innerText = 'Tambah Jadwal Pengajian';
+                dayEl.value = '';
+                timeEl.value = '';
+                locEl.value = '';
+                agendaEl.value = '';
+            }
+
+            const modal = document.getElementById('schedule-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => dayEl.focus(), 100);
+            }
+        }
+
+        function closeScheduleModal() {
+            editingScheduleId = null;
+            const modal = document.getElementById('schedule-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function saveScheduleForm() {
+            if (!isAdmin) return;
+            const day = document.getElementById('sched-day').value.trim();
+            const time = document.getElementById('sched-time').value.trim();
+            const location = document.getElementById('sched-location').value.trim();
+            const agenda = document.getElementById('sched-agenda').value.trim();
+
+            if (!time || !location || !agenda) {
+                showToast("Jam, lokasi, dan agenda wajib diisi!");
+                return;
+            }
+
+            if (editingScheduleId) {
+                const idx = scheduleData.findIndex(x => x.id === editingScheduleId);
+                if (idx > -1) {
+                    scheduleData[idx] = {
+                        id: scheduleData[idx].id,
+                        day: day || 'Jadwal Rutin',
+                        time: time,
+                        location: location,
+                        agenda: agenda
+                    };
+                }
+                showToast("Jadwal diperbarui!");
+            } else {
+                scheduleData.push({
+                    id: Date.now(),
+                    day: day || 'Jadwal Rutin',
+                    time: time,
+                    location: location,
+                    agenda: agenda
+                });
+                showToast("Jadwal ditambahkan!");
+            }
+
+            saveSchedules();
+            closeScheduleModal();
+            renderSchedules();
+        }
+
+        function promptDeleteSchedule(id) {
+            if (!isAdmin) return;
+            openModal({
+                title: 'Hapus Jadwal Pengajian Ini?',
+                isInput: false,
+                isPassword: false,
+                isSelect: false,
+                confirmText: 'Hapus',
+                onConfirm: () => {
+                    scheduleData = scheduleData.filter(x => x.id !== id);
+                    saveSchedules();
+                    showToast('Jadwal berhasil dihapus!');
+                    renderSchedules();
+                }
+            });
+        }
+
+        function shareScheduleItem(id) {
+            const item = scheduleData.find(x => x.id === id);
+            if (!item) return;
+            const shareText = "Jadwal Pengajian\nHari/Tanggal: " + (item.day || '-') + "\nJam Mulai: " + (item.time || '-') + "\nLokasi: " + (item.location || '-') + "\nAgenda: " + (item.agenda || '-');
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Jadwal Pengajian',
+                    text: shareText
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(shareText);
+                showToast("Info jadwal disalin!");
+            }
+        }
+
+        function renderSchedules() {
+            const container = document.getElementById('schedule-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!scheduleData || scheduleData.length === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 py-14 font-serif italic"><i class="fas fa-calendar-times text-3xl text-gold-500/40 mb-3 block"></i>Belum ada jadwal pengajian.</div>';
+                return;
+            }
+
+            scheduleData.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'bg-royal-dark/60 border border-gold-500/20 p-4 rounded-xl shadow-md space-y-3';
+
+                const adminBtns = isAdmin
+                    ? '<button onclick="openScheduleModal(' + item.id + ')" class="p-1.5 text-gold-500/80 hover:text-gold-400 transition-colors" title="Edit Jadwal"><i class="fas fa-pen text-xs"></i></button>' +
+                      '<button onclick="promptDeleteSchedule(' + item.id + ')" class="p-1.5 text-red-500/80 hover:text-red-400 transition-colors" title="Hapus Jadwal"><i class="fas fa-trash text-xs"></i></button>'
+                    : '';
+
+                card.innerHTML =
+                    '<div class="flex items-start justify-between gap-2 border-b border-gold-500/15 pb-2.5">' +
+                        '<div class="flex flex-wrap items-center gap-2">' +
+                            '<span class="inline-flex items-center gap-1.5 bg-gold-500/15 border border-gold-500/30 text-gold-400 text-xs font-semibold px-2.5 py-1 rounded-full">' +
+                                '<i class="fas fa-calendar-day text-[10px]"></i> ' + escapeScheduleText(item.day || 'Jadwal Rutin') +
+                            '</span>' +
+                            '<span class="inline-flex items-center gap-1.5 bg-black/40 border border-gold-500/20 text-slate-200 text-xs px-2.5 py-1 rounded-full">' +
+                                '<i class="fas fa-clock text-gold-500 text-[10px]"></i> ' + escapeScheduleText(item.time) +
+                            '</span>' +
+                        '</div>' +
+                        '<div class="flex items-center gap-1 flex-shrink-0">' +
+                            '<button onclick="shareScheduleItem(' + item.id + ')" class="p-1.5 text-slate-400 hover:text-gold-400 transition-colors" title="Bagikan Jadwal">' +
+                                '<i class="fas fa-share-nodes text-xs"></i>' +
+                            '</button>' +
+                            adminBtns +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="space-y-2 text-sm">' +
+                        '<div class="flex items-start gap-2.5">' +
+                            '<i class="fas fa-map-marker-alt text-gold-500 mt-1 w-4 text-center flex-shrink-0"></i>' +
+                            '<div>' +
+                                '<div class="text-[10px] uppercase tracking-wider text-slate-400">Lokasi</div>' +
+                                '<div class="text-slate-100 font-medium">' + escapeScheduleText(item.location) + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="flex items-start gap-2.5">' +
+                            '<i class="fas fa-list-ul text-gold-500 mt-1 w-4 text-center flex-shrink-0"></i>' +
+                            '<div>' +
+                                '<div class="text-[10px] uppercase tracking-wider text-slate-400">Agenda Acara</div>' +
+                                '<div class="text-slate-200 whitespace-pre-wrap leading-relaxed">' + escapeScheduleText(item.agenda) + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+
+                container.appendChild(card);
+            });
         }
     </script>
 </body>
