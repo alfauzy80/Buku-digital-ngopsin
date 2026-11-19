@@ -127,9 +127,14 @@
                     </select>
                 </div>
 
-                <div class="flex justify-end gap-3">
-                    <button onclick="closeModal()" class="px-4 py-2 text-slate-400 hover:text-white">Batal</button>
-                    <button id="btn-modal-confirm" class="px-5 py-2 bg-gradient-to-r from-gold-500 to-gold-400 text-black font-bold rounded-lg shadow-md">Simpan</button>
+                <div class="flex items-center justify-between gap-3">
+                    <button id="btn-modal-bio" onclick="triggerBiometricFromModal()" class="hidden px-3 py-2 bg-royal-base/80 border border-gold-500/50 text-gold-400 rounded-lg text-sm items-center gap-1.5 hover:bg-gold-500 hover:text-black transition-colors">
+                        <i class="fas fa-fingerprint"></i> Sidik Jari
+                    </button>
+                    <div class="flex justify-end gap-3 ml-auto">
+                        <button onclick="closeModal()" class="px-4 py-2 text-slate-400 hover:text-white">Batal</button>
+                        <button id="btn-modal-confirm" class="px-5 py-2 bg-gradient-to-r from-gold-500 to-gold-400 text-black font-bold rounded-lg shadow-md">Simpan</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -186,9 +191,12 @@
                 </div>
             </div>
 
-            <div class="absolute bottom-8 w-full text-center z-20 left-0 pointer-events-none">
-                <button onclick="promptAdminLogin()" class="p-3 text-slate-600 hover:text-gold-500 transition-colors pointer-events-auto">
+            <div class="absolute bottom-8 w-full flex items-center justify-center gap-2 z-20 left-0 pointer-events-none">
+                <button onclick="promptAdminLogin()" class="p-3 text-slate-600 hover:text-gold-500 transition-colors pointer-events-auto" title="Admin">
                     <i id="admin-icon" class="fas fa-lock text-sm"></i>
+                </button>
+                <button id="btn-bio-setup" onclick="toggleAdminBiometric()" class="hidden p-3 text-gold-500/70 hover:text-gold-400 transition-colors pointer-events-auto" title="Atur Sidik Jari Admin">
+                    <i id="bio-setup-icon" class="fas fa-fingerprint text-base"></i>
                 </button>
             </div>
         </div>
@@ -478,7 +486,7 @@
         }
 
         let modalCallback = null;
-        function openModal({ title, isInput, isPassword, isSelect, confirmText, onConfirm }) {
+        function openModal({ title, isInput, isPassword, isSelect, showBioBtn, confirmText, onConfirm }) {
             document.getElementById('modal-title').innerText = title;
             const inputEl = document.getElementById('modal-input');
             inputEl.value = ''; inputEl.type = isPassword ? 'password' : 'text';
@@ -487,6 +495,17 @@
             document.getElementById('modal-eye-btn').style.display = isPassword ? 'block' : 'none';
             document.getElementById('modal-select-container').style.display = isSelect ? 'block' : 'none';
             document.getElementById('btn-modal-confirm').innerText = confirmText || 'Simpan';
+
+            const bioBtn = document.getElementById('btn-modal-bio');
+            if (bioBtn) {
+                if (showBioBtn) {
+                    bioBtn.classList.remove('hidden');
+                    bioBtn.classList.add('flex');
+                } else {
+                    bioBtn.classList.add('hidden');
+                    bioBtn.classList.remove('flex');
+                }
+            }
             
             modalCallback = onConfirm;
             document.getElementById('custom-modal').classList.remove('hidden'); document.getElementById('custom-modal').classList.add('flex');
@@ -522,6 +541,168 @@
             document.getElementById('image-modal').classList.add('hidden');
         }
 
+        // ============ FITUR SIDIK JARI ADMIN (WebAuthn) ============
+        function bufferToBase64(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        function base64ToBuffer(base64) {
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function hasRegisteredBiometric() {
+            return !!localStorage.getItem('ngopsinAdminBioId');
+        }
+
+        function setAdminLoggedIn(msg) {
+            isAdmin = true;
+            document.getElementById('admin-icon').className = 'fas fa-unlock text-sm';
+            document.getElementById('admin-icon').parentElement.classList.replace('text-slate-600', 'text-gold-500');
+            updateAdminUI();
+            showToast(msg || "Akses Terbuka!");
+        }
+
+        async function registerAdminBiometric() {
+            if (!window.isSecureContext || !window.PublicKeyCredential || !navigator.credentials) {
+                showToast("Sidik jari butuh link HTTPS & HP yang mendukung.");
+                return;
+            }
+            try {
+                const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                if (!available) {
+                    showToast("Sensor sidik jari tidak tersedia di perangkat ini.");
+                    return;
+                }
+
+                const challenge = new Uint8Array(32);
+                window.crypto.getRandomValues(challenge);
+                const userId = new Uint8Array(16);
+                window.crypto.getRandomValues(userId);
+
+                const credential = await navigator.credentials.create({
+                    publicKey: {
+                        challenge: challenge,
+                        rp: { name: "Buku Saku Digital" },
+                        user: {
+                            id: userId,
+                            name: "admin-bukusaku",
+                            displayName: "Admin Buku Saku"
+                        },
+                        pubKeyCredParams: [
+                            { type: "public-key", alg: -7 },
+                            { type: "public-key", alg: -257 }
+                        ],
+                        authenticatorSelection: {
+                            authenticatorAttachment: "platform",
+                            userVerification: "required"
+                        },
+                        timeout: 60000,
+                        attestation: "none"
+                    }
+                });
+
+                if (credential && credential.rawId) {
+                    localStorage.setItem('ngopsinAdminBioId', bufferToBase64(credential.rawId));
+                    updateAdminUI();
+                    showToast("Sidik jari Admin aktif!");
+                }
+            } catch (err) {
+                if (err && err.name === 'NotAllowedError') {
+                    showToast("Pendaftaran sidik jari dibatalkan.");
+                } else {
+                    showToast("Gagal mendaftarkan sidik jari.");
+                }
+            }
+        }
+
+        async function authenticateAdminBiometric(fallbackToPassword = true) {
+            const savedId = localStorage.getItem('ngopsinAdminBioId');
+            if (!savedId || !window.isSecureContext || !window.PublicKeyCredential || !navigator.credentials) {
+                if (fallbackToPassword) openAdminPasswordModal();
+                return false;
+            }
+            try {
+                const challenge = new Uint8Array(32);
+                window.crypto.getRandomValues(challenge);
+
+                const assertion = await navigator.credentials.get({
+                    publicKey: {
+                        challenge: challenge,
+                        allowCredentials: [{
+                            id: base64ToBuffer(savedId),
+                            type: "public-key",
+                            transports: ["internal"]
+                        }],
+                        userVerification: "required",
+                        timeout: 60000
+                    }
+                });
+
+                if (assertion) {
+                    closeModal();
+                    setAdminLoggedIn("Akses Terbuka (Sidik Jari)!");
+                    return true;
+                }
+            } catch (err) {
+                if (fallbackToPassword) {
+                    openAdminPasswordModal();
+                } else {
+                    showToast("Verifikasi sidik jari dibatalkan.");
+                }
+            }
+            return false;
+        }
+
+        function toggleAdminBiometric() {
+            if (!isAdmin) return;
+            if (hasRegisteredBiometric()) {
+                openModal({
+                    title: 'Nonaktifkan Sidik Jari Admin?',
+                    isInput: false,
+                    isPassword: false,
+                    isSelect: false,
+                    confirmText: 'Hapus',
+                    onConfirm: () => {
+                        localStorage.removeItem('ngopsinAdminBioId');
+                        updateAdminUI();
+                        showToast('Sidik jari Admin dinonaktifkan.');
+                    }
+                });
+            } else {
+                registerAdminBiometric();
+            }
+        }
+
+        function triggerBiometricFromModal() {
+            authenticateAdminBiometric(false);
+        }
+
+        function openAdminPasswordModal() {
+            openModal({
+                title: 'Sandi Admin',
+                isInput: true,
+                isPassword: true,
+                showBioBtn: hasRegisteredBiometric() && window.isSecureContext && !!window.PublicKeyCredential,
+                onConfirm: (val) => {
+                    if (val === 'ngopsinoznet') {
+                        setAdminLoggedIn("Akses Terbuka!");
+                    } else {
+                        showToast("Sandi Salah!");
+                    }
+                }
+            });
+        }
+
         function updateAdminUI() {
             document.querySelectorAll('.cover-edit-icon').forEach(el => {
                 if (isAdmin) { el.classList.remove('hidden'); el.classList.add('flex'); } 
@@ -533,6 +714,23 @@
                 if (isAdmin) btnClearChat.classList.remove('hidden');
                 else btnClearChat.classList.add('hidden');
             }
+            const btnBioSetup = document.getElementById('btn-bio-setup');
+            if (btnBioSetup) {
+                if (isAdmin && window.PublicKeyCredential) {
+                    btnBioSetup.classList.remove('hidden');
+                    if (hasRegisteredBiometric()) {
+                        btnBioSetup.classList.remove('text-gold-500/70');
+                        btnBioSetup.classList.add('text-emerald-400');
+                        btnBioSetup.title = 'Sidik Jari Aktif (Ketuk untuk Nonaktifkan)';
+                    } else {
+                        btnBioSetup.classList.remove('text-emerald-400');
+                        btnBioSetup.classList.add('text-gold-500/70');
+                        btnBioSetup.title = 'Aktifkan Sidik Jari Admin';
+                    }
+                } else {
+                    btnBioSetup.classList.add('hidden');
+                }
+            }
             if(document.getElementById('page-toc').classList.contains('active')) renderToc(document.getElementById('search-input').value);
         }
 
@@ -542,13 +740,11 @@
                 document.getElementById('admin-icon').className = 'fas fa-lock text-sm'; document.getElementById('admin-icon').parentElement.classList.replace('text-gold-500', 'text-slate-600'); 
                 updateAdminUI(); return;
             }
-            openModal({ title: 'Sandi Admin', isInput: true, isPassword: true, onConfirm: (val) => {
-                if(val === 'ngopsinoznet') {
-                    isAdmin = true; showToast("Akses Terbuka!");
-                    document.getElementById('admin-icon').className = 'fas fa-unlock text-sm'; document.getElementById('admin-icon').parentElement.classList.replace('text-slate-600', 'text-gold-500');
-                    updateAdminUI();
-                } else showToast("Sandi Salah!");
-            }});
+            if (hasRegisteredBiometric() && window.isSecureContext && window.PublicKeyCredential) {
+                authenticateAdminBiometric(true);
+            } else {
+                openAdminPasswordModal();
+            }
         }
 
         function editCoverData(field) {
