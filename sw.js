@@ -1,46 +1,89 @@
-const CACHE_NAME = "buku-saku-cache-v7";
-const urlsToCache = [
-  "./index.html",
-  "./manifest.json",
-  "https://cdn.tailwindcss.com",
-  "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+const CACHE_NAME = 'buku-saku-ngopsin-v8';
+const STATIC_ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  './logo.png',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
-// Menginstal Service Worker
-self.addEventListener("install", (event) => {
+// Install & langsung aktifkan worker baru tanpa menunggu
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
-  );
-});
-
-// Menghapus cache lama saat ada pembaruan
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
+      return Promise.allSettled(
+        STATIC_ASSETS.map((url) => cache.add(url))
       );
     })
   );
 });
 
-// Mengambil file dari Cache (Mode Offline Support)
-self.addEventListener("fetch", (event) => {
-  // Biarkan panggilan Firebase langsung ke internet, jangan di-cache
-  if (event.request.url.includes("firebase")) {
+// Hapus semua cache versi lama secara otomatis
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// Network-First untuk halaman HTML agar update selalu langsung tampil
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+
+  const url = new URL(req.url);
+
+  // Jangan cache request ke Firebase / domain luar agar data selalu real-time
+  if (url.origin !== self.location.origin) return;
+
+  // Untuk navigasi / index.html: selalu cek jaringan dulu, baru fallback ke cache
+  if (req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(req, { cache: 'no-store' })
+        .then((res) => {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
+          return res;
+        })
+        .catch(() => caches.match(req).then((cached) => cached || caches.match('./index.html')))
+    );
     return;
   }
-  
+
+  // Untuk aset lokal (logo, icon, manifest): ambil dari cache sambil update di background
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Kembalikan file dari cache jika ada, jika tidak, unduh dari internet
-      return response || fetch(event.request);
+    caches.match(req).then((cached) => {
+      const networkFetch = fetch(req)
+        .then((res) => {
+          if (res && res.status === 200) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
+          }
+          return res;
+        })
+        .catch(() => cached);
+
+      return cached || networkFetch;
+    })
+  );
+});
+
+// Saat notifikasi chat diklik, langsung buka / fokus ke aplikasi
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow('./');
     })
   );
 });
