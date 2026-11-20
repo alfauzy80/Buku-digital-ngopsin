@@ -1,4 +1,4 @@
-const CACHE_NAME = 'buku-saku-ngopsin-v9';
+const CACHE_NAME = 'buku-saku-ngopsin-v10';
 const STATIC_ASSETS = [
   './',
   './index.html',
