@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>Buku Saku Digital - Premium Edition</title>
     
-    <meta name="theme-color" content="#022c22">
+    <meta name="theme-color" id="meta-theme-color" content="#022c22">
     <link rel="apple-touch-icon" href="./icon-512.png">
     
     <link rel="preload" href="./logo.png" as="image">
@@ -105,6 +105,133 @@
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #eab308; border-radius: 4px; }
+
+        /* ============ TEMA 2: HIJAU SAGE TEDUH (SOFT SAGE MIST) ============ */
+        html.theme-sage, body.theme-sage {
+            background: radial-gradient(ellipse at top, #e2ebe4, #d2e0d6, #c2d4c8) !important;
+            color: #12372b !important;
+        }
+        body.theme-sage .header-fixed {
+            background: rgba(214, 228, 218, 0.96) !important;
+            border-bottom-color: rgba(18, 55, 43, 0.18) !important;
+            box-shadow: 0 4px 12px rgba(18, 55, 43, 0.1) !important;
+        }
+        body.theme-sage .bg-royal-dark,
+        body.theme-sage .bg-royal-dark\/60,
+        body.theme-sage .bg-royal-dark\/70,
+        body.theme-sage .bg-royal-dark\/95 {
+            background-color: rgba(237, 244, 239, 0.92) !important;
+        }
+        body.theme-sage .bg-royal-base,
+        body.theme-sage .bg-royal-base\/80,
+        body.theme-sage .hover\:bg-royal-base:hover {
+            background-color: #d2e2d7 !important;
+        }
+        body.theme-sage .bg-black\/20 {
+            background-color: rgba(18, 55, 43, 0.06) !important;
+        }
+        body.theme-sage .bg-black\/40,
+        body.theme-sage .bg-black\/50 {
+            background-color: rgba(246, 250, 247, 0.85) !important;
+        }
+        body.theme-sage .text-gold-400,
+        body.theme-sage .text-gold-500 {
+            color: #855a08 !important;
+        }
+        body.theme-sage .text-gold-500\/70,
+        body.theme-sage .text-gold-500\/80,
+        body.theme-sage .text-gold-500\/50 {
+            color: rgba(133, 90, 8, 0.82) !important;
+        }
+        body.theme-sage .text-slate-100,
+        body.theme-sage .text-slate-200 {
+            color: #12372b !important;
+        }
+        body.theme-sage .text-white:not(#chat-badge) {
+            color: #12372b !important;
+        }
+        body.theme-sage .text-slate-300,
+        body.theme-sage .text-slate-400 {
+            color: #35584b !important;
+        }
+        body.theme-sage .text-slate-500,
+        body.theme-sage .text-slate-600 {
+            color: #547569 !important;
+        }
+        body.theme-sage .text-emerald-400 {
+            color: #047857 !important;
+        }
+        body.theme-sage .border-gold-500,
+        body.theme-sage .border-gold-500\/50 {
+            border-color: rgba(133, 90, 8, 0.5) !important;
+        }
+        body.theme-sage .border-gold-500\/30,
+        body.theme-sage .border-gold-500\/20 {
+            border-color: rgba(18, 55, 43, 0.2) !important;
+        }
+        body.theme-sage .bg-gold-500 {
+            background-color: #d9a726 !important;
+        }
+        body.theme-sage #btn-scroll-top {
+            background-color: #0f5132 !important;
+            color: #f8f4e6 !important;
+        }
+        body.theme-sage #toast {
+            background-color: #123c2f !important;
+            color: #f8f4e6 !important;
+            border-color: #d9a726 !important;
+        }
+        body.theme-sage input::placeholder {
+            color: #5d7e72 !important;
+        }
+        body.theme-sage #image-modal {
+            background-color: rgba(0, 0, 0, 0.95) !important;
+        }
+        body.theme-sage #image-modal button {
+            color: #f1f5f9 !important;
+        }
+        body.theme-sage .editor-box[contenteditable="true"]:focus {
+            border-color: rgba(133, 90, 8, 0.55) !important;
+            background: rgba(255, 255, 255, 0.35) !important;
+        }
+        body.theme-sage ::-webkit-scrollbar-thumb {
+            background: #855a08;
+        }
+
+        /* Penyesuaian kontras otomatis teks konten saat mode Hijau Sage Teduh aktif */
+        body.theme-sage #detail-content {
+            color: #123c2f !important;
+        }
+        body.theme-sage #detail-content [style*="facc15" i],
+        body.theme-sage #detail-content [style*="250, 204, 21"] {
+            color: #8a5f06 !important;
+        }
+        body.theme-sage #detail-content [style*="f8f4e6" i],
+        body.theme-sage #detail-content [style*="248, 244, 230"],
+        body.theme-sage #detail-content [style*="ffffff" i],
+        body.theme-sage #detail-content [style*="255, 255, 255"] {
+            color: #123c2f !important;
+        }
+        body.theme-sage #detail-content [style*="f3e2c7" i],
+        body.theme-sage #detail-content [style*="243, 226, 199"] {
+            color: #6b4c26 !important;
+        }
+        body.theme-sage #detail-content [style*="e5c675" i],
+        body.theme-sage #detail-content [style*="229, 198, 117"] {
+            color: #7c5e10 !important;
+        }
+        body.theme-sage #detail-content [style*="6ed3c8" i],
+        body.theme-sage #detail-content [style*="110, 211, 200"] {
+            color: #0f6b63 !important;
+        }
+        body.theme-sage #detail-content [style*="e29578" i],
+        body.theme-sage #detail-content [style*="226, 149, 120"] {
+            color: #9e472a !important;
+        }
+        body.theme-sage #detail-content [style*="a9cbb0" i],
+        body.theme-sage #detail-content [style*="169, 203, 176"] {
+            color: #266045 !important;
+        }
     </style>
 </head>
 <body class="selection:bg-gold-500 selection:text-royal-dark font-sans relative">
@@ -163,6 +290,10 @@
 
         <!-- HALAMAN 1: COVER -->
         <div id="page-cover" class="page active relative px-6">
+            <button id="btn-theme-cover" onclick="toggleAppTheme()" class="absolute top-5 right-5 z-30 w-9 h-9 rounded-full bg-royal-dark/70 border border-gold-500/30 text-gold-400 flex items-center justify-center shadow-md active:scale-95 transition-transform" title="Ganti Tema">
+                <i id="theme-icon-cover" class="fas fa-sun text-sm"></i>
+            </button>
+
             <div class="flex-grow w-full flex items-center justify-center pt-8">
                 <div class="relative">
                     <div class="absolute inset-0 bg-gold-500 blur-[40px] opacity-25 rounded-full scale-110"></div>
@@ -263,6 +394,8 @@
                     
                     <button onclick="toggleWakeLock()" id="btn-wakelock" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-lightbulb text-gold-500"></i> Layar</button>
                     <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-angle-double-down text-gold-500"></i> Scroll</button>
+                    <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
+                    <button onclick="toggleAppTheme()" id="btn-theme-reader" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i id="theme-icon-reader" class="fas fa-sun text-gold-500"></i> Tema</button>
                 </div>
 
                 <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 shadow-inner select-none">
@@ -305,10 +438,55 @@
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-0.5"></div>
                     <button onmousedown="event.preventDefault()" onclick="changeLineHeight()" class="px-2 h-8 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center gap-1 text-xs hover:bg-gold-500/10 active:bg-gold-500/20"><i class="fas fa-text-height"></i> Spasi</button>
                     
-                    <input type="color" ontouchstart="captureEditorSelection()" onmousedown="captureEditorSelection()" onchange="changeColor(this.value)" class="w-8 h-8 p-0 ml-1 border-0 rounded bg-transparent cursor-pointer flex-shrink-0" title="Warna">
+                    <button id="btn-color-palette" onmousedown="event.preventDefault()" onclick="toggleColorPalette()" class="w-8 h-8 ml-1 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center justify-center relative hover:bg-gold-500/10 active:bg-gold-500/20" title="Pilih Warna">
+                        <i class="fas fa-palette text-xs"></i>
+                        <span id="active-color-dot" class="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 rounded-full border border-black/60" style="background-color: #FACC15;"></span>
+                    </button>
                     
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
                     <button onmousedown="event.preventDefault()" onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0 hover:bg-red-500/20 active:bg-red-500/40"><i class="fas fa-trash text-xs"></i></button>
+                </div>
+
+                <!-- PAPAN PALET WARNA EDITOR ADMIN -->
+                <div id="color-palette-panel" class="hidden p-2.5 bg-royal-dark/95 border-t border-gold-500/20 select-none">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-semibold text-gold-400 tracking-wide"><i class="fas fa-palette mr-1"></i>Palet Warna Teks</span>
+                        <button onmousedown="event.preventDefault()" onclick="closeColorPalette()" class="text-slate-400 hover:text-white text-xs px-1.5 py-0.5"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button onmousedown="event.preventDefault()" onclick="selectPaletteColor('#F8F4E6', 'Putih Gading')" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/40 border border-gold-500/20 hover:border-gold-400 text-left transition-colors">
+                            <span class="w-4 h-4 rounded-full flex-shrink-0 border border-black/30 shadow-inner" style="background-color:#F8F4E6;"></span>
+                            <span class="text-[11px] text-slate-200 truncate">Putih Gading</span>
+                        </button>
+                        <button onmousedown="event.preventDefault()" onclick="selectPaletteColor('#F3E2C7', 'Warm Cream')" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/40 border border-gold-500/20 hover:border-gold-400 text-left transition-colors">
+                            <span class="w-4 h-4 rounded-full flex-shrink-0 border border-black/30 shadow-inner" style="background-color:#F3E2C7;"></span>
+                            <span class="text-[11px] text-slate-200 truncate">Warm Cream</span>
+                        </button>
+                        <button onmousedown="event.preventDefault()" onclick="selectPaletteColor('#FACC15', 'Emas Cerah')" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/40 border border-gold-500/20 hover:border-gold-400 text-left transition-colors">
+                            <span class="w-4 h-4 rounded-full flex-shrink-0 border border-black/30 shadow-inner" style="background-color:#FACC15;"></span>
+                            <span class="text-[11px] text-slate-200 truncate">Emas Cerah</span>
+                        </button>
+                        <button onmousedown="event.preventDefault()" onclick="selectPaletteColor('#6ED3C8', 'Soft Teal')" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/40 border border-gold-500/20 hover:border-gold-400 text-left transition-colors">
+                            <span class="w-4 h-4 rounded-full flex-shrink-0 border border-black/30 shadow-inner" style="background-color:#6ED3C8;"></span>
+                            <span class="text-[11px] text-slate-200 truncate">Soft Teal</span>
+                        </button>
+                        <button onmousedown="event.preventDefault()" onclick="selectPaletteColor('#E5C675', 'Soft Gold')" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/40 border border-gold-500/20 hover:border-gold-400 text-left transition-colors">
+                            <span class="w-4 h-4 rounded-full flex-shrink-0 border border-black/30 shadow-inner" style="background-color:#E5C675;"></span>
+                            <span class="text-[11px] text-slate-200 truncate">Soft Gold</span>
+                        </button>
+                        <button onmousedown="event.preventDefault()" onclick="selectPaletteColor('#E29578', 'Soft Terracotta')" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/40 border border-gold-500/20 hover:border-gold-400 text-left transition-colors">
+                            <span class="w-4 h-4 rounded-full flex-shrink-0 border border-black/30 shadow-inner" style="background-color:#E29578;"></span>
+                            <span class="text-[11px] text-slate-200 truncate">Soft Terracotta</span>
+                        </button>
+                        <button onmousedown="event.preventDefault()" onclick="selectPaletteColor('#A9CBB0', 'Hijau Sage Terang')" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/40 border border-gold-500/20 hover:border-gold-400 text-left transition-colors">
+                            <span class="w-4 h-4 rounded-full flex-shrink-0 border border-black/30 shadow-inner" style="background-color:#A9CBB0;"></span>
+                            <span class="text-[11px] text-slate-200 truncate">Hijau Sage Terang</span>
+                        </button>
+                        <label ontouchstart="captureEditorSelection()" onmousedown="captureEditorSelection()" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/40 border border-dashed border-gold-500/40 hover:border-gold-400 cursor-pointer transition-colors">
+                            <input type="color" id="custom-color-input" ontouchstart="captureEditorSelection()" onmousedown="captureEditorSelection()" onchange="selectPaletteColor(this.value, 'Warna Kustom')" class="w-4 h-4 p-0 border-0 rounded-full bg-transparent cursor-pointer flex-shrink-0">
+                            <span class="text-[11px] text-gold-400 truncate">Warna Bebas</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -386,6 +564,36 @@
         let renderedMsgKeys = new Set();
 
         window.chatAudioCtx = null;
+
+        // ============ PENGATURAN TEMA (MALAM EMERALD / HIJAU SAGE TEDUH) ============
+        let currentTheme = localStorage.getItem('ngopsinTheme') || 'dark';
+
+        function applyAppTheme(theme, silent = true) {
+            currentTheme = theme === 'sage' ? 'sage' : 'dark';
+            localStorage.setItem('ngopsinTheme', currentTheme);
+
+            const isSage = currentTheme === 'sage';
+            document.documentElement.classList.toggle('theme-sage', isSage);
+            document.body.classList.toggle('theme-sage', isSage);
+
+            const metaTheme = document.getElementById('meta-theme-color');
+            if (metaTheme) metaTheme.setAttribute('content', isSage ? '#d6e4da' : '#022c22');
+
+            const iconCover = document.getElementById('theme-icon-cover');
+            const iconReader = document.getElementById('theme-icon-reader');
+            if (iconCover) iconCover.className = isSage ? 'fas fa-moon text-sm' : 'fas fa-sun text-sm';
+            if (iconReader) iconReader.className = isSage ? 'fas fa-moon text-gold-500' : 'fas fa-sun text-gold-500';
+
+            if (!silent) {
+                showToast(isSage ? 'Tema: Hijau Sage Teduh' : 'Tema: Malam Emerald');
+            }
+        }
+
+        function toggleAppTheme() {
+            applyAppTheme(currentTheme === 'sage' ? 'dark' : 'sage', false);
+        }
+
+        applyAppTheme(currentTheme, true);
 
         function unlockAudioContext() {
             try {
@@ -484,6 +692,7 @@
         window.addEventListener('popstate', (e) => {
             closeImageModal(); 
             closeModal();
+            closeColorPalette();
             if (e.state && e.state.page) {
                 navigateTo(e.state.page, true);
             } else {
@@ -781,6 +990,7 @@
         }
 
         function navigateTo(pageId, isPopState = false) {
+            closeColorPalette();
             ['page-cover', 'page-toc', 'page-detail', 'page-chat'].forEach(id => { 
                 document.getElementById(id).classList.remove('active'); 
             });
@@ -983,6 +1193,7 @@
 
         function openDetail(id) {
             currentActiveId = id; const item = appData.find(x => x.id === id); if(!item) return;
+            closeColorPalette();
             document.getElementById('detail-title').innerText = (item.title||'').replace(/^\d+[\.\-]?\s*/, '');
             const contentEl = document.getElementById('detail-content');
             contentEl.innerHTML = item.content || ""; contentEl.style.fontSize = baseFontSize + 'px';
@@ -1033,8 +1244,29 @@
             }
         }
 
-        // ============ EDITOR STABIL: A-/A+, SPASI PARAGRAF, FONT, WARNA & UNDO/REDO ============
+        // ============ EDITOR STABIL: A-/A+, SPASI PARAGRAF, FONT, PALET WARNA & UNDO/REDO ============
         const editorContent = document.getElementById('detail-content');
+
+        function toggleColorPalette() {
+            const panel = document.getElementById('color-palette-panel');
+            if (!panel) return;
+            panel.classList.toggle('hidden');
+        }
+
+        function closeColorPalette() {
+            const panel = document.getElementById('color-palette-panel');
+            if (panel) panel.classList.add('hidden');
+        }
+
+        function selectPaletteColor(color, label) {
+            if (!color) return;
+            if (applyInlineStyleToSelection('color', color)) {
+                const dot = document.getElementById('active-color-dot');
+                if (dot) dot.style.backgroundColor = color;
+                closeColorPalette();
+                if (label) showToast('Warna: ' + label);
+            }
+        }
 
         function pushEditHistory() {
             if (!isEditorActive) return;
@@ -1060,6 +1292,7 @@
                 document.getElementById('font-size-display').innerText = baseFontSize + 'px';
                 showToast("Mode Edit Aktif.");
             } else {
+                closeColorPalette();
                 aBar.classList.replace('flex', 'hidden'); rBar.classList.replace('hidden', 'flex');
                 iconEdit.className = 'fas fa-pen'; btnEdit.classList.replace('text-gold-400', 'text-slate-500');
                 editorContent.setAttribute('contenteditable', 'false');
