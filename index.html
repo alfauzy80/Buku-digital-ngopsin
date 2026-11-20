@@ -101,6 +101,26 @@
             border: 1px dashed rgba(234, 179, 8, 0.5); 
             border-radius: 8px; padding: 8px; background: rgba(255,255,255,0.02); 
         }
+
+        /* Sorotan hasil pencarian teks editor tanpa mengubah HTML asli */
+        ::highlight(editor-find-all) {
+            background-color: rgba(250, 204, 21, 0.32);
+            color: inherit;
+        }
+        ::highlight(editor-find-active) {
+            background-color: #facc15;
+            color: #022c22;
+        }
+        body.theme-sage::highlight(editor-find-all),
+        .theme-sage ::highlight(editor-find-all) {
+            background-color: rgba(133, 83, 0, 0.24);
+            color: inherit;
+        }
+        body.theme-sage::highlight(editor-find-active),
+        .theme-sage ::highlight(editor-find-active) {
+            background-color: #855300;
+            color: #f8f4e6;
+        }
         
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -203,7 +223,6 @@
         body.theme-sage #detail-content * {
             color: #132e25 !important;
         }
-        /* Pertahankan pembedaan aksen warna dalam versi gelap & tajam */
         body.theme-sage #detail-content [style*="facc15" i],
         body.theme-sage #detail-content [style*="250, 204, 21"],
         body.theme-sage #detail-content [style*="eab308" i],
@@ -448,6 +467,10 @@
                         <i class="fas fa-palette text-xs"></i>
                         <span id="active-color-dot" class="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 rounded-full border border-black/60" style="background-color: #FACC15;"></span>
                     </button>
+
+                    <button id="btn-find-replace" onmousedown="event.preventDefault()" onclick="toggleFindReplace()" class="w-8 h-8 ml-0.5 bg-royal-dark text-gold-400 rounded border border-gold-500/30 flex-shrink-0 flex items-center justify-center hover:bg-gold-500/10 active:bg-gold-500/20" title="Cari & Ganti Teks">
+                        <i class="fas fa-search text-xs"></i>
+                    </button>
                     
                     <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
                     <button onmousedown="event.preventDefault()" onclick="promptDeleteCurrent()" class="w-8 h-8 bg-red-900/80 text-red-400 rounded border border-red-500/30 flex-shrink-0 hover:bg-red-500/20 active:bg-red-500/40"><i class="fas fa-trash text-xs"></i></button>
@@ -492,6 +515,28 @@
                             <input type="color" id="custom-color-input" ontouchstart="captureEditorSelection()" onmousedown="captureEditorSelection()" onchange="selectPaletteColor(this.value, 'Warna Kustom')" class="w-4 h-4 p-0 border-0 rounded-full bg-transparent cursor-pointer flex-shrink-0">
                             <span class="text-[11px] text-gold-400 truncate">Warna Bebas</span>
                         </label>
+                    </div>
+                </div>
+
+                <!-- PAPAN CARI & GANTI TEKS EDITOR ADMIN -->
+                <div id="find-replace-panel" class="hidden p-2.5 bg-royal-dark/95 border-t border-gold-500/20 space-y-2 select-none">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-semibold text-gold-400 tracking-wide"><i class="fas fa-search mr-1"></i>Cari & Ganti Teks</span>
+                            <span id="find-match-counter" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/40 border border-gold-500/20 text-slate-300">0/0</span>
+                        </div>
+                        <button onmousedown="event.preventDefault()" onclick="closeFindReplace()" class="text-slate-400 hover:text-white text-xs px-1.5 py-0.5"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <input type="text" id="find-text-input" oninput="runEditorFind(true)" onkeydown="if(event.key==='Enter'){ event.preventDefault(); selectCurrentFindMatch(); }" placeholder="Cari teks di halaman ini..." class="flex-grow min-w-0 bg-black/40 border border-gold-500/30 text-white text-xs rounded-lg px-2.5 py-1.5 outline-none focus:border-gold-400">
+                        <button onmousedown="event.preventDefault()" onclick="stepFindMatch(-1)" class="w-7 h-7 bg-royal-dark text-gold-400 rounded-lg border border-gold-500/30 flex items-center justify-center flex-shrink-0 active:scale-95" title="Hasil Sebelumnya"><i class="fas fa-chevron-up text-[10px]"></i></button>
+                        <button onmousedown="event.preventDefault()" onclick="stepFindMatch(1)" class="w-7 h-7 bg-royal-dark text-gold-400 rounded-lg border border-gold-500/30 flex items-center justify-center flex-shrink-0 active:scale-95" title="Hasil Berikutnya"><i class="fas fa-chevron-down text-[10px]"></i></button>
+                        <button onmousedown="event.preventDefault()" onclick="selectCurrentFindMatch()" class="px-2 h-7 bg-royal-dark text-gold-400 rounded-lg border border-gold-500/40 text-[11px] font-semibold flex-shrink-0 active:scale-95" title="Tandai / Drag Teks Ini">Tandai</button>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <input type="text" id="replace-text-input" placeholder="Ganti dengan teks baru..." class="flex-grow min-w-0 bg-black/40 border border-gold-500/30 text-white text-xs rounded-lg px-2.5 py-1.5 outline-none focus:border-gold-400">
+                        <button onmousedown="event.preventDefault()" onclick="replaceCurrentFindMatch()" class="px-2.5 h-7 bg-royal-dark text-gold-400 rounded-lg border border-gold-500/40 text-[11px] font-semibold flex-shrink-0 active:scale-95">Ganti</button>
+                        <button onmousedown="event.preventDefault()" onclick="replaceAllFindMatches()" class="px-2.5 h-7 bg-gold-500 text-black rounded-lg text-[11px] font-bold flex-shrink-0 shadow-sm active:scale-95">Ganti Semua</button>
                     </div>
                 </div>
             </div>
@@ -552,6 +597,8 @@
         let editHistory = [];
         let editHistoryIndex = -1;
         let historyTimer = null;
+        let findMatches = [];
+        let currentFindIndex = -1;
 
         let userFavorites = JSON.parse(localStorage.getItem('ngopsinFavorites')) || [];
         let userCustomOrder = JSON.parse(localStorage.getItem('ngopsinOrder')) || [];
@@ -570,6 +617,21 @@
         let renderedMsgKeys = new Set();
 
         window.chatAudioCtx = null;
+
+        // Kunci tinggi layar ke visualViewport agar papan edit tidak terlempar saat keyboard HP muncul
+        if (window.visualViewport) {
+            const syncVisualViewport = () => {
+                const wrapper = document.querySelector('.app-wrapper');
+                if (!wrapper) return;
+                if (window.visualViewport.scale <= 1.05 && window.visualViewport.height > 150) {
+                    wrapper.style.height = window.visualViewport.height + 'px';
+                    wrapper.style.top = window.visualViewport.offsetTop + 'px';
+                    wrapper.style.bottom = 'auto';
+                }
+            };
+            window.visualViewport.addEventListener('resize', syncVisualViewport);
+            window.visualViewport.addEventListener('scroll', syncVisualViewport);
+        }
 
         // ============ PENGATURAN TEMA (MALAM EMERALD / HIJAU SAGE TEDUH) ============
         let currentTheme = localStorage.getItem('ngopsinTheme') || 'dark';
@@ -699,6 +761,7 @@
             closeImageModal(); 
             closeModal();
             closeColorPalette();
+            closeFindReplace();
             if (e.state && e.state.page) {
                 navigateTo(e.state.page, true);
             } else {
@@ -997,6 +1060,7 @@
 
         function navigateTo(pageId, isPopState = false) {
             closeColorPalette();
+            closeFindReplace();
             ['page-cover', 'page-toc', 'page-detail', 'page-chat'].forEach(id => { 
                 document.getElementById(id).classList.remove('active'); 
             });
@@ -1200,6 +1264,7 @@
         function openDetail(id) {
             currentActiveId = id; const item = appData.find(x => x.id === id); if(!item) return;
             closeColorPalette();
+            closeFindReplace();
             document.getElementById('detail-title').innerText = (item.title||'').replace(/^\d+[\.\-]?\s*/, '');
             const contentEl = document.getElementById('detail-content');
             contentEl.innerHTML = item.content || ""; contentEl.style.fontSize = baseFontSize + 'px';
@@ -1250,12 +1315,14 @@
             }
         }
 
-        // ============ EDITOR STABIL: A-/A+, SPASI PARAGRAF, FONT, PALET WARNA & UNDO/REDO ============
+        // ============ EDITOR STABIL: A-/A+, SPASI, FONT, PALET WARNA, CARI & GANTI, UNDO/REDO ============
         const editorContent = document.getElementById('detail-content');
 
         function toggleColorPalette() {
             const panel = document.getElementById('color-palette-panel');
             if (!panel) return;
+            const willOpen = panel.classList.contains('hidden');
+            if (willOpen) closeFindReplace();
             panel.classList.toggle('hidden');
         }
 
@@ -1272,6 +1339,304 @@
                 closeColorPalette();
                 if (label) showToast('Warna: ' + label);
             }
+        }
+
+        // ============ CARI & GANTI TEKS (FIND & REPLACE) ============
+        function clearFindHighlights() {
+            if (window.CSS && CSS.highlights) {
+                CSS.highlights.delete('editor-find-all');
+                CSS.highlights.delete('editor-find-active');
+            }
+        }
+
+        function toggleFindReplace() {
+            const panel = document.getElementById('find-replace-panel');
+            if (!panel) return;
+            const willOpen = panel.classList.contains('hidden');
+            if (willOpen) {
+                closeColorPalette();
+                panel.classList.remove('hidden');
+                const findInp = document.getElementById('find-text-input');
+                if (findInp) {
+                    setTimeout(() => findInp.focus(), 50);
+                    if (findInp.value.length > 0) runEditorFind(true);
+                }
+            } else {
+                closeFindReplace();
+            }
+        }
+
+        function closeFindReplace() {
+            const panel = document.getElementById('find-replace-panel');
+            if (panel) panel.classList.add('hidden');
+            clearFindHighlights();
+            findMatches = [];
+            currentFindIndex = -1;
+            const counter = document.getElementById('find-match-counter');
+            if (counter) counter.innerText = '0/0';
+        }
+
+        function getEditorTextMap() {
+            const map = [];
+            let fullText = '';
+            const blockTags = new Set(['DIV', 'P', 'LI', 'BLOCKQUOTE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'TR']);
+            let lastBlock = null;
+
+            const getBlock = (n) => {
+                let el = n.nodeType === 3 ? n.parentElement : n;
+                while (el && el !== editorContent && !blockTags.has(el.tagName)) {
+                    el = el.parentElement;
+                }
+                return el || editorContent;
+            };
+
+            const walker = document.createTreeWalker(editorContent, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, null);
+            let node;
+            while ((node = walker.nextNode())) {
+                if (node.nodeType === 1) {
+                    if (node.tagName === 'BR') fullText += '\n';
+                    continue;
+                }
+                const val = node.nodeValue || '';
+                if (val.length === 0) continue;
+                const blk = getBlock(node);
+                if (lastBlock && blk !== lastBlock && !fullText.endsWith('\n')) {
+                    fullText += '\n';
+                }
+                lastBlock = blk;
+                map.push({
+                    node: node,
+                    start: fullText.length,
+                    end: fullText.length + val.length
+                });
+                fullText += val;
+            }
+            return { fullText, map };
+        }
+
+        function createRangeFromTextMap(map, matchStart, matchEnd) {
+            let startNode = null, startOffset = 0;
+            let endNode = null, endOffset = 0;
+
+            for (let i = 0; i < map.length; i++) {
+                const entry = map[i];
+                if (!startNode && matchStart >= entry.start && matchStart < entry.end) {
+                    startNode = entry.node;
+                    startOffset = matchStart - entry.start;
+                }
+                if (matchEnd > entry.start && matchEnd <= entry.end) {
+                    endNode = entry.node;
+                    endOffset = matchEnd - entry.start;
+                    break;
+                }
+            }
+
+            if (!startNode || !endNode) return null;
+            const range = document.createRange();
+            range.setStart(startNode, startOffset);
+            range.setEnd(endNode, endOffset);
+            return range;
+        }
+
+        function scanEditorMatches(query) {
+            const { fullText, map } = getEditorTextMap();
+            const matches = [];
+            if (!query) return { map, matches };
+
+            const lowerText = fullText.toLowerCase();
+            const lowerQuery = query.toLowerCase();
+            let pos = 0;
+            while (pos <= lowerText.length - lowerQuery.length) {
+                const idx = lowerText.indexOf(lowerQuery, pos);
+                if (idx === -1) break;
+                matches.push({ start: idx, end: idx + lowerQuery.length });
+                pos = idx + lowerQuery.length;
+            }
+            return { map, matches };
+        }
+
+        function scrollRangeIntoViewSmart(range) {
+            if (!range || !scrollContainer) return;
+            try {
+                const rect = range.getBoundingClientRect();
+                const cRect = scrollContainer.getBoundingClientRect();
+                if (rect.width > 0 || rect.height > 0) {
+                    const targetTop = (rect.top - cRect.top) + scrollContainer.scrollTop - (scrollContainer.clientHeight * 0.25);
+                    scrollContainer.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+                }
+            } catch (e) {}
+        }
+
+        function runEditorFind(resetIndex = true) {
+            const findInp = document.getElementById('find-text-input');
+            const counter = document.getElementById('find-match-counter');
+            const query = findInp ? findInp.value : '';
+
+            clearFindHighlights();
+            if (!query) {
+                findMatches = [];
+                currentFindIndex = -1;
+                if (counter) counter.innerText = '0/0';
+                return;
+            }
+
+            const { map, matches } = scanEditorMatches(query);
+            findMatches = matches;
+
+            if (matches.length === 0) {
+                currentFindIndex = -1;
+                if (counter) counter.innerText = '0/0';
+                return;
+            }
+
+            if (resetIndex || currentFindIndex < 0 || currentFindIndex >= matches.length) {
+                currentFindIndex = 0;
+            }
+
+            if (counter) counter.innerText = `${currentFindIndex + 1}/${matches.length}`;
+
+            const ranges = [];
+            let activeRange = null;
+            for (let i = 0; i < matches.length; i++) {
+                const r = createRangeFromTextMap(map, matches[i].start, matches[i].end);
+                if (r) {
+                    ranges.push(r);
+                    if (i === currentFindIndex) activeRange = r;
+                }
+            }
+
+            if (window.CSS && CSS.highlights && typeof Highlight === 'function') {
+                try {
+                    CSS.highlights.set('editor-find-all', new Highlight(...ranges));
+                    if (activeRange) {
+                        CSS.highlights.set('editor-find-active', new Highlight(activeRange));
+                    }
+                } catch (e) {}
+            }
+
+            if (activeRange) {
+                savedRange = activeRange.cloneRange();
+                lastCursorRange = activeRange.cloneRange();
+                updateFontSizeDisplay();
+                scrollRangeIntoViewSmart(activeRange);
+            }
+        }
+
+        function stepFindMatch(delta) {
+            const findInp = document.getElementById('find-text-input');
+            const query = findInp ? findInp.value : '';
+            if (!query) return showToast("Ketik teks yang dicari dulu!");
+
+            const { matches } = scanEditorMatches(query);
+            if (matches.length === 0) return showToast("Teks tidak ditemukan.");
+
+            currentFindIndex = (currentFindIndex + delta + matches.length) % matches.length;
+            runEditorFind(false);
+        }
+
+        function selectCurrentFindMatch() {
+            const findInp = document.getElementById('find-text-input');
+            const query = findInp ? findInp.value : '';
+            if (!query) return showToast("Ketik teks yang dicari dulu!");
+
+            const { map, matches } = scanEditorMatches(query);
+            if (matches.length === 0) return showToast("Teks tidak ditemukan.");
+
+            if (currentFindIndex < 0 || currentFindIndex >= matches.length) currentFindIndex = 0;
+            const activeRange = createRangeFromTextMap(map, matches[currentFindIndex].start, matches[currentFindIndex].end);
+            if (!activeRange) return;
+
+            if (findInp) findInp.blur();
+            clearFindHighlights();
+
+            editorContent.focus({ preventScroll: true });
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(activeRange);
+            savedRange = activeRange.cloneRange();
+            lastCursorRange = activeRange.cloneRange();
+            updateFontSizeDisplay();
+            scrollRangeIntoViewSmart(activeRange);
+            showToast(`Teks ditandai (${currentFindIndex + 1}/${matches.length})`);
+        }
+
+        function replaceRangeTextPreserveStyle(range, replacementText) {
+            if (!range) return false;
+            if (range.startContainer === range.endContainer && range.startContainer.nodeType === 3) {
+                const tn = range.startContainer;
+                tn.nodeValue = tn.nodeValue.slice(0, range.startOffset) + replacementText + tn.nodeValue.slice(range.endOffset);
+                return true;
+            }
+            const touched = getSelectedTextNodes(range);
+            if (touched.length === 0) return false;
+            const startNode = range.startContainer;
+            const startOffset = range.startOffset;
+            const endNode = range.endContainer;
+            const endOffset = range.endOffset;
+            for (let i = 0; i < touched.length; i++) {
+                const tn = touched[i];
+                if (tn === startNode) {
+                    tn.nodeValue = tn.nodeValue.slice(0, startOffset) + replacementText;
+                } else if (tn === endNode) {
+                    tn.nodeValue = tn.nodeValue.slice(endOffset);
+                } else {
+                    tn.nodeValue = '';
+                }
+            }
+            return true;
+        }
+
+        function replaceCurrentFindMatch() {
+            const findInp = document.getElementById('find-text-input');
+            const replaceInp = document.getElementById('replace-text-input');
+            const query = findInp ? findInp.value : '';
+            const replacement = replaceInp ? replaceInp.value : '';
+
+            if (!query) return showToast("Ketik teks yang dicari dulu!");
+
+            const { map, matches } = scanEditorMatches(query);
+            if (matches.length === 0) return showToast("Teks tidak ditemukan.");
+
+            if (currentFindIndex < 0 || currentFindIndex >= matches.length) currentFindIndex = 0;
+            const activeRange = createRangeFromTextMap(map, matches[currentFindIndex].start, matches[currentFindIndex].end);
+            if (!activeRange) return;
+
+            replaceRangeTextPreserveStyle(activeRange, replacement);
+            pushEditHistory();
+            saveCurrentContent();
+            showToast("1 teks berhasil diganti!");
+            runEditorFind(false);
+        }
+
+        function replaceAllFindMatches() {
+            const findInp = document.getElementById('find-text-input');
+            const replaceInp = document.getElementById('replace-text-input');
+            const query = findInp ? findInp.value : '';
+            const replacement = replaceInp ? replaceInp.value : '';
+
+            if (!query) return showToast("Ketik teks yang dicari dulu!");
+
+            const { map, matches } = scanEditorMatches(query);
+            if (matches.length === 0) return showToast("Teks tidak ditemukan.");
+
+            const total = matches.length;
+            for (let i = total - 1; i >= 0; i--) {
+                const r = createRangeFromTextMap(map, matches[i].start, matches[i].end);
+                if (r) replaceRangeTextPreserveStyle(r, replacement);
+            }
+
+            clearFindHighlights();
+            findMatches = [];
+            currentFindIndex = -1;
+            savedRange = null;
+            lastCursorRange = null;
+
+            const counter = document.getElementById('find-match-counter');
+            if (counter) counter.innerText = '0/0';
+
+            pushEditHistory();
+            saveCurrentContent();
+            showToast(`${total} teks berhasil diganti!`);
         }
 
         function pushEditHistory() {
@@ -1299,6 +1664,7 @@
                 showToast("Mode Edit Aktif.");
             } else {
                 closeColorPalette();
+                closeFindReplace();
                 aBar.classList.replace('flex', 'hidden'); rBar.classList.replace('hidden', 'flex');
                 iconEdit.className = 'fas fa-pen'; btnEdit.classList.replace('text-gold-400', 'text-slate-500');
                 editorContent.setAttribute('contenteditable', 'false');
@@ -1476,6 +1842,8 @@
                 return false;
             }
 
+            clearFindHighlights();
+
             const sel = window.getSelection();
             if (!sel || sel.rangeCount === 0) {
                 showToast("Tandai (drag) teks dulu!");
@@ -1522,6 +1890,7 @@
         function execCmd(command, value = null) {
             if (command === 'undo') {
                 if (editHistoryIndex > 0) {
+                    clearFindHighlights();
                     editHistoryIndex--;
                     editorContent.innerHTML = editHistory[editHistoryIndex];
                     savedRange = null;
@@ -1534,6 +1903,7 @@
             }
             if (command === 'redo') {
                 if (editHistoryIndex < editHistory.length - 1) {
+                    clearFindHighlights();
                     editHistoryIndex++;
                     editorContent.innerHTML = editHistory[editHistoryIndex];
                     savedRange = null;
@@ -1551,6 +1921,7 @@
             } else {
                 if (!restoreSavedSelection(false)) return showToast("Tandai (drag) teks dulu!");
             }
+            clearFindHighlights();
             document.execCommand('styleWithCSS', false, true);
             document.execCommand(command, false, value);
             refreshSavedRangeFromLive();
