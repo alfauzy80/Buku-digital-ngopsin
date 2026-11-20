@@ -108,81 +108,81 @@
 
         /* ============ TEMA 2: HIJAU SAGE TEDUH (SOFT SAGE MIST) ============ */
         html.theme-sage, body.theme-sage {
-            background: radial-gradient(ellipse at top, #e2ebe4, #d2e0d6, #c2d4c8) !important;
-            color: #12372b !important;
+            background: radial-gradient(ellipse at top, #e2e8e0, #d3ddd2, #c4d2c4) !important;
+            color: #132e25 !important;
         }
         body.theme-sage .header-fixed {
-            background: rgba(214, 228, 218, 0.96) !important;
-            border-bottom-color: rgba(18, 55, 43, 0.18) !important;
-            box-shadow: 0 4px 12px rgba(18, 55, 43, 0.1) !important;
+            background: rgba(212, 224, 214, 0.96) !important;
+            border-bottom-color: rgba(19, 46, 37, 0.18) !important;
+            box-shadow: 0 4px 12px rgba(19, 46, 37, 0.1) !important;
         }
         body.theme-sage .bg-royal-dark,
         body.theme-sage .bg-royal-dark\/60,
         body.theme-sage .bg-royal-dark\/70,
         body.theme-sage .bg-royal-dark\/95 {
-            background-color: rgba(237, 244, 239, 0.92) !important;
+            background-color: rgba(238, 243, 238, 0.92) !important;
         }
         body.theme-sage .bg-royal-base,
         body.theme-sage .bg-royal-base\/80,
         body.theme-sage .hover\:bg-royal-base:hover {
-            background-color: #d2e2d7 !important;
+            background-color: #cfe0d4 !important;
         }
         body.theme-sage .bg-black\/20 {
-            background-color: rgba(18, 55, 43, 0.06) !important;
+            background-color: rgba(19, 46, 37, 0.06) !important;
         }
         body.theme-sage .bg-black\/40,
         body.theme-sage .bg-black\/50 {
-            background-color: rgba(246, 250, 247, 0.85) !important;
+            background-color: rgba(247, 250, 247, 0.88) !important;
         }
         body.theme-sage .text-gold-400,
         body.theme-sage .text-gold-500 {
-            color: #855a08 !important;
+            color: #855300 !important;
         }
         body.theme-sage .text-gold-500\/70,
         body.theme-sage .text-gold-500\/80,
         body.theme-sage .text-gold-500\/50 {
-            color: rgba(133, 90, 8, 0.82) !important;
+            color: rgba(133, 83, 0, 0.85) !important;
         }
         body.theme-sage .text-slate-100,
         body.theme-sage .text-slate-200 {
-            color: #12372b !important;
+            color: #132e25 !important;
         }
         body.theme-sage .text-white:not(#chat-badge) {
-            color: #12372b !important;
+            color: #132e25 !important;
         }
         body.theme-sage .text-slate-300,
         body.theme-sage .text-slate-400 {
-            color: #35584b !important;
+            color: #2f5246 !important;
         }
         body.theme-sage .text-slate-500,
         body.theme-sage .text-slate-600 {
-            color: #547569 !important;
+            color: #4f6f64 !important;
         }
         body.theme-sage .text-emerald-400 {
             color: #047857 !important;
         }
         body.theme-sage .border-gold-500,
         body.theme-sage .border-gold-500\/50 {
-            border-color: rgba(133, 90, 8, 0.5) !important;
+            border-color: rgba(133, 83, 0, 0.5) !important;
         }
         body.theme-sage .border-gold-500\/30,
         body.theme-sage .border-gold-500\/20 {
-            border-color: rgba(18, 55, 43, 0.2) !important;
+            border-color: rgba(19, 46, 37, 0.22) !important;
         }
         body.theme-sage .bg-gold-500 {
             background-color: #d9a726 !important;
         }
         body.theme-sage #btn-scroll-top {
-            background-color: #0f5132 !important;
+            background-color: #134e3a !important;
             color: #f8f4e6 !important;
         }
         body.theme-sage #toast {
-            background-color: #123c2f !important;
+            background-color: #132e25 !important;
             color: #f8f4e6 !important;
             border-color: #d9a726 !important;
         }
         body.theme-sage input::placeholder {
-            color: #5d7e72 !important;
+            color: #56766a !important;
         }
         body.theme-sage #image-modal {
             background-color: rgba(0, 0, 0, 0.95) !important;
@@ -191,46 +191,55 @@
             color: #f1f5f9 !important;
         }
         body.theme-sage .editor-box[contenteditable="true"]:focus {
-            border-color: rgba(133, 90, 8, 0.55) !important;
+            border-color: rgba(133, 83, 0, 0.55) !important;
             background: rgba(255, 255, 255, 0.35) !important;
         }
         body.theme-sage ::-webkit-scrollbar-thumb {
-            background: #855a08;
+            background: #855300;
         }
 
-        /* Penyesuaian kontras otomatis teks konten saat mode Hijau Sage Teduh aktif */
-        body.theme-sage #detail-content {
-            color: #123c2f !important;
+        /* Kontras tinggi otomatis untuk seluruh teks doa saat mode Hijau Sage Teduh aktif */
+        body.theme-sage #detail-content,
+        body.theme-sage #detail-content * {
+            color: #132e25 !important;
         }
+        /* Pertahankan pembedaan aksen warna dalam versi gelap & tajam */
         body.theme-sage #detail-content [style*="facc15" i],
-        body.theme-sage #detail-content [style*="250, 204, 21"] {
-            color: #8a5f06 !important;
-        }
-        body.theme-sage #detail-content [style*="f8f4e6" i],
-        body.theme-sage #detail-content [style*="248, 244, 230"],
-        body.theme-sage #detail-content [style*="ffffff" i],
-        body.theme-sage #detail-content [style*="255, 255, 255"] {
-            color: #123c2f !important;
+        body.theme-sage #detail-content [style*="250, 204, 21"],
+        body.theme-sage #detail-content [style*="eab308" i],
+        body.theme-sage #detail-content [style*="234, 179, 8"],
+        body.theme-sage #detail-content [style*="ffff00" i],
+        body.theme-sage #detail-content [style*="255, 255, 0"],
+        body.theme-sage #detail-content [style*="ffd700" i],
+        body.theme-sage #detail-content [style*="255, 215, 0"],
+        body.theme-sage #detail-content [style*="fde047" i],
+        body.theme-sage #detail-content [style*="253, 224, 71"],
+        body.theme-sage #detail-content [style*="e5c675" i],
+        body.theme-sage #detail-content [style*="229, 198, 117"],
+        body.theme-sage #detail-content [style*="yellow" i],
+        body.theme-sage #detail-content [style*="gold" i],
+        body.theme-sage #detail-content font[color*="facc15" i],
+        body.theme-sage #detail-content font[color*="ffff00" i],
+        body.theme-sage #detail-content font[color*="ffd700" i],
+        body.theme-sage #detail-content font[color*="yellow" i],
+        body.theme-sage #detail-content font[color*="gold" i] {
+            color: #855300 !important;
         }
         body.theme-sage #detail-content [style*="f3e2c7" i],
         body.theme-sage #detail-content [style*="243, 226, 199"] {
-            color: #6b4c26 !important;
-        }
-        body.theme-sage #detail-content [style*="e5c675" i],
-        body.theme-sage #detail-content [style*="229, 198, 117"] {
-            color: #7c5e10 !important;
+            color: #664621 !important;
         }
         body.theme-sage #detail-content [style*="6ed3c8" i],
         body.theme-sage #detail-content [style*="110, 211, 200"] {
-            color: #0f6b63 !important;
+            color: #0d625a !important;
         }
         body.theme-sage #detail-content [style*="e29578" i],
         body.theme-sage #detail-content [style*="226, 149, 120"] {
-            color: #9e472a !important;
+            color: #9a3d20 !important;
         }
         body.theme-sage #detail-content [style*="a9cbb0" i],
         body.theme-sage #detail-content [style*="169, 203, 176"] {
-            color: #266045 !important;
+            color: #1e6141 !important;
         }
     </style>
 </head>
@@ -290,10 +299,6 @@
 
         <!-- HALAMAN 1: COVER -->
         <div id="page-cover" class="page active relative px-6">
-            <button id="btn-theme-cover" onclick="toggleAppTheme()" class="absolute top-5 right-5 z-30 w-9 h-9 rounded-full bg-royal-dark/70 border border-gold-500/30 text-gold-400 flex items-center justify-center shadow-md active:scale-95 transition-transform" title="Ganti Tema">
-                <i id="theme-icon-cover" class="fas fa-sun text-sm"></i>
-            </button>
-
             <div class="flex-grow w-full flex items-center justify-center pt-8">
                 <div class="relative">
                     <div class="absolute inset-0 bg-gold-500 blur-[40px] opacity-25 rounded-full scale-110"></div>
@@ -354,7 +359,7 @@
             <div class="header-fixed p-4 flex justify-between items-center">
                 <button onclick="window.history.back()" class="text-gold-500 text-xl"><i class="fas fa-arrow-left"></i></button>
                 <h1 class="font-serif font-bold text-gold-400 tracking-widest">DAFTAR ISI</h1>
-                <div class="w-6"></div>
+                <button id="btn-theme-toc" onclick="toggleAppTheme()" class="text-gold-400 hover:text-gold-500 text-lg transition-colors" title="Ganti Tema"><i id="theme-icon-toc" class="fas fa-sun"></i></button>
             </div>
             <div class="content-scroll p-6 pb-20">
                 
@@ -380,7 +385,10 @@
                 <div class="flex justify-between items-center p-3 border-b border-gold-500/20">
                     <button onclick="window.history.back()" class="text-gold-400 text-xl px-2"><i class="fas fa-arrow-left"></i></button>
                     <h1 id="detail-title" class="font-serif font-bold text-gold-400 truncate max-w-[200px]" ondblclick="if(isAdmin) promptEditTitle()">Judul</h1>
-                    <button id="btn-edit-mode" onclick="toggleEditor()" class="text-slate-500 hidden px-2"><i id="edit-icon" class="fas fa-pen"></i></button>
+                    <div class="flex items-center gap-1">
+                        <button id="btn-theme-detail" onclick="toggleAppTheme()" class="text-gold-400 hover:text-gold-500 text-base px-2 transition-colors" title="Ganti Tema"><i id="theme-icon-detail" class="fas fa-sun"></i></button>
+                        <button id="btn-edit-mode" onclick="toggleEditor()" class="text-slate-500 hidden px-2"><i id="edit-icon" class="fas fa-pen"></i></button>
+                    </div>
                 </div>
 
                 <div id="reader-features" class="flex overflow-x-auto gap-2 p-2 no-scrollbar items-center bg-black/20 select-none">
@@ -394,8 +402,6 @@
                     
                     <button onclick="toggleWakeLock()" id="btn-wakelock" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-lightbulb text-gold-500"></i> Layar</button>
                     <button onclick="toggleAutoScroll()" id="btn-autoscroll" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i class="fas fa-angle-double-down text-gold-500"></i> Scroll</button>
-                    <div class="w-px h-5 bg-gold-500/20 flex-shrink-0 mx-1"></div>
-                    <button onclick="toggleAppTheme()" id="btn-theme-reader" class="px-3 py-1 bg-royal-dark text-slate-300 rounded border border-gold-500/30 flex items-center gap-1 flex-shrink-0 text-sm"><i id="theme-icon-reader" class="fas fa-sun text-gold-500"></i> Tema</button>
                 </div>
 
                 <div id="admin-features" class="hidden overflow-x-auto gap-1.5 p-2 no-scrollbar items-center bg-black/40 shadow-inner select-none">
@@ -577,12 +583,12 @@
             document.body.classList.toggle('theme-sage', isSage);
 
             const metaTheme = document.getElementById('meta-theme-color');
-            if (metaTheme) metaTheme.setAttribute('content', isSage ? '#d6e4da' : '#022c22');
+            if (metaTheme) metaTheme.setAttribute('content', isSage ? '#d4e0d6' : '#022c22');
 
-            const iconCover = document.getElementById('theme-icon-cover');
-            const iconReader = document.getElementById('theme-icon-reader');
-            if (iconCover) iconCover.className = isSage ? 'fas fa-moon text-sm' : 'fas fa-sun text-sm';
-            if (iconReader) iconReader.className = isSage ? 'fas fa-moon text-gold-500' : 'fas fa-sun text-gold-500';
+            const iconToc = document.getElementById('theme-icon-toc');
+            const iconDetail = document.getElementById('theme-icon-detail');
+            if (iconToc) iconToc.className = isSage ? 'fas fa-moon' : 'fas fa-sun';
+            if (iconDetail) iconDetail.className = isSage ? 'fas fa-moon' : 'fas fa-sun';
 
             if (!silent) {
                 showToast(isSage ? 'Tema: Hijau Sage Teduh' : 'Tema: Malam Emerald');
