@@ -1097,15 +1097,43 @@
 
         function moveItem(id, direction, e) {
             e.stopPropagation();
-            appData.forEach(item => { if(!userCustomOrder.includes(item.id)) userCustomOrder.push(item.id); });
 
-            const index = userCustomOrder.indexOf(id);
-            if (index < 0) return;
+            // Jika item termasuk Favorit, susun urutan di dalam grup Favorit (paling atas)
+            if (userFavorites.includes(id)) {
+                const visibleIds = new Set(appData.filter(item => item && (isAdmin || !item.hidden)).map(item => item.id));
+                const activeFavs = userFavorites.filter(fid => visibleIds.has(fid));
+                const pos = activeFavs.indexOf(id);
+                if (direction === 'up' && pos > 0) {
+                    const idxA = userFavorites.indexOf(id);
+                    const idxB = userFavorites.indexOf(activeFavs[pos - 1]);
+                    [userFavorites[idxA], userFavorites[idxB]] = [userFavorites[idxB], userFavorites[idxA]];
+                } else if (direction === 'down' && pos < activeFavs.length - 1) {
+                    const idxA = userFavorites.indexOf(id);
+                    const idxB = userFavorites.indexOf(activeFavs[pos + 1]);
+                    [userFavorites[idxA], userFavorites[idxB]] = [userFavorites[idxB], userFavorites[idxA]];
+                }
+                saveFavorites();
+                renderToc(document.getElementById('search-input').value);
+                return;
+            }
 
-            if (direction === 'up' && index > 0) {
-                [userCustomOrder[index - 1], userCustomOrder[index]] = [userCustomOrder[index], userCustomOrder[index - 1]];
-            } else if (direction === 'down' && index < userCustomOrder.length - 1) {
-                [userCustomOrder[index + 1], userCustomOrder[index]] = [userCustomOrder[index], userCustomOrder[index + 1]];
+            // Jika bukan Favorit, susun urutan di dalam grup non-favorit
+            appData.forEach(item => { if(item && !userCustomOrder.includes(item.id)) userCustomOrder.push(item.id); });
+            const visibleNonFavIds = new Set(
+                appData.filter(item => item && !userFavorites.includes(item.id) && (isAdmin || !item.hidden)).map(item => item.id)
+            );
+            const orderedNonFav = userCustomOrder.filter(oid => visibleNonFavIds.has(oid));
+            const pos = orderedNonFav.indexOf(id);
+            if (pos < 0) return;
+
+            if (direction === 'up' && pos > 0) {
+                const idxA = userCustomOrder.indexOf(id);
+                const idxB = userCustomOrder.indexOf(orderedNonFav[pos - 1]);
+                [userCustomOrder[idxA], userCustomOrder[idxB]] = [userCustomOrder[idxB], userCustomOrder[idxA]];
+            } else if (direction === 'down' && pos < orderedNonFav.length - 1) {
+                const idxA = userCustomOrder.indexOf(id);
+                const idxB = userCustomOrder.indexOf(orderedNonFav[pos + 1]);
+                [userCustomOrder[idxA], userCustomOrder[idxB]] = [userCustomOrder[idxB], userCustomOrder[idxA]];
             }
             
             saveCustomOrder();
@@ -1116,15 +1144,26 @@
             const container = document.getElementById('toc-container'); container.innerHTML = '';
             
             let sortedData = [...appData];
-            if(userCustomOrder.length > 0) {
-                sortedData.sort((a, b) => {
+            sortedData.sort((a, b) => {
+                const favIndexA = userFavorites.indexOf(a.id);
+                const favIndexB = userFavorites.indexOf(b.id);
+                const isFavA = favIndexA !== -1;
+                const isFavB = favIndexB !== -1;
+
+                // Doa yang difavoritkan selalu berada di posisi paling atas
+                if (isFavA && !isFavB) return -1;
+                if (!isFavA && isFavB) return 1;
+                if (isFavA && isFavB) return favIndexA - favIndexB;
+
+                if(userCustomOrder.length > 0) {
                     let indexA = userCustomOrder.indexOf(a.id);
                     let indexB = userCustomOrder.indexOf(b.id);
                     if (indexA === -1) indexA = 999999;
                     if (indexB === -1) indexB = 999999;
                     return indexA - indexB;
-                });
-            }
+                }
+                return 0;
+            });
 
             const filteredData = sortedData.filter(item => {
                 if(!item) return false;
@@ -1225,7 +1264,7 @@
                 userFavorites.splice(index, 1);
                 showToast("Dihapus dari Favorit");
             } else {
-                userFavorites.push(currentActiveId);
+                userFavorites.unshift(currentActiveId);
                 showToast("Ditambahkan ke Favorit");
             }
             saveFavorites();
